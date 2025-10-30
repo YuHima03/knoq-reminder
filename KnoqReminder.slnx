@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="src/KnoqReminder.Domain/KnoqReminder.Domain.csproj" Id="adcf4124-11c7-4498-8d70-262cfe4a6f2a" />
+</Solution>
