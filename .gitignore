@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/csharp
-# Edit at https://www.toptal.com/developers/gitignore?templates=csharp
+# Created by https://www.toptal.com/developers/gitignore/api/csharp,dotenv
+# Edit at https://www.toptal.com/developers/gitignore?templates=csharp,dotenv
 
 ### Csharp ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -399,4 +399,12 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-# End of https://www.toptal.com/developers/gitignore/api/csharp
+### dotenv ###
+.env
+.env.*
+!.env.*.example
+
+# End of https://www.toptal.com/developers/gitignore/api/csharp,dotenv
+
+# Taskfile temp files
+.task

@@ -4,5 +4,6 @@
     <File Path=".gitignore" />
     <File Path="README.md" />
   </Folder>
+  <Project Path="src/KnoqReminder.Infrastructure/KnoqReminder.Infrastructure.csproj" Id="7f7c756b-39ac-4973-ac95-461a399122d8" />
   <Project Path="src/KnoqReminder.Domain/KnoqReminder.Domain.csproj" Id="adcf4124-11c7-4498-8d70-262cfe4a6f2a" />
 </Solution>
