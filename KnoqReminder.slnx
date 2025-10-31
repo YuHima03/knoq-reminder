@@ -4,6 +4,8 @@
     <File Path=".gitignore" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="src/KnoqReminder.Infrastructure/KnoqReminder.Infrastructure.csproj" Id="7f7c756b-39ac-4973-ac95-461a399122d8" />
+  <Project Path="src/KnoqReminder.App/KnoqReminder.App.Client/KnoqReminder.App.Client.csproj" Id="9708ac6f-d54b-4b31-89e1-cd3029ba42dd" />
+  <Project Path="src/KnoqReminder.App/KnoqReminder.App/KnoqReminder.App.csproj" Id="4bac5928-4017-46ba-acb1-609490eb4f29" />
   <Project Path="src/KnoqReminder.Domain/KnoqReminder.Domain.csproj" Id="adcf4124-11c7-4498-8d70-262cfe4a6f2a" />
+  <Project Path="src/KnoqReminder.Infrastructure/KnoqReminder.Infrastructure.csproj" Id="7f7c756b-39ac-4973-ac95-461a399122d8" />
 </Solution>
