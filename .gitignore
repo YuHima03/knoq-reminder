@@ -402,6 +402,7 @@ FodyWeavers.xsd
 ### dotenv ###
 .env
 .env.*
+!.env.example
 !.env.*.example
 
 # End of https://www.toptal.com/developers/gitignore/api/csharp,dotenv
