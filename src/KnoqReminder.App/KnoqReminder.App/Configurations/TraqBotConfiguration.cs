@@ -1,12 +1,26 @@
-﻿namespace KnoqReminder.App.Configurations;
+﻿using KnoqReminder.Domain.Options;
 
-public class TraqBotConfiguration
+namespace KnoqReminder.App.Configurations;
+
+public class TraqBotConfiguration : ITraqBotOptions
 {
     public const string EnvironmentPrefix = "TRAQ_BOT_";
 
     [ConfigurationKeyName(EnvironmentPrefix + "ID")]
-    public string? Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     [ConfigurationKeyName(EnvironmentPrefix + "ACCESS_TOKEN")]
-    public string? AccessToken { get; set; }
+    public string AccessToken { get; set; } = string.Empty;
+    Guid ITraqBotOptions.Id
+    {
+        get
+        {
+            if (_id == Guid.Empty && Guid.TryParse(Id, out var guid))
+            {
+                return _id = guid;
+            }
+            return _id;
+        }
+    }
+    Guid _id = Guid.Empty;
 }
