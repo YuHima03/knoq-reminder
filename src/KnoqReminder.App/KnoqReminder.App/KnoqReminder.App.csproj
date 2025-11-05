@@ -6,6 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\KnoqReminder.Domain\KnoqReminder.Domain.csproj" />
     <ProjectReference Include="..\KnoqReminder.App.Client\KnoqReminder.App.Client.csproj" />
