@@ -55,6 +55,8 @@ tasks:
       - dotnet format --include {{.DESTINATION_DIR}}/*.cs --severity info
 
   format:
+    aliases:
+      - fmt
     desc: Format the codebase.
     dir: .
     cmd: dotnet format --severity info
