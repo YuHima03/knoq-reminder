@@ -2,5 +2,5 @@
 
 public interface IDbConnectionOptions
 {
-    string? ConnectionString { get; }
+    string ConnectionString { get; }
 }
