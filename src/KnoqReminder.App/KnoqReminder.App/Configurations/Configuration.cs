@@ -21,9 +21,14 @@ static class Configuration
         where TOptions : class
         where TOptionsImplement : class, TOptions
     {
-        return services
-            .AddOptions()
-            .AddSingleton((IOptionsChangeTokenSource<TOptions>)new ConfigurationChangeTokenSource<TOptionsImplement>(config))
-            .AddSingleton((IConfigureOptions<TOptions>)new ConfigureOptions<TOptionsImplement>(config.Bind));
+        services.AddOptions();
+        // Bind the configuration section to the implementation type.
+        services.AddSingleton<IConfigureOptions<TOptionsImplement>>(new ConfigureOptions<TOptionsImplement>(config.Bind));
+        // Register the implementation type as the base type.
+        services
+            .AddSingleton<IOptionsChangeTokenSource<TOptions>>(new ConfigurationChangeTokenSource<TOptions>(config))
+            .AddSingleton<IOptions<TOptions>>(sp => sp.GetRequiredService<IOptions<TOptionsImplement>>());
+
+        return services;
     }
 }
