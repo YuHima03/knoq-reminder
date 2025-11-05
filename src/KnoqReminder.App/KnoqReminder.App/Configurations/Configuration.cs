@@ -8,7 +8,10 @@ static class Configuration
     public static IServiceCollection ConfigureAppOptions(this IServiceCollection services, IConfiguration config)
     {
         return services
-            .Configure<IDbConnectionOptions, MariaDbConnectionConfiguration>(config);
+            .Configure<IDbConnectionOptions, MariaDbConnectionConfiguration>(config)
+            .Configure<IKnoqApiClientOptions, KnoqApiClientConfiguration>(config)
+            .Configure<ITraqApiClientOptions, TraqApiClientConfiguration>(config)
+            .Configure<ITraqBotOptions, TraqBotConfiguration>(config);
     }
 
     /// <summary>
