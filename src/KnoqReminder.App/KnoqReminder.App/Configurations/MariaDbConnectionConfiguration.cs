@@ -2,7 +2,7 @@
 
 namespace KnoqReminder.App.Configurations;
 
-public class MariaDbConnectionConfiguration : Domain.Options.DbConnectionOptions
+public class MariaDbConnectionConfiguration : Domain.Options.IDbConnectionOptions
 {
     public const string EnvironmentPrefix = "MARIADB_";
 
@@ -20,7 +20,7 @@ public class MariaDbConnectionConfiguration : Domain.Options.DbConnectionOptions
 
     [ConfigurationKeyName(EnvironmentPrefix + "DATABASE")]
     public string? Database { get; set; }
-    public override string? ConnectionString => _connectionString ??= BuildConnectionString();
+    public string? ConnectionString => _connectionString ??= BuildConnectionString();
     string? _connectionString = null;
 
     string BuildConnectionString()

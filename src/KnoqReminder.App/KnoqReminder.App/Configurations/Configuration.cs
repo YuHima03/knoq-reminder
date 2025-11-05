@@ -8,7 +8,7 @@ static class Configuration
     public static IServiceCollection ConfigureAppOptions(this IServiceCollection services, IConfiguration config)
     {
         return services
-            .Configure<DbConnectionOptions, MariaDbConnectionConfiguration>(config);
+            .Configure<IDbConnectionOptions, MariaDbConnectionConfiguration>(config);
     }
 
     /// <summary>
