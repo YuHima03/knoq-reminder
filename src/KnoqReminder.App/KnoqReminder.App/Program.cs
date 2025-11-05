@@ -1,10 +1,13 @@
 using KnoqReminder.App.Components;
+using KnoqReminder.App.Configurations;
 
 class Program
 {
     static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.ConfigureAppOptions(builder.Configuration);
 
         // Add services to the container.
         builder.Services.AddRazorComponents()
