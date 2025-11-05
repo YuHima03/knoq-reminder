@@ -3,6 +3,4 @@
 public interface ITraqBotOptions
 {
     Guid Id { get; }
-
-    string AccessToken { get; }
 }

@@ -9,8 +9,6 @@ public class TraqBotConfiguration : ITraqBotOptions
     [ConfigurationKeyName(EnvironmentPrefix + "ID")]
     public string Id { get; set; } = string.Empty;
 
-    [ConfigurationKeyName(EnvironmentPrefix + "ACCESS_TOKEN")]
-    public string AccessToken { get; set; } = string.Empty;
     Guid ITraqBotOptions.Id
     {
         get
