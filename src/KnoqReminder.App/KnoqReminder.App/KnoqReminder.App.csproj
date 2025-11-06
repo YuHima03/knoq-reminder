@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\KnoqReminder.Domain\KnoqReminder.Domain.csproj" />
+    <ProjectReference Include="..\..\KnoqReminder.Infrastructure\KnoqReminder.Infrastructure.csproj" />
+    <ProjectReference Include="..\KnoqReminder.App.Client\KnoqReminder.App.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.10" />
+  </ItemGroup>
+
+</Project>
