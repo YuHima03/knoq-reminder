@@ -2,11 +2,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace KnoqReminder.Infrastructure.Repository;
+namespace KnoqReminder.Infrastructure.Database;
 
-[Table("ahead_of_time_reminders")]
+[Table("daily_reminders")]
 [Index("ReminderId", Name = "reminder_id")]
-public partial class AheadOfTimeReminder
+[Index("Time", Name = "time")]
+public partial class DailyReminder
 {
     [Key]
     [Column("id")]
@@ -16,10 +17,10 @@ public partial class AheadOfTimeReminder
     public Guid ReminderId { get; set; }
 
     /// <summary>
-    /// Duration before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)
+    /// Time of day in UTC; Seconds is ignored
     /// </summary>
-    [Column("duration", TypeName = "time")]
-    public TimeSpan Duration { get; set; }
+    [Column("time", TypeName = "time")]
+    public TimeSpan Time { get; set; }
 
     [Column("created_at", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
@@ -28,6 +29,6 @@ public partial class AheadOfTimeReminder
     public DateTime UpdatedAt { get; set; }
 
     [ForeignKey("ReminderId")]
-    [InverseProperty("AheadOfTimeReminders")]
+    [InverseProperty("DailyReminders")]
     public virtual UserReminder Reminder { get; set; } = null!;
 }

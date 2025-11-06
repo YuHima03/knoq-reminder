@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace KnoqReminder.Infrastructure.Repository;
+namespace KnoqReminder.Infrastructure.Database;
 
 public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {

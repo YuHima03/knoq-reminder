@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace KnoqReminder.Infrastructure.Repository;
+namespace KnoqReminder.Infrastructure.Database;
 
 [Table("user_reminders")]
 [Index("UserId", Name = "user_id")]
