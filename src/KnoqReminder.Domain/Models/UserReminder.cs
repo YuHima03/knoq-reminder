@@ -5,8 +5,8 @@ public record UserReminder(
     Guid UserId,
     ReminderKind RemindsWhenAbsent,
     ReminderKind RemindsFreeEvents,
-    TimeSpan[] AheadOfTimeReminderTimes,
-    TimeOnly[] DailyReminderTimes,
+    AheadOfTimeReminderTime[] AheadOfTimeReminderTimes,
+    DailyReminderTime[] DailyReminderTimes,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt
     );
