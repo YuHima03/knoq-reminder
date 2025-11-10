@@ -284,5 +284,9 @@ dotnet_style_predefined_type_for_locals_parameters_members = true:silent
 dotnet_style_predefined_type_for_member_access = true:silent
 insert_final_newline = true
 
+# CA1036: Override methods on comparable types
+dotnet_diagnostic.CA1036.severity = suggestion
+# CA2231: Overload operator equals on overriding ValueType.Equals
+dotnet_diagnostic.CA2231.severity = suggestion
 # IDE0005: Remove unnecessary using directives
 dotnet_diagnostic.IDE0005.severity = suggestion
