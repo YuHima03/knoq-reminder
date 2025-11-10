@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using KnoqReminder.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace KnoqReminder.Infrastructure.Database;
 
-public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IRepository
 {
     public virtual DbSet<AheadOfTimeReminder> AheadOfTimeReminders { get; set; }
 
