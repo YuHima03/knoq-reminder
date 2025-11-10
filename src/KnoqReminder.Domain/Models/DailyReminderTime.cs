@@ -17,6 +17,8 @@ public readonly struct DailyReminderTime : IComparable<DailyReminderTime>, IEqua
 
     public int Minutes => _timeOnly.Minute;
 
+    public TimeSpan TimeSpan => _timeOnly.ToTimeSpan();
+
     public DailyReminderTime(int hour, int minute)
     {
         _timeOnly = new TimeOnly(hour, minute);
