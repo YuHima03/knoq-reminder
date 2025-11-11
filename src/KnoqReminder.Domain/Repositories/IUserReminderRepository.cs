@@ -6,7 +6,7 @@ public interface IUserReminderRepository : IRepositoryBase
 {
     ValueTask<UserReminder> AddUserReminderAsync(UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken = default);
 
-    ValueTask<UserReminder> DeleteUserRemindersAsync(ReadOnlySpan<Guid> ids, CancellationToken cancellationToken = default);
+    ValueTask DeleteUserRemindersAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
 
     ValueTask<UserReminder> GetUserReminderAsync(Guid id, CancellationToken cancellationToken = default);
 
