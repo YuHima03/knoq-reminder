@@ -170,7 +170,6 @@ file static class EnumerableHelper
 
     public static RentArray<(T, Difference)> CompareTo<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other) where T : unmanaged, IEquatable<T>
     {
-        var tComparer = Comparer<T>.Default;
         if (other.Length * 2 * Unsafe.SizeOf<T>() <= 1024)
         {
             Span<T> bufOther = stackalloc T[other.Length];
