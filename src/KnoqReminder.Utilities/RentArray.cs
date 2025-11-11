@@ -26,9 +26,9 @@ struct RentArray<T>(T[] source, int length) : IDisposable
         }
         if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
         {
-            _source.AsSpan(0, _length).Clear();
+            array.AsSpan(0, _length).Clear();
         }
-        ArrayPool<T>.Shared.Return(_source, false);
+        ArrayPool<T>.Shared.Return(array, false);
     }
 
     public RentArray<T> Resize(int length)
