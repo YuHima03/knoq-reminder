@@ -31,7 +31,7 @@ public readonly struct AheadOfTimeReminderTime : IComparable<AheadOfTimeReminder
         {
             ThrowHelper.ThrowArgumentException(nameof(timeSpan), "Seconds and smaller units are not supported.");
         }
-        ValidateConstructorArguments(timeSpan.Hours, timeSpan.Seconds);
+        ValidateConstructorArguments(timeSpan.Hours, timeSpan.Minutes);
         _timeSpan = timeSpan;
     }
 
