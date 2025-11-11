@@ -15,7 +15,7 @@ public readonly struct AheadOfTimeReminderTime : IComparable<AheadOfTimeReminder
 
     public int Hours => _timeSpan.Hours;
 
-    public int Seconds => _timeSpan.Seconds;
+    public int Minutes => _timeSpan.Minutes;
 
     public TimeSpan TimeSpan => _timeSpan;
 
