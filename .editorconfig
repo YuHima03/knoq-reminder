@@ -53,14 +53,14 @@ dotnet_style_require_accessibility_modifiers = for_non_interface_members
 
 # 式レベルの設定
 dotnet_prefer_system_hash_code = true
-dotnet_style_coalesce_expression = true
-dotnet_style_collection_initializer = true
-dotnet_style_explicit_tuple_names = true
+dotnet_style_coalesce_expression = true:warning
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_explicit_tuple_names = true:silent
 dotnet_style_namespace_match_folder = true
-dotnet_style_null_propagation = true
-dotnet_style_object_initializer = true
+dotnet_style_null_propagation = true:warning
+dotnet_style_object_initializer = true:warning
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
-dotnet_style_prefer_auto_properties = true
+dotnet_style_prefer_auto_properties = true:warning
 dotnet_style_prefer_collection_expression = when_types_loosely_match
 dotnet_style_prefer_compound_assignment = true
 dotnet_style_prefer_conditional_expression_over_assignment = true
@@ -95,12 +95,12 @@ csharp_style_var_when_type_is_apparent = false:silent
 # 式のようなメンバー
 csharp_style_expression_bodied_accessors = when_on_single_line:silent
 csharp_style_expression_bodied_constructors = false:silent
-csharp_style_expression_bodied_indexers = true:silent
+csharp_style_expression_bodied_indexers = when_on_single_line:suggestion
 csharp_style_expression_bodied_lambdas = when_on_single_line:silent
 csharp_style_expression_bodied_local_functions = when_on_single_line:silent
 csharp_style_expression_bodied_methods = false:silent
 csharp_style_expression_bodied_operators = false:silent
-csharp_style_expression_bodied_properties = true:silent
+csharp_style_expression_bodied_properties = when_on_single_line:suggestion
 
 # パターン マッチング設定
 csharp_style_pattern_matching_over_as_with_null_check = true:warning
@@ -121,9 +121,9 @@ csharp_style_prefer_readonly_struct = true:suggestion
 csharp_style_prefer_readonly_struct_member = true:suggestion
 
 # コード ブロックの設定
-csharp_prefer_braces = true:suggestion
+csharp_prefer_braces = true:warning
 csharp_prefer_simple_using_statement = true:suggestion
-csharp_prefer_system_threading_lock = true:suggestion
+csharp_prefer_system_threading_lock = true:warning
 csharp_style_namespace_declarations = file_scoped:suggestion
 csharp_style_prefer_method_group_conversion = true:suggestion
 csharp_style_prefer_primary_constructors = true:suggestion
@@ -276,7 +276,7 @@ dotnet_style_prefer_inferred_tuple_names = true:suggestion
 dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
 dotnet_style_prefer_compound_assignment = true:suggestion
 dotnet_style_prefer_simplified_interpolation = true:suggestion
-dotnet_style_prefer_collection_expression = when_types_loosely_match:suggestion
+dotnet_style_prefer_collection_expression = when_types_exactly_match:suggestion
 dotnet_style_namespace_match_folder = true:suggestion
 dotnet_style_allow_multiple_blank_lines_experimental = false:suggestion
 dotnet_style_allow_statement_immediately_after_block_experimental = true:silent
@@ -288,5 +288,15 @@ insert_final_newline = true
 dotnet_diagnostic.CA1036.severity = suggestion
 # CA2231: Overload operator equals on overriding ValueType.Equals
 dotnet_diagnostic.CA2231.severity = suggestion
+# CS0162: Unreachable code detected
+dotnet_diagnostic.CS0162.severity = error
+# IDE0004: Remove unnecessary cast
+dotnet_diagnostic.IDE0004.severity = suggestion
 # IDE0005: Remove unnecessary using directives
 dotnet_diagnostic.IDE0005.severity = suggestion
+# IDE0010: Add missing case to switch statement
+dotnet_diagnostic.IDE0010.severity = warning
+# IDE0035: Remove unreachable code
+dotnet_diagnostic.IDE0035.severity = error
+# IDE0036: Order modifiers
+dotnet_diagnostic.IDE0036.severity = suggestion
