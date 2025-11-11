@@ -296,7 +296,13 @@ dotnet_diagnostic.IDE0004.severity = suggestion
 dotnet_diagnostic.IDE0005.severity = suggestion
 # IDE0010: Add missing case to switch statement
 dotnet_diagnostic.IDE0010.severity = warning
-# IDE0035: Remove unreachable code
+# IDE0035: Remove unreachable code (ignored except in the IDE)
 dotnet_diagnostic.IDE0035.severity = error
 # IDE0036: Order modifiers
 dotnet_diagnostic.IDE0036.severity = suggestion
+# IDE0110: Remove unnecessary discard
+dotnet_diagnostic.IDE0110.severity = suggestion
+# IDE0120: Simplify LINQ expression
+dotnet_diagnostic.IDE0120.severity = warning
+# IDE0121: Simplify LINQ type check and cast
+dotnet_diagnostic.IDE0121.severity = warning
