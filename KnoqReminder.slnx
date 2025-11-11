@@ -8,4 +8,5 @@
   <Project Path="src/KnoqReminder.App/KnoqReminder.App/KnoqReminder.App.csproj" Id="4bac5928-4017-46ba-acb1-609490eb4f29" />
   <Project Path="src/KnoqReminder.Domain/KnoqReminder.Domain.csproj" Id="adcf4124-11c7-4498-8d70-262cfe4a6f2a" />
   <Project Path="src/KnoqReminder.Infrastructure/KnoqReminder.Infrastructure.csproj" Id="7f7c756b-39ac-4973-ac95-461a399122d8" />
+  <Project Path="src/KnoqReminder.Utilities/KnoqReminder.Utilities.csproj" Id="7845485e-3967-4886-99bf-6d289f244928" />
 </Solution>

@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\KnoqReminder.Domain\KnoqReminder.Domain.csproj" />
+    <ProjectReference Include="..\KnoqReminder.Utilities\KnoqReminder.Utilities.csproj" />
   </ItemGroup>
 
 </Project>
