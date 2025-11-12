@@ -1,4 +1,4 @@
-﻿namespace KnoqReminder.Domain.Exceptions;
+namespace KnoqReminder.Domain.Exceptions;
 
 public class RepositoryKeyNotFoundException : Exception
 {

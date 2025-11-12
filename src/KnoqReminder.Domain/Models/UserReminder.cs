@@ -1,4 +1,4 @@
-﻿namespace KnoqReminder.Domain.Models;
+namespace KnoqReminder.Domain.Models;
 
 /// <summary>
 /// Represents a setting for event reminders to a user.

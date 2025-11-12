@@ -1,4 +1,4 @@
-﻿namespace KnoqReminder.Domain.Repositories;
+namespace KnoqReminder.Domain.Repositories;
 
 public interface IRepository :
     IRepositoryBase,

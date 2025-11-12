@@ -1,3 +1,3 @@
-﻿namespace KnoqReminder.Domain.Repositories;
+namespace KnoqReminder.Domain.Repositories;
 
 public interface IRepositoryBase : IAsyncDisposable, IDisposable;

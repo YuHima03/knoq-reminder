@@ -1,4 +1,4 @@
-﻿using KnoqReminder.Domain.Repositories;
+using KnoqReminder.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace KnoqReminder.Infrastructure.Database;

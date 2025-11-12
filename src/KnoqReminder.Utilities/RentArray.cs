@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Diagnostics;
 
@@ -37,7 +37,7 @@ struct RentArray<T>(T[] source, int length) : IDisposable
         var source = Interlocked.Exchange(ref _source, []);
         if (source.Length == 0)
         {
-            return ThrowHelper.ThrowObjectDisposedException<RentArray<T>>(nameof(RentArray<T>));
+            return ThrowHelper.ThrowObjectDisposedException<RentArray<T>>(nameof(RentArray<>));
         }
         Guard.IsLessThanOrEqualTo(length, source.Length);
         return new(source, length);

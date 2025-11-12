@@ -1,4 +1,4 @@
-﻿using KnoqReminder.Domain.Models;
+using KnoqReminder.Domain.Models;
 
 namespace KnoqReminder.Domain.Repositories;
 

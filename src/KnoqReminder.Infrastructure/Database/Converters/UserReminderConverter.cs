@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using KnoqReminder.Domain.Models;
 
 namespace KnoqReminder.Infrastructure.Database.Converters;

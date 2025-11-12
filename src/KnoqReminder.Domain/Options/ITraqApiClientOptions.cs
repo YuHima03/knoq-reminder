@@ -1,4 +1,4 @@
-﻿namespace KnoqReminder.Domain.Options;
+namespace KnoqReminder.Domain.Options;
 
 public interface ITraqApiClientOptions
 {

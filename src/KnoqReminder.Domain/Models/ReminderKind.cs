@@ -1,4 +1,4 @@
-﻿namespace KnoqReminder.Domain.Models;
+namespace KnoqReminder.Domain.Models;
 
 /// <summary>
 /// Represents which kinds of reminders to send.
