@@ -1,4 +1,4 @@
-# Remove the following line if you want to inherit .editorconfig settings from parent directories
+﻿# Remove the following line if you want to inherit .editorconfig settings from parent directories
 root = true
 
 #### Core EditorConfig options ####
@@ -7,7 +7,6 @@ root = true
 charset = utf-8
 indent_size = 4
 indent_style = space
-tab_width = 4
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
