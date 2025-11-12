@@ -1,4 +1,4 @@
-﻿# Remove the following line if you want to inherit .editorconfig settings from parent directories
+# Remove the following line if you want to inherit .editorconfig settings from parent directories
 root = true
 
 #### Core EditorConfig options ####
@@ -285,6 +285,19 @@ insert_final_newline = true
 
 # CA1036: Override methods on comparable types
 dotnet_diagnostic.CA1036.severity = suggestion
+# CA1825: Avoid zero-length array allocations
+dotnet_diagnostic.CA1825.severity = suggestion
+# CA1826: Use property instead of Linq Enumerable method
+dotnet_diagnostic.CA1826.severity = suggestion
+dotnet_code_quality.CA1826.exclude_ordefault_methods = true
+# CA1827: Do not use Count()/LongCount() when Any() can be used
+dotnet_diagnostic.CA1827.severity = warning
+# CA1828: Do not use CountAsync/LongCountAsync when AnyAsync can be used
+dotnet_diagnostic.CA1828.severity = warning
+# CA1829: Use Length/Count property instead of Enumerable.Count method
+dotnet_diagnostic.CA1829.severity = warning
+# CA1846: Prefer AsSpan over Substring
+dotnet_diagnostic.CA1846.severity = suggestion
 # CA2231: Overload operator equals on overriding ValueType.Equals
 dotnet_diagnostic.CA2231.severity = suggestion
 # CS0162: Unreachable code detected
@@ -293,15 +306,21 @@ dotnet_diagnostic.CS0162.severity = error
 dotnet_diagnostic.IDE0004.severity = suggestion
 # IDE0005: Remove unnecessary using directives
 dotnet_diagnostic.IDE0005.severity = suggestion
-# IDE0010: Add missing case to switch statement
-dotnet_diagnostic.IDE0010.severity = warning
 # IDE0035: Remove unreachable code (ignored except in the IDE)
 dotnet_diagnostic.IDE0035.severity = error
 # IDE0036: Order modifiers
 dotnet_diagnostic.IDE0036.severity = suggestion
+# IDE0080: Remove unnecessary suppression operator
+dotnet_diagnostic.IDE0080.severity = suggestion
+# IDE0082: Convert typeof to nameof
+dotnet_diagnostic.IDE0082.severity = suggestion
+# IDE0100: Remove unnecessary equality operator
+dotnet_diagnostic.IDE0100.severity = suggestion
 # IDE0110: Remove unnecessary discard
 dotnet_diagnostic.IDE0110.severity = suggestion
 # IDE0120: Simplify LINQ expression
 dotnet_diagnostic.IDE0120.severity = warning
 # IDE0121: Simplify LINQ type check and cast
 dotnet_diagnostic.IDE0121.severity = warning
+# IDE0370: Remove unnecessary supppression
+dotnet_diagnostic.IDE0370.severity = suggestion
