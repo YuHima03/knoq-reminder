@@ -1,4 +1,4 @@
-﻿using KnoqReminder.Domain.Options;
+using KnoqReminder.Domain.Options;
 
 namespace KnoqReminder.App.Configurations;
 

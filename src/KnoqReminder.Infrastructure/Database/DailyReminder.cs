@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace KnoqReminder.Infrastructure.Repository;
+namespace KnoqReminder.Infrastructure.Database;
 
 [Table("daily_reminders")]
 [Index("ReminderId", Name = "reminder_id")]

@@ -1,17 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MySql.EntityFrameworkCore" Version="9.0.9" />
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.0-rc" />
+    <PackageReference Include="ZLinq" Version="1.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KnoqReminder.Domain\KnoqReminder.Domain.csproj" />
+    <ProjectReference Include="..\KnoqReminder.Utilities\KnoqReminder.Utilities.csproj" />
   </ItemGroup>
 
 </Project>

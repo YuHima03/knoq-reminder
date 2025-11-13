@@ -1,7 +1,7 @@
 using KnoqReminder.App.Components;
 using KnoqReminder.App.Configurations;
 using KnoqReminder.Domain.Options;
-using KnoqReminder.Infrastructure.Repository;
+using KnoqReminder.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
