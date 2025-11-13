@@ -15,7 +15,7 @@ static class GenericThrowHelper
             ).Compile();
         });
 
-        public static readonly Lazy<Func<string?, Exception>> InitializerWithMessage = new(isThreadSafe: true, valueFactory: () =>
+        public static readonly Lazy<Func<string?, TException>> InitializerWithMessage = new(isThreadSafe: true, valueFactory: () =>
         {
             var msgParam = Expression.Parameter(typeof(string), "message");
             return Expression.Lambda<Func<string?, TException>>(
@@ -27,7 +27,7 @@ static class GenericThrowHelper
             ).Compile();
         });
 
-        public static readonly Lazy<Func<string?, Exception?, Exception>> InitializerWithMessageAndInnerException = new(isThreadSafe: true, valueFactory: () =>
+        public static readonly Lazy<Func<string?, Exception?, TException>> InitializerWithMessageAndInnerException = new(isThreadSafe: true, valueFactory: () =>
         {
             var msgParam = Expression.Parameter(typeof(string), "message");
             var exParam = Expression.Parameter(typeof(Exception), "innerException");
