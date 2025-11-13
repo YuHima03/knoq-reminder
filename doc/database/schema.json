@@ -1,0 +1,445 @@
+{
+  "name": "dev",
+  "tables": [
+    {
+      "name": "ahead_of_time_reminders",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false
+        },
+        {
+          "name": "reminder_id",
+          "type": "char(36)",
+          "nullable": false
+        },
+        {
+          "name": "duration",
+          "type": "time",
+          "nullable": false,
+          "comment": "Duration before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()",
+          "extra_def": "on update current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "reminder_id",
+          "def": "KEY reminder_id (reminder_id) USING BTREE",
+          "table": "ahead_of_time_reminders",
+          "columns": [
+            "reminder_id"
+          ]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (id) USING BTREE",
+          "table": "ahead_of_time_reminders",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "ahead_of_time_reminders_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (reminder_id) REFERENCES user_reminders (id)",
+          "table": "ahead_of_time_reminders",
+          "referenced_table": "user_reminders",
+          "columns": [
+            "reminder_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "ahead_of_time_reminders",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "def": "CREATE TABLE `ahead_of_time_reminders` (\n  `id` char(36) NOT NULL,\n  `reminder_id` char(36) NOT NULL,\n  `duration` time NOT NULL COMMENT 'Duration before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)',\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`id`),\n  KEY `reminder_id` (`reminder_id`),\n  CONSTRAINT `ahead_of_time_reminders_ibfk_1` FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders` (`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    },
+    {
+      "name": "daily_reminders",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false
+        },
+        {
+          "name": "reminder_id",
+          "type": "char(36)",
+          "nullable": false
+        },
+        {
+          "name": "time",
+          "type": "time",
+          "nullable": false,
+          "default": "'22:00:00'",
+          "comment": "Time of day in UTC; Seconds is ignored"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()",
+          "extra_def": "on update current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "reminder_id",
+          "def": "KEY reminder_id (reminder_id) USING BTREE",
+          "table": "daily_reminders",
+          "columns": [
+            "reminder_id"
+          ]
+        },
+        {
+          "name": "time",
+          "def": "KEY time (time) USING BTREE",
+          "table": "daily_reminders",
+          "columns": [
+            "time"
+          ]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (id) USING BTREE",
+          "table": "daily_reminders",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "daily_reminders_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (reminder_id) REFERENCES user_reminders (id)",
+          "table": "daily_reminders",
+          "referenced_table": "user_reminders",
+          "columns": [
+            "reminder_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "daily_reminders",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "def": "CREATE TABLE `daily_reminders` (\n  `id` char(36) NOT NULL,\n  `reminder_id` char(36) NOT NULL,\n  `time` time NOT NULL DEFAULT '22:00:00' COMMENT 'Time of day in UTC; Seconds is ignored',\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`id`),\n  KEY `reminder_id` (`reminder_id`),\n  KEY `time` (`time`),\n  CONSTRAINT `daily_reminders_ibfk_1` FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders` (`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    },
+    {
+      "name": "destinations_discord",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "reminder_id",
+          "type": "char(36)",
+          "nullable": false
+        },
+        {
+          "name": "webhook_id",
+          "type": "varchar(63)",
+          "nullable": false
+        },
+        {
+          "name": "webhook_secret",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()",
+          "extra_def": "on update current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "reminder_id",
+          "def": "UNIQUE KEY reminder_id (reminder_id, webhook_id) USING BTREE",
+          "table": "destinations_discord",
+          "columns": [
+            "reminder_id",
+            "webhook_id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "destinations_discord_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (reminder_id) REFERENCES user_reminders (id)",
+          "table": "destinations_discord",
+          "referenced_table": "user_reminders",
+          "columns": [
+            "reminder_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "reminder_id",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY reminder_id (reminder_id, webhook_id)",
+          "table": "destinations_discord",
+          "columns": [
+            "reminder_id",
+            "webhook_id"
+          ]
+        }
+      ],
+      "def": "CREATE TABLE `destinations_discord` (\n  `reminder_id` char(36) NOT NULL,\n  `webhook_id` varchar(63) NOT NULL,\n  `webhook_secret` varchar(255) NOT NULL,\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  UNIQUE KEY `reminder_id` (`reminder_id`,`webhook_id`),\n  CONSTRAINT `destinations_discord_ibfk_1` FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders` (`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    },
+    {
+      "name": "destinations_traq",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "reminder_id",
+          "type": "char(36)",
+          "nullable": false
+        },
+        {
+          "name": "channel_id",
+          "type": "char(36)",
+          "nullable": false,
+          "comment": "traQ channel uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()",
+          "extra_def": "on update current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "reminder_id",
+          "def": "UNIQUE KEY reminder_id (reminder_id, channel_id) USING BTREE",
+          "table": "destinations_traq",
+          "columns": [
+            "reminder_id",
+            "channel_id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "destinations_traq_ibfk_1",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (reminder_id) REFERENCES user_reminders (id)",
+          "table": "destinations_traq",
+          "referenced_table": "user_reminders",
+          "columns": [
+            "reminder_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "reminder_id",
+          "type": "UNIQUE",
+          "def": "UNIQUE KEY reminder_id (reminder_id, channel_id)",
+          "table": "destinations_traq",
+          "columns": [
+            "reminder_id",
+            "channel_id"
+          ]
+        }
+      ],
+      "def": "CREATE TABLE `destinations_traq` (\n  `reminder_id` char(36) NOT NULL,\n  `channel_id` char(36) NOT NULL COMMENT 'traQ channel uuid',\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  UNIQUE KEY `reminder_id` (`reminder_id`,`channel_id`),\n  CONSTRAINT `destinations_traq_ibfk_1` FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders` (`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    },
+    {
+      "name": "user_reminders",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "comment": "traQ user uuid"
+        },
+        {
+          "name": "reminds_when_absent",
+          "type": "varchar(7)",
+          "nullable": false,
+          "default": "'none'",
+          "comment": "none to disable, daily to enable only daily reminders, always to enable all reminders"
+        },
+        {
+          "name": "reminds_free_events",
+          "type": "varchar(7)",
+          "nullable": false,
+          "default": "'none'",
+          "comment": "none to disable, daily to enable only daily reminders, always to enable all reminders"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()"
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime",
+          "nullable": false,
+          "default": "current_timestamp()",
+          "extra_def": "on update current_timestamp()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "user_id",
+          "def": "KEY user_id (user_id) USING BTREE",
+          "table": "user_reminders",
+          "columns": [
+            "user_id"
+          ]
+        },
+        {
+          "name": "PRIMARY",
+          "def": "PRIMARY KEY (id) USING BTREE",
+          "table": "user_reminders",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PRIMARY",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "user_reminders",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "def": "CREATE TABLE `user_reminders` (\n  `id` char(36) NOT NULL,\n  `user_id` char(36) NOT NULL COMMENT 'traQ user uuid',\n  `reminds_when_absent` varchar(7) NOT NULL DEFAULT 'none' COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',\n  `reminds_free_events` varchar(7) NOT NULL DEFAULT 'none' COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`id`),\n  KEY `user_id` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    }
+  ],
+  "relations": [
+    {
+      "table": "ahead_of_time_reminders",
+      "columns": [
+        "reminder_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "user_reminders",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (reminder_id) REFERENCES user_reminders (id)"
+    },
+    {
+      "table": "daily_reminders",
+      "columns": [
+        "reminder_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "user_reminders",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (reminder_id) REFERENCES user_reminders (id)"
+    },
+    {
+      "table": "destinations_discord",
+      "columns": [
+        "reminder_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "user_reminders",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (reminder_id) REFERENCES user_reminders (id)"
+    },
+    {
+      "table": "destinations_traq",
+      "columns": [
+        "reminder_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "user_reminders",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (reminder_id) REFERENCES user_reminders (id)"
+    }
+  ],
+  "driver": {
+    "name": "mariadb",
+    "database_version": "11.8.4-MariaDB-ubu2404",
+    "meta": {
+      "dict": {
+        "Functions": "Stored procedures and functions"
+      }
+    }
+  }
+}
