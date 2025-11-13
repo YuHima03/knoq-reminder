@@ -7,7 +7,7 @@ vars:
   STEP_END: "\e[m"
 
 tasks:
-  
+
   default:
     desc: Print list of available tasks.
     silent: true
@@ -17,7 +17,7 @@ tasks:
     desc: Scaffold a new DbContext and entity types based on the current database schema.
     vars:
       PROJECT_DIR: src/KnoqReminder.Infrastructure
-      DESTINATION_DIR: "{{.PROJECT_DIR}}/Repository"
+      DESTINATION_DIR: "{{.PROJECT_DIR}}/Database"
     sources:
       - "{{.TASKFILE_DIR}}/db/init/*.sql"
     generates:
@@ -27,16 +27,16 @@ tasks:
       - "{{.DEV_COMPOSE_ENVFILE}}"
     preconditions:
       - sh: ls {{.DEV_COMPOSE_FILENAME}}
-        msg: required docker-compose file not found.
+        msg: "required docker-compose file not found: {{.DEV_COMPOSE_FILENAME}}"
       - sh: ls {{.DEV_COMPOSE_ENVFILE}}
-        msg: required .env file not found.
+        msg: "required .env file not found: {{.DEV_COMPOSE_ENVFILE}}"
       - sh: dotnet --version
         msg: dotnet command not found.
       - sh: dotnet ef --version
         msg: Entity Framework Core tools for .NET CLI not found.
     silent: true
     cmds:
-      - defer: "echo \"{{.STEP_BEGIN}}[4/4] Terminating...{{.STEP_END}}\" 
+      - defer: "echo \"{{.STEP_BEGIN}}[4/4] Terminating...{{.STEP_END}}\"
                 && docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down"
       - "echo \"{{.STEP_BEGIN}}[1/4] Starting temporary database container...{{.STEP_END}}\""
       - docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build -d --wait db-temp
