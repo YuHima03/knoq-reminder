@@ -12,6 +12,8 @@ static class UserReminderConverter
         Enum.Parse<ReminderKind>(dto.RemindsFreeEvents, true),
         dto.AheadOfTimeReminders.Select(ar => new AheadOfTimeReminderTime(ar.Duration)).ToArray(),
         dto.DailyReminders.Select(dr => new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time))).ToArray(),
+        Array.Empty<DestinationDiscordWebhook>(),
+        Array.Empty<DestinationTraqChannel>(),
         dto.CreatedAt,
         dto.UpdatedAt);
 
@@ -24,6 +26,8 @@ static class UserReminderConverter
             Enum.Parse<ReminderKind>(dto.RemindsFreeEvents, true),
             [.. dto.AheadOfTimeReminders.Select(ar => new AheadOfTimeReminderTime(ar.Duration))],
             [.. dto.DailyReminders.Select(dr => new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time)))],
+            [],
+            [],
             dto.CreatedAt,
             dto.UpdatedAt);
     }
