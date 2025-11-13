@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Diagnostics;
 
-namespace KnoqReminder.Domain.Models;
+namespace KnoqReminder.Domain.Repositories.Models;
 
 /// <summary>
 /// Represents a specific time of day for daily reminders, within the range 00:00 to 23:59.

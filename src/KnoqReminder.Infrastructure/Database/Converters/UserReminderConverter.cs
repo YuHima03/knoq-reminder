@@ -1,11 +1,11 @@
 using System.Linq.Expressions;
-using KnoqReminder.Domain.Models;
+using KnoqReminder.Domain.Repositories.Models;
 
 namespace KnoqReminder.Infrastructure.Database.Converters;
 
 static class UserReminderConverter
 {
-    public static readonly Expression<Func<UserReminder, Domain.Models.UserReminder>> DtoToDomainExpression = dto => new(
+    public static readonly Expression<Func<UserReminder, Domain.Repositories.Models.UserReminder>> DtoToDomainExpression = dto => new(
         dto.Id,
         dto.UserId,
         Enum.Parse<ReminderKind>(dto.RemindsWhenAbsent, true),
@@ -15,7 +15,7 @@ static class UserReminderConverter
         dto.CreatedAt,
         dto.UpdatedAt);
 
-    public static Domain.Models.UserReminder ToDomain(this UserReminder dto)
+    public static Domain.Repositories.Models.UserReminder ToDomain(this UserReminder dto)
     {
         return new(
             dto.Id,

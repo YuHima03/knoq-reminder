@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Diagnostics;
 
-namespace KnoqReminder.Domain.Models;
+namespace KnoqReminder.Domain.Repositories.Models;
 
 /// <summary>
 /// Represents a specific time offset before a scheduled event when a reminder should be triggered, within the range 00:00 (reminding on time) to 24:00 (reminding a day before).

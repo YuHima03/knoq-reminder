@@ -1,4 +1,4 @@
-namespace KnoqReminder.Domain.Models;
+namespace KnoqReminder.Domain.Repositories.Models;
 
 /// <summary>
 /// Represents a configuration for adding a new item to or updating an existing item in a set of <see cref="UserReminder"/>s.
