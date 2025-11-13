@@ -168,9 +168,11 @@ file static class EnumerableHelper
 {
     public enum Difference { Zero = 0, Add = 1, Remove = -1 }
 
+    const int MaxStackAllocationBytes = 1024;
+
     public static RentArray<(T, Difference)> CompareTo<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other) where T : unmanaged, IEquatable<T>
     {
-        if (other.Length * 2 * Unsafe.SizeOf<T>() <= 1024)
+        if (other.Length * 2 * Unsafe.SizeOf<T>() <= MaxStackAllocationBytes)
         {
             Span<T> bufOther = stackalloc T[other.Length];
             Span<T?> bufOtherRemains = stackalloc T?[other.Length];
