@@ -17,24 +17,37 @@ public partial class AppDbContext : IUserReminderRepository
     async ValueTask<Domain.Repositories.Models.UserReminder> IUserReminderRepository.AddUserReminderAsync(UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)
     {
         var reminderId = Guid.CreateVersion7();
+
+        AheadOfTimeReminders.AddRange([.. (item.AheadOfTimeReminderTimes ?? []).Distinct().Select(x => new AheadOfTimeReminder
+        {
+            Id = Guid.CreateVersion7(),
+            ReminderId = reminderId,
+            Duration = x.TimeSpan
+        })]);
+        DailyReminders.AddRange([.. (item.DailyReminderTimes ?? []).Distinct().Select(x => new DailyReminder
+        {
+            Id = Guid.CreateVersion7(),
+            ReminderId = reminderId,
+            Time = x.TimeSpan
+        })]);
+        DestinationsDiscords.AddRange([.. (item.DestinationDiscordWebhooks ?? []).Select(x => new DestinationsDiscord
+        {
+            ReminderId = reminderId,
+            WebhookId = x.WebhookId,
+            WebhookSecret = x.WebhookSecret
+        })]);
+        DestinationsTraqs.AddRange([.. (item.DestinationTraqChannels ?? []).Select(x => new DestinationsTraq
+        {
+            ReminderId = reminderId,
+            ChannelId = x.ChannelId
+        })]);
+
         UserReminder reminder = new()
         {
             Id = reminderId,
             UserId = item.UserId.GetValueOrDefault(),
             RemindsWhenAbsent = (item.RemindsWhenAbsent ?? ReminderKind.None).ToString(),
             RemindsFreeEvents = (item.RemindsFreeEvents ?? ReminderKind.None).ToString(),
-            AheadOfTimeReminders = [.. (item.AheadOfTimeReminderTimes ?? []).Distinct().Select(x => new AheadOfTimeReminder
-            {
-                Id = Guid.CreateVersion7(),
-                ReminderId = reminderId,
-                Duration = x.TimeSpan
-            })],
-            DailyReminders = [.. (item.DailyReminderTimes ?? []).Distinct().Select(x => new DailyReminder
-            {
-                Id = Guid.CreateVersion7(),
-                ReminderId = reminderId,
-                Time = x.TimeSpan
-            })],
         };
         UserReminders.Add(reminder);
         await SaveChangesAsync(cancellationToken);
