@@ -132,7 +132,7 @@ public partial class AppDbContext : IUserReminderRepository
             using var current = entity.AheadOfTimeReminders.AsValueEnumerable()
                 .Select(x => new AheadOfTimeReminderTime(x.Duration))
                 .ToArrayPool();
-            using var diff = EnumerableHelper.CompareTo<AheadOfTimeReminderTime>(item.AheadOfTimeReminderTimes, current.Span);
+            using var diff = EnumerableHelper.CompareTo(item.AheadOfTimeReminderTimes, current.Span);
             foreach (var (x, d) in diff.Span)
             {
                 if (d == EnumerableHelper.Difference.Add)
@@ -155,7 +155,7 @@ public partial class AppDbContext : IUserReminderRepository
             using var current = entity.DailyReminders.AsValueEnumerable()
                 .Select(x => new DailyReminderTime(TimeOnly.FromTimeSpan(x.Time)))
                 .ToArrayPool();
-            using var diff = EnumerableHelper.CompareTo<DailyReminderTime>(item.DailyReminderTimes, current.Span);
+            using var diff = EnumerableHelper.CompareTo(item.DailyReminderTimes, current.Span);
             foreach (var (x, d) in diff.Span)
             {
                 if (d == EnumerableHelper.Difference.Add)
