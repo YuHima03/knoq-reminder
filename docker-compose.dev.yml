@@ -13,9 +13,26 @@ services:
     volumes:
       - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD", "mariadb-admin", "-h", "localhost", "ping"]
+      test: ["CMD", "mariadb-admin", "-h", "127.0.0.1", "ping"]
       interval: 5s
       timeout: 2s
       retries: 5
       start_period: 5s
     mem_limit: 256m
+
+  tbls:
+    image: ghcr.io/k1low/tbls:latest
+    depends_on:
+      db-temp:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ./doc/database
+        target: /work/dbdoc
+        read_only: false
+      - type: bind
+        source: ./.tbls.yml
+        target: /work/.tbls.yml
+        read_only: true
+    working_dir: /work
+    command: doc mariadb://${MARIADB_USER:?}:${MARIADB_PASSWORD:?}@db-temp:3306/${MARIADB_DATABASE:?} dbdoc -c .tbls.yml --rm-dist
