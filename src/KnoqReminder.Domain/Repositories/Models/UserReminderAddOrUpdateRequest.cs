@@ -13,5 +13,7 @@ public record UserReminderAddOrUpdateRequest(
     ReminderKind? RemindsWhenAbsent,
     ReminderKind? RemindsFreeEvents,
     AheadOfTimeReminderTime[]? AheadOfTimeReminderTimes,
-    DailyReminderTime[]? DailyReminderTimes
+    DailyReminderTime[]? DailyReminderTimes,
+    DestinationDiscordWebhook[]? DestinationDiscordWebhooks,
+    DestinationTraqChannel[]? DestinationTraqChannels
     );
