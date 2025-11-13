@@ -1,3 +1,5 @@
+using KnoqReminder.Domain.Repositories.Models;
+
 namespace KnoqReminder.Domain.Models;
 
 /// <summary>
@@ -18,6 +20,8 @@ public record UserReminder(
     ReminderKind RemindsFreeEvents,
     AheadOfTimeReminderTime[] AheadOfTimeReminderTimes,
     DailyReminderTime[] DailyReminderTimes,
+    DestinationDiscordWebhook[] DestinationDiscordWebhooks,
+    DestinationTraqChannel[] DestinationTraqChannels,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt
     );
