@@ -14,7 +14,9 @@
     <ProjectReference Include="..\..\KnoqReminder.Domain\KnoqReminder.Domain.csproj" />
     <ProjectReference Include="..\..\KnoqReminder.Infrastructure\KnoqReminder.Infrastructure.csproj" />
     <ProjectReference Include="..\KnoqReminder.App.Client\KnoqReminder.App.Client.csproj" />
+    <PackageReference Include="KnoqNet" Version="1.0.0-alpha.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
+    <PackageReference Include="Traq" Version="1.0.0-alpha.1" />
   </ItemGroup>
 
 </Project>
