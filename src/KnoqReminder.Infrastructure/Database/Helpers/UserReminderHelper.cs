@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
 using KnoqReminder.Domain.Repositories.Models;
 
-namespace KnoqReminder.Infrastructure.Database.Converters;
+namespace KnoqReminder.Infrastructure.Database.Helpers;
 
-static class UserReminderConverter
+static class UserReminderHelper
 {
     public static readonly Expression<Func<UserReminder, Domain.Repositories.Models.UserReminder>> DtoToDomainExpression = dto => new(
         dto.Id,
