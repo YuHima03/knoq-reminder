@@ -13,7 +13,7 @@ struct RentArray<T>(T[] source, int length) : IDisposable
 
     public readonly int Length => Disposed ? 0 : _length;
 
-    public readonly T[] SourceArray => _source;
+    public readonly T[] SourceArrayUnsafe => _source;
 
     public readonly Span<T> Span => Disposed ? [] : _source.AsSpan(0, _length);
 
