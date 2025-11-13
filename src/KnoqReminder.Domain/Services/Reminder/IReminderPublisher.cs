@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using KnoqReminder.Domain.Repositories.Models;
 using KnoqReminder.Domain.Services.Events;
 
 namespace KnoqReminder.Domain.Services.Reminder;
