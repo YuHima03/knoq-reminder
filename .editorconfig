@@ -5,7 +5,6 @@ root = true
 [*]
 
 charset = utf-8
-indent_size = 4
 indent_style = space
 end_of_line = lf
 insert_final_newline = true
@@ -14,7 +13,25 @@ trim_trailing_whitespace = true
 #### Document files options ####
 [*.{md,txt}]
 
+indent_size = 2
 trim_trailing_whitespace = false
+
+#### Configuration files options ####
+[*.{json,yaml,yml}]
+
+indent_size = 2
+
+#### .NET configuration files options ####
+[*.{csproj,fsproj,vbproj,sln,slnx}]
+
+indent_size = 2
+
+#### Source codes options ####
+[*.{cs,razor}]
+indent_size = 4
+
+[*.{css,html,js}]
+indent_size = 2
 
 #### .NET code actions ####
 [*.cs]
@@ -226,29 +243,31 @@ dotnet_naming_rule.non_field_members_should_be_pascal_case.style = pascal_case
 
 dotnet_naming_symbols.interface.applicable_kinds = interface
 dotnet_naming_symbols.interface.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.interface.required_modifiers = 
+dotnet_naming_symbols.interface.required_modifiers =
 
 dotnet_naming_symbols.types.applicable_kinds = class, struct, interface, enum
 dotnet_naming_symbols.types.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.types.required_modifiers = 
+dotnet_naming_symbols.types.required_modifiers =
 
 dotnet_naming_symbols.non_field_members.applicable_kinds = property, event, method
 dotnet_naming_symbols.non_field_members.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.non_field_members.required_modifiers = 
+dotnet_naming_symbols.non_field_members.required_modifiers =
 
 # Naming styles
 
-dotnet_naming_style.pascal_case.required_prefix = 
-dotnet_naming_style.pascal_case.required_suffix = 
-dotnet_naming_style.pascal_case.word_separator = 
+dotnet_naming_style.pascal_case.required_prefix =
+dotnet_naming_style.pascal_case.required_suffix =
+dotnet_naming_style.pascal_case.word_separator =
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 
 dotnet_naming_style.begins_with_i.required_prefix = I
-dotnet_naming_style.begins_with_i.required_suffix = 
-dotnet_naming_style.begins_with_i.word_separator = 
+dotnet_naming_style.begins_with_i.required_suffix =
+dotnet_naming_style.begins_with_i.word_separator =
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
+#### C# and VB.NET source files ####
 [*.{cs,vb}]
+
 dotnet_style_qualification_for_property = false:silent
 dotnet_style_qualification_for_event = false:silent
 dotnet_style_coalesce_expression = true:suggestion
