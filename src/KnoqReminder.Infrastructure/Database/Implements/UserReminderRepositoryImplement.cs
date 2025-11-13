@@ -20,6 +20,7 @@ public partial class AppDbContext : IUserReminderRepository
         UserReminder reminder = new()
         {
             Id = reminderId,
+            UserId = item.UserId.GetValueOrDefault(),
             RemindsWhenAbsent = (item.RemindsWhenAbsent ?? ReminderKind.None).ToString(),
             RemindsFreeEvents = (item.RemindsFreeEvents ?? ReminderKind.None).ToString(),
             AheadOfTimeReminders = [.. (item.AheadOfTimeReminderTimes ?? []).Distinct().Select(x => new AheadOfTimeReminder
