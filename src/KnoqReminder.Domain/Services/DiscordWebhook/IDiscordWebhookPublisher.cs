@@ -1,6 +1,6 @@
 namespace KnoqReminder.Domain.Services.DiscordWebhook;
 
-public interface IDiscordWebhookPublisherService
+public interface IDiscordWebhookPublisher
 {
     /// <summary>
     /// Sends a message to the specified Discord webhook.
