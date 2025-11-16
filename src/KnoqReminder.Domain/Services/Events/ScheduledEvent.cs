@@ -4,6 +4,7 @@ public record ScheduledEvent(
     Guid Id,
     string Name,
     string Place,
+    Guid HostGroupId,
     string Description,
     DateTimeOffset StartsAt,
     DateTimeOffset EndsAt
