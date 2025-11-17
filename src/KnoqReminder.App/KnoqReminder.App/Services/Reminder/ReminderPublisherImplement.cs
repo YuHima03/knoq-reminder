@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using CommunityToolkit.Diagnostics;
+using KnoqReminder.App.Helpers.Traq;
 using KnoqReminder.Domain.Repositories.Models;
 using KnoqReminder.Domain.Services.DiscordWebhook;
 using KnoqReminder.Domain.Services.Events;
@@ -20,14 +22,23 @@ public class ReminderPublisherImplement(
     ILocalTimeProvider localTimeProvider,
     TraqApiClient traq,
     ObjectPool<Traq.Models.PostMessageRequest> postMessageRequestPool,
-    ILogger<ReminderPublisherImplement> logger
+    ObjectPool<StringBuilder> stringBuilderPool,
+    ILogger<ReminderPublisherImplement> logger,
+    ILoggerFactory loggerFactory
     )
     : IReminderPublisher
 {
     [StringSyntax(StringSyntaxAttribute.DateTimeFormat)]
     const string EventDateTimeFormat = "MM/dd(ddd) HH:mm";
 
+    [StringSyntax(StringSyntaxAttribute.DateOnlyFormat)]
+    const string TodayDateOnlyFormat = "MM/dd (ddd)";
+
     const int MaxDiscordWebhookEmbedsPerMessage = 10;
+    const int MaxEventNameLength = 256;
+    const int MaxEventHostNameLength = 256;
+    const int MaxEventPlaceNameLength = 1024;
+    const int MaxEventDescriptionLength = 2048;
 
     public ValueTask PublishAotReminderForUserAsync(Guid userId, ReminderDestination dest, ScheduledEvent[] events, CancellationToken cancellationToken = default)
     {
@@ -36,111 +47,88 @@ public class ReminderPublisherImplement(
 
     public async ValueTask PublishDailyRemainderForUserAsync(Guid userId, ReminderDestination dest, ScheduledEvent[] events, CancellationToken cancellationToken = default)
     {
-        string titleTextMd = $"# Today's Events: {localTimeProvider.LocalToday:MM/dd (ddd)}";
-        using var publishTasks = ValueEnumerableExtensions.Concat(
-            publishDiscordWebhook(dest.DiscordWebhooks, events, titleTextMd, discordWebhookPublisher, knoqUrlProvider, localTimeProvider, cancellationToken),
-            publishTraq()
-        ).ToArrayPool();
-        await Task.WhenAll(publishTasks.Span);
+        await Task.WhenAll(
+            (dest.DiscordWebhooks.Length == 0) ? Task.CompletedTask : PublishDailyReminderForUserAsyncInternal_DiscordWebhook(userId, dest.DiscordWebhooks, events, cancellationToken),
+            (dest.TraqChannels.Length == 0) ? Task.CompletedTask : PublishDailyReminderForUserAsyncInternal_Traq(userId, dest.TraqChannels, events, cancellationToken)
+        );
+    }
 
-        static ValueEnumerable<ZLinq.Linq.FromEnumerable<Task>, Task> publishDiscordWebhook(
-            DestinationDiscordWebhook[] dest,
-            ScheduledEvent[] events,
-            string titleTextMd,
-            IDiscordWebhookPublisher discordWebhookPublisher,
-            IKnoqUrlProvider knoqUrlProvider,
-            ILocalTimeProvider localTimeProvider,
-            CancellationToken cancellationToken)
-        {
-            IEnumerable<Task> tasks = [];
-            if (dest.Length == 0)
+    async Task PublishDailyReminderForUserAsyncInternal_DiscordWebhook(Guid userId, DestinationDiscordWebhook[] webhooks, ScheduledEvent[] events, CancellationToken cancellationToken = default)
+    {
+        using var tasks = events.AsValueEnumerable()
+            .Select(e => new DiscordWebhookMessage.Embed
             {
-                return tasks.AsValueEnumerable();
-            }
-            using var embedsArray = events.AsValueEnumerable()
-                .Select(e => new DiscordWebhookMessage.Embed
+                Author = new()
                 {
-                    Author = new()
+                    Name = "{Host name (ToDo)}",
+                    Url = knoqUrlProvider.GetGroupPageUrl(e.HostGroupId)
+                },
+                Title = e.Name.Truncate(MaxEventNameLength),
+                Url = knoqUrlProvider.GetEventPageUrl(e.Id),
+                Description = e.Description.Truncate(MaxEventDescriptionLength),
+                Fields = [
+                    new()
                     {
-                        Name = "{Host name (ToDo)}",
-                        Url = knoqUrlProvider.GetGroupPageUrl(e.HostGroupId)
+                        Name = "Time",
+                        Value = $"{e.StartsAt.ToString(EventDateTimeFormat)} ~ {e.EndsAt.ToString(EventDateTimeFormat)}"
                     },
-                    Title = e.Name.Truncate(256),
-                    Url = knoqUrlProvider.GetEventPageUrl(e.Id),
-                    Description = e.Description.Truncate(2048),
-                    Fields = [
-                        new()
-                        {
-                            Name = "Time",
-                            Value = $"{e.StartsAt.ToString(EventDateTimeFormat)} ~ {e.EndsAt.ToString(EventDateTimeFormat)}"
-                        },
-                        new()
-                        {
-                            Name = "Place",
-                            Value = e.Place.Truncate(1024)
-                        }
-                    ]
-                })
-                .ToArrayPool();
-            var embeds = embedsArray.Span;
-            for (int i = 0; i < embeds.Length; i += MaxDiscordWebhookEmbedsPerMessage)
+                    new()
+                    {
+                        Name = "Place",
+                        Value = e.Place.Truncate(MaxEventPlaceNameLength)
+                    }
+                ]
+            })
+            .Chunk(MaxDiscordWebhookEmbedsPerMessage)
+            .SelectMany((ems, i) =>
             {
                 DiscordWebhookMessage msg = new()
                 {
                     Username = "knoQ Reminder",
-                    Content = (i == 0) ? titleTextMd : null,
-                    Embeds = [.. embeds.Slice(i, Math.Min(MaxDiscordWebhookEmbedsPerMessage, embeds.Length - i))]
+                    Content = (i == 0) ? $"# Today's Events: {localTimeProvider.LocalToday.ToString(TodayDateOnlyFormat)}" : null,
+                    Embeds = ems
                 };
-                tasks = tasks.Concat(
-                    dest.Select(w => discordWebhookPublisher.PublishDiscordWebhookMessageAsync(w.WebhookId, w.WebhookSecret, msg, cancellationToken).AsTask())
-                );
-            }
-            return tasks.AsValueEnumerable();
-        }
-
-        static ValueEnumerable<ZLinq.Linq.FromEnumerable<Task>, Task> publishTraq()
-        {
-            return default;
-        }
+                return webhooks.AsValueEnumerable().Select(w => discordWebhookPublisher.PublishDiscordWebhookMessageAsync(w.WebhookId, w.WebhookSecret, msg, cancellationToken).AsTask());
+            })
+            .ToArrayPool();
+        await Task.WhenAll(tasks.Span);
     }
 
-    async ValueTask SendTraqMessageAsync(Guid channelId, string message, CancellationToken cancellationToken = default)
+    async Task PublishDailyReminderForUserAsyncInternal_Traq(Guid userId, DestinationTraqChannel[] channels, ScheduledEvent[] events, CancellationToken cancellationToken = default)
     {
-        Guard.IsNotNullOrEmpty(message);
-        var req = postMessageRequestPool.Get();
-        try
+        var user = await traq.Users[userId].GetAsync(cancellationToken: cancellationToken);
+        if (user is null)
         {
-            req.Content = message;
-            req.Embed = false;
-            await traq.Channels[channelId].Messages.PostAsync(req, cancellationToken: cancellationToken);
+            return;
         }
-        catch (ApiException ex) when (ex.ResponseStatusCode == StatusCodes.Status404NotFound)
+        var sb = stringBuilderPool.Get();
+        sb.AppendLine($"# Today's Events: {localTimeProvider.LocalToday.ToString(TodayDateOnlyFormat)}")
+            .AppendLine()
+            .AppendLine($"!{{\"type\":\"user\",\"raw\":\"@{user.Name}\",\"id\":\"{userId}\"}}")
+            .AppendLine();
+        foreach (var e in events)
         {
-            logger.LogError_FailedToSendTraqMessage_ChannelNotFound(channelId);
+            var host = await traq.Groups[e.HostGroupId].GetAsync(cancellationToken: cancellationToken);
+            if (host is null)
+            {
+                continue;
+            }
+            sb.AppendLine($"""
+                    ## [{e.Name.Truncate(MaxEventNameLength)}]({knoqUrlProvider.GetEventPageUrl(e.Id)})
+
+                    - Host: [{host.Name?.Truncate(MaxEventHostNameLength)}]({knoqUrlProvider.GetGroupPageUrl(e.HostGroupId)})
+                    - Time: {e.StartsAt.ToString(EventDateTimeFormat)} ~ {e.EndsAt.ToString(EventDateTimeFormat)}
+                    - Place: {e.Place.Truncate(MaxEventPlaceNameLength)}
+
+                    """);
         }
-        catch (Exception ex)
-        {
-            logger.LogError_FailedToSendTraqMessage(ex);
-        }
-        finally
-        {
-            req.Content = null;
-            postMessageRequestPool.Return(req);
-        }
+        var postReq = postMessageRequestPool.Get();
+        postReq.Content = sb.ToString();
+        postReq.Embed = false;
+        stringBuilderPool.Return(Interlocked.Exchange(ref sb, null));
+        await Task.WhenAll(
+            channels.Select(async ch => await traq.Channels[ch.ChannelId].Messages.PostWithLogOnFailureAsync(postReq, loggerFactory, cancellationToken: cancellationToken))
+        );
+        postMessageRequestPool.Return(postReq);
     }
-}
-
-static partial class MessageLogger
-{
-    /// <summary>
-    /// Failed to send a message to traQ: channel not found: {<paramref name="channelId"/>}
-    /// </summary>
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send a message to traQ: channel not found: {ChannelId}")]
-    public static partial void LogError_FailedToSendTraqMessage_ChannelNotFound(this ILogger logger, Guid channelId);
-
-    /// <summary>
-    /// Failed to send a message to traQ.
-    /// </summary>
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send a message to traQ.")]
-    public static partial void LogError_FailedToSendTraqMessage(this ILogger logger, Exception exception);
 }
