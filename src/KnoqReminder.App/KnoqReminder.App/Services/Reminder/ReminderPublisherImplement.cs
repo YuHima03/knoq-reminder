@@ -9,6 +9,7 @@ using KnoqReminder.Domain.Services.Localization;
 using KnoqReminder.Domain.Services.Reminder;
 using KnoqReminder.Domain.Services.Urls;
 using KnoqReminder.Utilities.Helpers;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.ObjectPool;
 using Microsoft.Kiota.Abstractions;
 using Traq;
@@ -21,6 +22,7 @@ public class ReminderPublisherImplement(
     IKnoqUrlProvider knoqUrlProvider,
     ILocalTimeProvider localTimeProvider,
     TraqApiClient traq,
+    IMemoryCache cache,
     ObjectPool<Traq.Models.PostMessageRequest> postMessageRequestPool,
     ObjectPool<StringBuilder> stringBuilderPool,
     ILogger<ReminderPublisherImplement> logger,
@@ -96,7 +98,7 @@ public class ReminderPublisherImplement(
 
     async Task PublishDailyReminderForUserAsyncInternal_Traq(Guid userId, DestinationTraqChannel[] channels, ScheduledEvent[] events, CancellationToken cancellationToken = default)
     {
-        var user = await traq.Users[userId].GetAsync(cancellationToken: cancellationToken);
+        var user = await traq.Users[userId].GetCachedWithLogOnFailureAsync(cache, loggerFactory, cancellationToken: cancellationToken);
         if (user is null)
         {
             return;
