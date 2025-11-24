@@ -3,16 +3,14 @@ using Microsoft.Kiota.Abstractions;
 
 namespace KnoqReminder.App.Helpers.Traq;
 
-static class TraqLogHelper
+static class TraqMessageExtension
 {
-    static ILogger CreateLogger(ILoggerFactory factory)
+    static ILogger CreateLogger(ILoggerFactory loggerFactory)
     {
-        return factory.CreateLogger(typeof(TraqLogHelper));
+        return loggerFactory.CreateLogger(typeof(TraqMessageExtension));
     }
 
-    
-
-    public static async ValueTask<global::Traq.Models.Message?> PostWithLogOnFailureAsync(
+    public static async ValueTask<global::Traq.Models.Message?> TryPostAsync(
         this global::Traq.Channels.Item.Messages.MessagesRequestBuilder builder,
         global::Traq.Models.PostMessageRequest body,
         ILoggerFactory loggerFactory,
