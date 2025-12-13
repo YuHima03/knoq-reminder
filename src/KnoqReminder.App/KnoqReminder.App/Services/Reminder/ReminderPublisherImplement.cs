@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using KnoqReminder.App.Helpers.Traq;
@@ -34,6 +35,8 @@ public class ReminderPublisherImplement(
     [StringSyntax(StringSyntaxAttribute.DateOnlyFormat)]
     const string TodayDateOnlyFormat = "MM/dd (ddd)";
 
+    const string TraqGroupMapCacheKey = "KnoqReminder:Traq:GroupMap";
+
     const int MaxDiscordWebhookEmbedsPerMessage = 10;
     const int MaxEventNameLength = 256;
     const int MaxEventHostNameLength = 256;
@@ -55,12 +58,19 @@ public class ReminderPublisherImplement(
 
     async Task PublishDailyReminderForUserAsyncInternal_DiscordWebhook(Guid userId, DestinationDiscordWebhook[] webhooks, ScheduledEvent[] events, CancellationToken cancellationToken = default)
     {
+        var groupNames = await cache.GetOrCreateAsync(TraqGroupMapCacheKey, async entry =>
+        {
+            var list = await traq.Groups.TryGetAsync(loggerFactory, cancellationToken: cancellationToken);
+            entry.SetAbsoluteExpiration(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(3));
+            return list?.ToFrozenDictionary(g => g.Id.GetValueOrDefault(), g => g.Name);
+        }) ?? FrozenDictionary<Guid, string?>.Empty;
+
         using var tasks = events.AsValueEnumerable()
             .Select(e => new DiscordWebhookMessage.Embed
             {
                 Author = new()
                 {
-                    Name = "{Host name (ToDo)}",
+                    Name = groupNames.GetValueOrDefault(e.HostGroupId) ?? "Unknown group",
                     Url = knoqUrlProvider.GetGroupPageUrl(e.HostGroupId)
                 },
                 Title = e.Name.Truncate(MaxEventNameLength),

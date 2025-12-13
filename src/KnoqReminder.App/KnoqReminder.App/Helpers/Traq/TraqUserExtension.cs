@@ -47,8 +47,7 @@ static class TraqUserExtension
         }
         catch (ApiException ex)
         {
-            var logger = CreateLogger(loggerFactory);
-            logger.LogError_FailedToGetUser(ex);
+            CreateLogger(loggerFactory).LogError_FailedToGetUser(ex);
         }
         return null;
     }
@@ -61,16 +60,16 @@ static class TraqUserExtension
         CancellationToken cancellationToken = default
         )
     {
-        var userId = builder.ToGetRequestInformation(requestConfiguration).PathParameters["userId"];
-        if (userId is not Guid uid)
+        var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
+        if (pathParams.TryGetValue("userId", out var uidObj) && uidObj is Guid uid)
         {
-            return null;
+            return await cache.GetOrCreateAsync(UserCacheOptions.GetMemoryCacheKey(uid), async entry =>
+            {
+                entry.SetOptions(UserCacheOptions.Options);
+                return await builder.TryGetAsync(loggerFactory, requestConfiguration, cancellationToken).ConfigureAwait(false);
+            });
         }
-        return await cache.GetOrCreateAsync(UserCacheOptions.GetMemoryCacheKey(uid), async entry =>
-        {
-            entry.SetOptions(UserCacheOptions.Options);
-            return await builder.TryGetAsync(loggerFactory, requestConfiguration, cancellationToken).ConfigureAwait(false);
-        });
+        return null;
     }
 }
 
