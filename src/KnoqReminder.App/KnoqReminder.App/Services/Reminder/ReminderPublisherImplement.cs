@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using CommunityToolkit.Diagnostics;
 using KnoqReminder.App.Helpers.Traq;
 using KnoqReminder.Domain.Repositories.Models;
 using KnoqReminder.Domain.Services.DiscordWebhook;
@@ -11,7 +10,6 @@ using KnoqReminder.Domain.Services.Urls;
 using KnoqReminder.Utilities.Helpers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.ObjectPool;
-using Microsoft.Kiota.Abstractions;
 using Traq;
 using ZLinq;
 
@@ -98,7 +96,7 @@ public class ReminderPublisherImplement(
 
     async Task PublishDailyReminderForUserAsyncInternal_Traq(Guid userId, DestinationTraqChannel[] channels, ScheduledEvent[] events, CancellationToken cancellationToken = default)
     {
-        var user = await traq.Users[userId].GetCachedWithLogOnFailureAsync(cache, loggerFactory, cancellationToken: cancellationToken);
+        var user = await traq.Users[userId].TryGetCachedAsync(cache, loggerFactory, cancellationToken: cancellationToken);
         if (user is null)
         {
             return;
@@ -129,7 +127,7 @@ public class ReminderPublisherImplement(
         postReq.Embed = false;
         stringBuilderPool.Return(Interlocked.Exchange(ref sb, null));
         await Task.WhenAll(
-            channels.Select(async ch => await traq.Channels[ch.ChannelId].Messages.PostWithLogOnFailureAsync(postReq, loggerFactory, cancellationToken: cancellationToken))
+            channels.Select(async ch => await traq.Channels[ch.ChannelId].Messages.TryPostAsync(postReq, loggerFactory, cancellationToken: cancellationToken))
         );
         postMessageRequestPool.Return(postReq);
     }
