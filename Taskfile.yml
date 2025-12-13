@@ -77,3 +77,8 @@ tasks:
     desc: Format the codebase.
     dir: .
     cmd: dotnet format --severity info
+
+  lint:
+    desc: Lint the codebase.
+    dir: .
+    cmd: dotnet format --verify-no-changes --severity info
