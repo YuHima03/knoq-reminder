@@ -8,6 +8,6 @@ static class StringHelper
         {
             return string.Empty;
         }
-        return s.Length <= maxLength ? s : string.Concat(s.AsSpan(0, maxLength-1), "…");
+        return s.Length <= maxLength ? s : string.Concat(s.AsSpan(0, maxLength - 1), "…");
     }
 }
