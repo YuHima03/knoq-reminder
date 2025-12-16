@@ -8,6 +8,7 @@ using KnoqReminder.Domain.Services.Events;
 using KnoqReminder.Domain.Services.Localization;
 using KnoqReminder.Domain.Services.Reminder;
 using KnoqReminder.Domain.Services.Urls;
+using KnoqReminder.Utilities;
 using KnoqReminder.Utilities.Helpers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.ObjectPool;
@@ -29,19 +30,6 @@ public class ReminderPublisherImplement(
     )
     : IReminderPublisher
 {
-    [StringSyntax(StringSyntaxAttribute.DateTimeFormat)]
-    const string EventDateTimeFormat = "MM/dd(ddd) HH:mm";
-
-    [StringSyntax(StringSyntaxAttribute.DateOnlyFormat)]
-    const string TodayDateOnlyFormat = "MM/dd (ddd)";
-
-    const string TraqGroupMapCacheKey = "KnoqReminder:Traq:GroupMap";
-
-    const int MaxDiscordWebhookEmbedsPerMessage = 10;
-    const int MaxEventNameLength = 256;
-    const int MaxEventHostNameLength = 256;
-    const int MaxEventPlaceNameLength = 1024;
-    const int MaxEventDescriptionLength = 2048;
 
     public ValueTask PublishAotReminderForUserAsync(Guid userId, ReminderDestination dest, ScheduledEvent[] events, CancellationToken cancellationToken = default)
     {
@@ -51,54 +39,30 @@ public class ReminderPublisherImplement(
     public async ValueTask PublishDailyRemainderForUserAsync(Guid userId, ReminderDestination dest, ScheduledEvent[] events, CancellationToken cancellationToken = default)
     {
         await Task.WhenAll(
-            (dest.DiscordWebhooks.Length == 0) ? Task.CompletedTask : PublishDailyReminderForUserAsyncInternal_DiscordWebhook(userId, dest.DiscordWebhooks, events, cancellationToken),
+            (dest.DiscordWebhooks.Length == 0) ? Task.CompletedTask : PublishDailyReminderForUserAsyncInternal_DiscordWebhook(dest.DiscordWebhooks, events, cancellationToken),
             (dest.TraqChannels.Length == 0) ? Task.CompletedTask : PublishDailyReminderForUserAsyncInternal_Traq(userId, dest.TraqChannels, events, cancellationToken)
         );
     }
 
-    async Task PublishDailyReminderForUserAsyncInternal_DiscordWebhook(Guid userId, DestinationDiscordWebhook[] webhooks, ScheduledEvent[] events, CancellationToken cancellationToken = default)
+    async Task PublishDailyReminderForUserAsyncInternal_DiscordWebhook(DestinationDiscordWebhook[] webhooks, ScheduledEvent[] events, CancellationToken cancellationToken = default)
     {
-        var groupNames = await cache.GetOrCreateAsync(TraqGroupMapCacheKey, async entry =>
-        {
-            var list = await traq.Groups.TryGetAsync(loggerFactory, cancellationToken: cancellationToken);
-            entry.SetAbsoluteExpiration(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(3));
-            return list?.ToFrozenDictionary(g => g.Id.GetValueOrDefault(), g => g.Name);
-        }) ?? FrozenDictionary<Guid, string?>.Empty;
-
-        using var tasks = events.AsValueEnumerable()
-            .Select(e => new DiscordWebhookMessage.Embed
-            {
-                Author = new()
-                {
-                    Name = groupNames.GetValueOrDefault(e.HostGroupId) ?? "Unknown group",
-                    Url = knoqUrlProvider.GetGroupPageUrl(e.HostGroupId)
-                },
-                Title = e.Name.Truncate(MaxEventNameLength),
-                Url = knoqUrlProvider.GetEventPageUrl(e.Id),
-                Description = e.Description.Truncate(MaxEventDescriptionLength),
-                Fields = [
-                    new()
-                    {
-                        Name = "Time",
-                        Value = $"{e.StartsAt.ToString(EventDateTimeFormat)} ~ {e.EndsAt.ToString(EventDateTimeFormat)}"
-                    },
-                    new()
-                    {
-                        Name = "Place",
-                        Value = e.Place.Truncate(MaxEventPlaceNameLength)
-                    }
-                ]
-            })
-            .Chunk(MaxDiscordWebhookEmbedsPerMessage)
-            .SelectMany((ems, i) =>
-            {
-                DiscordWebhookMessage msg = new()
+        using var embedsArray = await DiscordWebhookReminderHelper.GetDiscordWebhookEmbedForEventsAsync(events, cache, knoqUrlProvider, loggerFactory, traq, cancellationToken);
+        using var messages = embedsArray.Span.AsValueEnumerable()
+            .Chunk(DiscordWebhookReminderHelper.MaxDiscordWebhookEmbedsPerMessage)
+            .Select((ems, i) => new DiscordWebhookMessage
                 {
                     Username = "knoQ Reminder",
-                    Content = (i == 0) ? $"# Today's Events: {localTimeProvider.LocalToday.ToString(TodayDateOnlyFormat)}" : null,
+                    Content = (i == 0) ? $"# Today's Events: {localTimeProvider.LocalToday.ToString(ReminderConstants.TodayDateOnlyFormat)}" : null,
                     Embeds = ems
-                };
-                return webhooks.AsValueEnumerable().Select(w => discordWebhookPublisher.PublishDiscordWebhookMessageAsync(w.WebhookId, w.WebhookSecret, msg, cancellationToken).AsTask());
+                })
+            .ToArrayPool();
+        using var tasks = webhooks.AsValueEnumerable()
+            .Select(async w =>
+            {
+                foreach (var msg in messages.Span)
+                {
+                    await discordWebhookPublisher.PublishDiscordWebhookMessageAsync(w.WebhookId, w.WebhookSecret, msg, cancellationToken).ConfigureAwait(false);
+                }
             })
             .ToArrayPool();
         await Task.WhenAll(tasks.Span);
@@ -112,25 +76,34 @@ public class ReminderPublisherImplement(
             return;
         }
         var sb = stringBuilderPool.Get();
-        sb.AppendLine($"# Today's Events: {localTimeProvider.LocalToday.ToString(TodayDateOnlyFormat)}")
+        var localToday = localTimeProvider.LocalToday;
+        sb.AppendLine($"# Today's Events: {localToday.ToString(ReminderConstants.TodayDateOnlyFormat)}")
             .AppendLine()
             .AppendLine($"!{{\"type\":\"user\",\"raw\":\"@{user.Name}\",\"id\":\"{userId}\"}}")
-            .AppendLine();
+            .AppendLine()
+            .AppendLine("""
+                | Name | Time | Place |
+                | :--- | :--- | :---- |
+                """);
+            
         foreach (var e in events)
         {
             var host = await traq.Groups[e.HostGroupId].GetAsync(cancellationToken: cancellationToken);
-            if (host is null)
+            // Event name and host
+            sb.Append($"| **[{e.Name.Truncate(ReminderConstants.MaxEventNameLength)}]({knoqUrlProvider.GetEventPageUrl(e.Id)})**\x20");
+            if (host?.Name is string hostName)
             {
-                continue;
+                sb.Append($"by [{hostName.Truncate(ReminderConstants.MaxEventHostNameLength)}]({knoqUrlProvider.GetGroupPageUrl(e.HostGroupId)})\x20");
             }
-            sb.AppendLine($"""
-                    ## [{e.Name.Truncate(MaxEventNameLength)}]({knoqUrlProvider.GetEventPageUrl(e.Id)})
-
-                    - Host: [{host.Name?.Truncate(MaxEventHostNameLength)}]({knoqUrlProvider.GetGroupPageUrl(e.HostGroupId)})
-                    - Time: {e.StartsAt.ToString(EventDateTimeFormat)} ~ {e.EndsAt.ToString(EventDateTimeFormat)}
-                    - Place: {e.Place.Truncate(MaxEventPlaceNameLength)}
-
-                    """);
+            // Event time
+            var localTodayDTOffset = localTimeProvider.ToUtcDateTime(localToday.ToDateTime(TimeOnly.MinValue));
+            var startsAtLocal = localTimeProvider.ToLocalDateTime(e.StartsAt.UtcDateTime);
+            sb.Append($"| {startsAtLocal.ToString((e.StartsAt < localTodayDTOffset) ? ReminderConstants.EventDateTimeFormat : ReminderConstants.EventDateTimeFormatTimeOnly)}\x20");
+            var endsAtLocal = localTimeProvider.ToLocalDateTime(e.EndsAt.UtcDateTime);
+            sb.Append($"~ {endsAtLocal.ToString((localTodayDTOffset.AddTicks(TimeSpan.TicksPerDay) <= e.EndsAt) ? ReminderConstants.EventDateTimeFormat : ReminderConstants.EventDateTimeFormatTimeOnly)}\x20");
+            // Event place
+            sb.Append($"| {e.Place.Truncate(ReminderConstants.MaxEventPlaceNameLength)} |");
+            sb.AppendLine();
         }
         var postReq = postMessageRequestPool.Get();
         postReq.Content = sb.ToString();
