@@ -30,7 +30,6 @@ public class ReminderPublisherImplement(
     )
     : IReminderPublisher
 {
-
     public ValueTask PublishAotReminderForUserAsync(Guid userId, ReminderDestination dest, ScheduledEvent[] events, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
