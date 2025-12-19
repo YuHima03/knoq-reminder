@@ -63,7 +63,7 @@ tasks:
           "Server=localhost;Port=$MARIADB_EXPOSE_PORT;Database=$MARIADB_DATABASE;User Id=$MARIADB_USER;Password=$MARIADB_PASSWORD;" \
           "MySql.EntityFrameworkCore" \
           --project {{.PROJECT_DIR}} \
-          --output-dir Repository \
+          --output-dir Database \
           --context AppDbContext \
           --data-annotations \
           --no-onconfiguring \
