@@ -13,7 +13,7 @@ CREATE TABLE `daily_reminders` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `reminder_id` (`reminder_id`),
+  UNIQUE KEY `reminder_id` (`reminder_id`,`time`),
   KEY `time` (`time`),
   CONSTRAINT `daily_reminders_ibfk_1` FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
@@ -37,14 +37,15 @@ CREATE TABLE `daily_reminders` (
 | ---- | ---- | ---------- |
 | daily_reminders_ibfk_1 | FOREIGN KEY | FOREIGN KEY (reminder_id) REFERENCES user_reminders (id) |
 | PRIMARY | PRIMARY KEY | PRIMARY KEY (id) |
+| reminder_id | UNIQUE | UNIQUE KEY reminder_id (reminder_id, time) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| reminder_id | KEY reminder_id (reminder_id) USING BTREE |
 | time | KEY time (time) USING BTREE |
 | PRIMARY | PRIMARY KEY (id) USING BTREE |
+| reminder_id | UNIQUE KEY reminder_id (reminder_id, time) USING BTREE |
 
 ## Relations
 

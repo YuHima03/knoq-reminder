@@ -1,9 +1,8 @@
-using KnoqReminder.Domain.Repositories;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace KnoqReminder.Infrastructure.Database;
 
-public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IRepository
+public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public virtual DbSet<AheadOfTimeReminder> AheadOfTimeReminders { get; set; }
 
@@ -22,7 +21,7 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("'current_timestamp()'");
-            entity.Property(e => e.Duration).HasComment("Duration before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)");
+            entity.Property(e => e.Offset).HasComment("Time offset before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)");
             entity.Property(e => e.UpdatedAt)
                 .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("'current_timestamp()'");

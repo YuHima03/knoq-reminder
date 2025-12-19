@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace KnoqReminder.Infrastructure.Database;
 
 [Table("ahead_of_time_reminders")]
-[Index("ReminderId", Name = "reminder_id")]
+[Index("ReminderId", "Offset", Name = "reminder_id", IsUnique = true)]
 public partial class AheadOfTimeReminder
 {
     [Key]
@@ -16,10 +16,10 @@ public partial class AheadOfTimeReminder
     public Guid ReminderId { get; set; }
 
     /// <summary>
-    /// Duration before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)
+    /// Time offset before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)
     /// </summary>
-    [Column("duration", TypeName = "time")]
-    public TimeSpan Duration { get; set; }
+    [Column("offset", TypeName = "time")]
+    public TimeSpan Offset { get; set; }
 
     [Column("created_at", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }

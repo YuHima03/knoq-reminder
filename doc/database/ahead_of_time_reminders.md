@@ -9,11 +9,11 @@
 CREATE TABLE `ahead_of_time_reminders` (
   `id` char(36) NOT NULL,
   `reminder_id` char(36) NOT NULL,
-  `duration` time NOT NULL COMMENT 'Duration before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)',
+  `offset` time NOT NULL COMMENT 'Time offset before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)',
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `reminder_id` (`reminder_id`),
+  UNIQUE KEY `reminder_id` (`reminder_id`,`offset`),
   CONSTRAINT `ahead_of_time_reminders_ibfk_1` FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ```
@@ -26,7 +26,7 @@ CREATE TABLE `ahead_of_time_reminders` (
 | ---- | ---- | ------- | -------- | ---------------- | -------- | ------- | ------- |
 | id | char(36) |  | false |  |  |  |  |
 | reminder_id | char(36) |  | false |  |  | [user_reminders](user_reminders.md) |  |
-| duration | time |  | false |  |  |  | Duration before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day) |
+| offset | time |  | false |  |  |  | Time offset before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day) |
 | created_at | datetime | current_timestamp() | false |  |  |  |  |
 | updated_at | datetime | current_timestamp() | false | on update current_timestamp() |  |  |  |
 
@@ -36,13 +36,14 @@ CREATE TABLE `ahead_of_time_reminders` (
 | ---- | ---- | ---------- |
 | ahead_of_time_reminders_ibfk_1 | FOREIGN KEY | FOREIGN KEY (reminder_id) REFERENCES user_reminders (id) |
 | PRIMARY | PRIMARY KEY | PRIMARY KEY (id) |
+| reminder_id | UNIQUE | UNIQUE KEY reminder_id (reminder_id, offset) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| reminder_id | KEY reminder_id (reminder_id) USING BTREE |
 | PRIMARY | PRIMARY KEY (id) USING BTREE |
+| reminder_id | UNIQUE KEY reminder_id (reminder_id, offset) USING BTREE |
 
 ## Relations
 
@@ -54,7 +55,7 @@ erDiagram
 "ahead_of_time_reminders" {
   char_36_ id PK
   char_36_ reminder_id FK
-  time duration
+  time offset
   datetime created_at
   datetime updated_at
 }

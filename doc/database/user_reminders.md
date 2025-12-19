@@ -65,7 +65,7 @@ erDiagram
 "ahead_of_time_reminders" {
   char_36_ id PK
   char_36_ reminder_id FK
-  time duration
+  time offset
   datetime created_at
   datetime updated_at
 }

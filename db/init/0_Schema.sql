@@ -12,9 +12,10 @@ ALTER TABLE `user_reminders` ADD INDEX (`user_id`);
 CREATE TABLE `ahead_of_time_reminders` (
     `id`            char(36)    NOT NULL    PRIMARY KEY,
     `reminder_id`   char(36)    NOT NULL,
-    `duration`      time        NOT NULL    COMMENT 'Duration before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)',
+    `offset`        time        NOT NULL    COMMENT 'Time offset before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)',
     `created_at`    datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP,
     `updated_at`    datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP   ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY (`reminder_id`, `offset`),
     FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders`(`id`) ON DELETE CASCADE
 )   DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -24,6 +25,7 @@ CREATE TABLE `daily_reminders` (
     `time`          time        NOT NULL    DEFAULT '22:00:00'  COMMENT 'Time of day in UTC; Seconds is ignored',
     `created_at`    datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP,
     `updated_at`    datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP   ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY (`reminder_id`, `time`),
     FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders`(`id`) ON DELETE CASCADE
 )   DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
