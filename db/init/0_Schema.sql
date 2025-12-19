@@ -18,6 +18,7 @@ CREATE TABLE `ahead_of_time_reminders` (
     UNIQUE KEY (`reminder_id`, `offset`),
     FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders`(`id`) ON DELETE CASCADE
 )   DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+ALTER TABLE `ahead_of_time_reminders` ADD INDEX (`offset`);
 
 CREATE TABLE `daily_reminders` (
     `id`            char(36)    NOT NULL    PRIMARY KEY,
@@ -28,7 +29,6 @@ CREATE TABLE `daily_reminders` (
     UNIQUE KEY (`reminder_id`, `time`),
     FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders`(`id`) ON DELETE CASCADE
 )   DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 ALTER TABLE `daily_reminders` ADD INDEX (`time`);
 
 CREATE TABLE `destinations_discord` (

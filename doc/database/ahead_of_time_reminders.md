@@ -14,6 +14,7 @@ CREATE TABLE `ahead_of_time_reminders` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `reminder_id` (`reminder_id`,`offset`),
+  KEY `offset` (`offset`),
   CONSTRAINT `ahead_of_time_reminders_ibfk_1` FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ```
@@ -42,6 +43,7 @@ CREATE TABLE `ahead_of_time_reminders` (
 
 | Name | Definition |
 | ---- | ---------- |
+| offset | KEY offset (offset) USING BTREE |
 | PRIMARY | PRIMARY KEY (id) USING BTREE |
 | reminder_id | UNIQUE KEY reminder_id (reminder_id, offset) USING BTREE |
 

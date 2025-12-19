@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace KnoqReminder.Infrastructure.Database;
 
 [Table("ahead_of_time_reminders")]
+[Index("Offset", Name = "offset")]
 [Index("ReminderId", "Offset", Name = "reminder_id", IsUnique = true)]
 public partial class AheadOfTimeReminder
 {

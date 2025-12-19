@@ -37,6 +37,14 @@
       ],
       "indexes": [
         {
+          "name": "offset",
+          "def": "KEY offset (offset) USING BTREE",
+          "table": "ahead_of_time_reminders",
+          "columns": [
+            "offset"
+          ]
+        },
+        {
           "name": "PRIMARY",
           "def": "PRIMARY KEY (id) USING BTREE",
           "table": "ahead_of_time_reminders",
@@ -88,7 +96,7 @@
           ]
         }
       ],
-      "def": "CREATE TABLE `ahead_of_time_reminders` (\n  `id` char(36) NOT NULL,\n  `reminder_id` char(36) NOT NULL,\n  `offset` time NOT NULL COMMENT 'Time offset before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)',\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `reminder_id` (`reminder_id`,`offset`),\n  CONSTRAINT `ahead_of_time_reminders_ibfk_1` FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders` (`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+      "def": "CREATE TABLE `ahead_of_time_reminders` (\n  `id` char(36) NOT NULL,\n  `reminder_id` char(36) NOT NULL,\n  `offset` time NOT NULL COMMENT 'Time offset before the event; Seconds is ignored; 00:00:00(on time) ~ 24:00:00(before a day)',\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `reminder_id` (`reminder_id`,`offset`),\n  KEY `offset` (`offset`),\n  CONSTRAINT `ahead_of_time_reminders_ibfk_1` FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders` (`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     },
     {
       "name": "daily_reminders",
