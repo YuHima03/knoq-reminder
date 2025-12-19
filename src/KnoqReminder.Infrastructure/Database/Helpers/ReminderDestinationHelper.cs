@@ -14,7 +14,8 @@ static class ReminderDestinationHelper
         this IQueryable<TSource> @this,
         IQueryable<DestinationsDiscord> destinationDiscordSet,
         IQueryable<DestinationsTraq> destinationTraqSet,
-        Expression<Func<TSource, Guid>> outerReminderIdSelector)
+        Expression<Func<TSource, Guid>> outerReminderIdSelector,
+        Expression<Func<(TSource, IEnumerable<DestinationsDiscord>), Guid>> outerReminderIdSelector2)
     {
         return @this
             .GroupJoin(
@@ -24,7 +25,7 @@ static class ReminderDestinationHelper
                 resultSelector: (reminders, discordWebhooks) => ValueTuple.Create(reminders, discordWebhooks))
             .GroupJoin(
                 inner: destinationTraqSet,
-                outerKeySelector: createOuterKeySelectorFor2ndGroupJoin(outerReminderIdSelector),
+                outerKeySelector: outerReminderIdSelector2,
                 innerKeySelector: dest => dest.ReminderId,
                 resultSelector: (t, traqChannels) => ValueTuple.Create(
                     item1: t.Item1,
@@ -33,15 +34,17 @@ static class ReminderDestinationHelper
                         DiscordWebhooks = t.Item2.Select(DestinationDiscordHelper.ToDomain).ToArray(),
                         TraqChannels = traqChannels.Select(DestinationTraqHelper.ToDomain).ToArray()
                     }));
+    }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Expression<Func<(TSource, IEnumerable<DestinationsDiscord>), Guid>> createOuterKeySelectorFor2ndGroupJoin<TSource>(Expression<Func<TSource, Guid>> selector)
-        {
-            var param0 = Expression.Parameter(typeof((TSource, IEnumerable<DestinationsDiscord>)));
-            return Expression.Lambda<Func<(TSource, IEnumerable<DestinationsDiscord>), Guid>>(
-                tailCall: false,
-                parameters: [Expression.Parameter(typeof((TSource, IEnumerable<DestinationsDiscord>)))],
-                body: Expression.Invoke(selector, param0));
-        }
+    public static IQueryable<(IGrouping<Guid, TSource>, ReminderDestination)> GroupJoinDestinations<TSource>(
+        this IQueryable<IGrouping<Guid, TSource>> @this,
+        IQueryable<DestinationsDiscord> destinationDiscordSet,
+        IQueryable<DestinationsTraq> destinationTraqSet)
+    {
+        return @this.GroupJoinDestinations(
+            destinationDiscordSet,
+            destinationTraqSet,
+            g => g.Key,
+            t => t.Item1.Key);
     }
 }

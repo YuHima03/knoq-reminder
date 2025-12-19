@@ -124,8 +124,7 @@ public partial class AppDbContext : IUserReminderRepository
             .GroupBy(r => r.ReminderId)
             .GroupJoinDestinations(
                 DestinationsDiscords.AsNoTracking(),
-                DestinationsTraqs.AsNoTracking(),
-                g => g.Key)
+                DestinationsTraqs.AsNoTracking())
             .SelectMany(t => t.Item1.Select(r => new UserAotReminder
             {
                 ReminderId = r.ReminderId,
@@ -144,8 +143,7 @@ public partial class AppDbContext : IUserReminderRepository
             .GroupBy(r => r.ReminderId)
             .GroupJoinDestinations(
                 DestinationsDiscords.AsNoTracking(),
-                DestinationsTraqs.AsNoTracking(),
-                g => g.Key)
+                DestinationsTraqs.AsNoTracking())
             .SelectMany(t => t.Item1.Select(r => new UserDailyReminder
             {
                 ReminderId = r.ReminderId,
