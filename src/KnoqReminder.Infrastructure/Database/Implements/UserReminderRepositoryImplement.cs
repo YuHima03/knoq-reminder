@@ -117,8 +117,10 @@ public partial class AppDbContext : IUserReminderRepository
     }
     async ValueTask<UserAotReminder[]> IUserReminderRepository.GetUserAotRemindersAsync(AheadOfTimeReminderTime offsetFrom, AheadOfTimeReminderTime offsetTo, CancellationToken cancellationToken)
     {
-        return await AheadOfTimeReminders.AsNoTracking()
-            .Where(x => offsetFrom.TimeSpan <= x.Offset && x.Offset <= offsetTo.TimeSpan)
+        var q = (offsetFrom == offsetTo)
+            ? AheadOfTimeReminders.AsNoTracking().Where(x => x.Offset == offsetFrom.TimeSpan)
+            : AheadOfTimeReminders.AsNoTracking().Where(x => offsetFrom.TimeSpan <= x.Offset && x.Offset <= offsetTo.TimeSpan);
+        return await q
             .GroupBy(r => r.ReminderId)
             .GroupJoinDestinations(
                 DestinationsDiscords.AsNoTracking(),
@@ -135,8 +137,10 @@ public partial class AppDbContext : IUserReminderRepository
 
     async ValueTask<UserDailyReminder[]> IUserReminderRepository.GetUserDailyRemindersAsync(DailyReminderTime timeFrom, DailyReminderTime timeTo, CancellationToken cancellationTokent)
     {
-        return await DailyReminders.AsNoTracking()
-            .Where(x => timeFrom.TimeSpan <= x.Time && x.Time <= timeTo.TimeSpan)
+        var q = (timeFrom == timeTo)
+            ? DailyReminders.AsNoTracking().Where(x => x.Time == timeFrom.TimeSpan)
+            : DailyReminders.AsNoTracking().Where(x => timeFrom.TimeSpan <= x.Time && x.Time <= timeTo.TimeSpan);
+        return await q
             .GroupBy(r => r.ReminderId)
             .GroupJoinDestinations(
                 DestinationsDiscords.AsNoTracking(),
