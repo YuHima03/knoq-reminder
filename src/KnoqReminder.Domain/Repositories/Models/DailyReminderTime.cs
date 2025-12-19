@@ -9,9 +9,14 @@ namespace KnoqReminder.Domain.Repositories.Models;
 /// </summary>
 public readonly struct DailyReminderTime : IComparable<DailyReminderTime>, IEquatable<DailyReminderTime>
 {
+    [StringSyntax(StringSyntaxAttribute.TimeOnlyFormat)]
     const string TimeOnlyFormat = "HH:mm";
 
     readonly TimeOnly _timeOnly;
+
+    public static readonly DailyReminderTime Zero = new(TimeOnly.MinValue);
+    public static readonly DailyReminderTime MaxValue = new(new TimeOnly(23, 59));
+    public static readonly DailyReminderTime MinValue = Zero;
 
     public int Hours => _timeOnly.Hour;
 
