@@ -1,33 +1,39 @@
-
-using KnoqReminder.Domain.Options;
-using KnoqReminder.Domain.Services.Events;
-using KnoqReminder.Domain.Services.Localization;
-using Microsoft.Extensions.Options;
+using System.Threading;
+using KnoqReminder.Domain.Repositories;
+using KnoqReminder.Domain.Repositories.Models;
 
 namespace KnoqReminder.App.Services.Reminder;
 
 public class ReminderScheduler(
-    IEventProvider eventProvider,
-    ILocalTimeProvider localTimeProvider,
-    IOptions<IReminderOptions> options
+    IUserReminderRepository userReminderRepository
     )
     : BackgroundService
 {
-    DateTimeOffset _lastCollectedAt = DateTimeOffset.MinValue;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var interval = options.Value.SchedulingInterval;
-        var aotTimeSpan = options.Value.AotReminderTimeBeforeEvent;
-        using PeriodicTimer timer = new(interval);
-        do
+        var lastRunAt = DateTimeOffset.MinValue;
+        using PeriodicTimer timer = new(TimeSpan.FromMinutes(1));
+        do // Run every minute
         {
+            var timeToRunAfter = lastRunAt.AddMinutes(1);
             var utcNow = DateTimeOffset.UtcNow;
-            var upcomingEvents = await eventProvider.GetEventsAsync(
-                utcNow - aotTimeSpan,
-                utcNow + interval - aotTimeSpan,
-                stoppingToken);
+            while (utcNow < timeToRunAfter)
+            {
+                utcNow = DateTimeOffset.UtcNow;
+            }
+            // Ensured: {lastRunAt:HH:mm} < {utcNow:HH:mm}
+            TimeOnly utcNowTimeOnly = new(utcNow.Ticks % TimeSpan.TicksPerDay);
+            DailyReminderTime utcNowReminderTime = new(utcNowTimeOnly);
+            var dailyRemindersLookup = (await userReminderRepository.GetUserDailyRemindersAsync(utcNowReminderTime, utcNowReminderTime, stoppingToken).ConfigureAwait(false)).ToLookup(r => r.ReminderId);
+            var aotReminders = await userReminderRepository.GetUserAotRemindersAsync(AheadOfTimeReminderTime.MinValue, AheadOfTimeReminderTime.MaxValue, stoppingToken).ConfigureAwait(false);
+            
         }
         while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false));
+    }
+
+    async ValueTask<ILookup<Guid, UserDailyReminder>> RetrieveUserDailyRemindersAsync(DailyReminderTime time, CancellationToken cancellationToken = default)
+    {
+        return (await userReminderRepository.GetUserDailyRemindersAsync(time, time, cancellationToken)).ToLookup(r => r.ReminderId);
     }
 }
