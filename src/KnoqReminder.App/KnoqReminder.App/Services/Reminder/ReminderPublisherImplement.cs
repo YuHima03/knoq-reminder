@@ -1,5 +1,3 @@
-using System.Collections.Frozen;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using KnoqReminder.App.Helpers.Traq;
 using KnoqReminder.Domain.Repositories.Models;
@@ -8,7 +6,6 @@ using KnoqReminder.Domain.Services.Events;
 using KnoqReminder.Domain.Services.Localization;
 using KnoqReminder.Domain.Services.Reminder;
 using KnoqReminder.Domain.Services.Urls;
-using KnoqReminder.Utilities;
 using KnoqReminder.Utilities.Helpers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.ObjectPool;
@@ -49,11 +46,11 @@ public class ReminderPublisherImplement(
         using var messages = embedsArray.Span.AsValueEnumerable()
             .Chunk(DiscordWebhookReminderHelper.MaxDiscordWebhookEmbedsPerMessage)
             .Select((ems, i) => new DiscordWebhookMessage
-                {
-                    Username = "knoQ Reminder",
-                    Content = (i == 0) ? $"# Today's Events: {localTimeProvider.LocalToday.ToString(ReminderConstants.TodayDateOnlyFormat)}" : null,
-                    Embeds = ems
-                })
+            {
+                Username = "knoQ Reminder",
+                Content = (i == 0) ? $"# Today's Events: {localTimeProvider.LocalToday.ToString(ReminderConstants.TodayDateOnlyFormat)}" : null,
+                Embeds = ems
+            })
             .ToArrayPool();
         using var tasks = webhooks.AsValueEnumerable()
             .Select(async w =>
@@ -84,7 +81,7 @@ public class ReminderPublisherImplement(
                 | Name | Time | Place |
                 | :--- | :--- | :---- |
                 """);
-            
+
         foreach (var e in events)
         {
             var host = await traq.Groups[e.HostGroupId].GetAsync(cancellationToken: cancellationToken);

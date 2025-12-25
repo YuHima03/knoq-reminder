@@ -1,4 +1,3 @@
-using System.Threading;
 using KnoqReminder.Domain.Repositories;
 using KnoqReminder.Domain.Repositories.Models;
 
@@ -27,7 +26,7 @@ public class ReminderScheduler(
             DailyReminderTime utcNowReminderTime = new(utcNowTimeOnly);
             var dailyRemindersLookup = (await userReminderRepository.GetUserDailyRemindersAsync(utcNowReminderTime, utcNowReminderTime, stoppingToken).ConfigureAwait(false)).ToLookup(r => r.ReminderId);
             var aotReminders = await userReminderRepository.GetUserAotRemindersAsync(AheadOfTimeReminderTime.MinValue, AheadOfTimeReminderTime.MaxValue, stoppingToken).ConfigureAwait(false);
-            
+
         }
         while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false));
     }

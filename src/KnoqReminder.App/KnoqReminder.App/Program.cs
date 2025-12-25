@@ -1,10 +1,7 @@
 using KnoqReminder.App.Components;
 using KnoqReminder.App.Configurations;
-using KnoqReminder.Domain.Options;
-using KnoqReminder.Domain.Repositories;
 using KnoqReminder.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 class Program
 {
