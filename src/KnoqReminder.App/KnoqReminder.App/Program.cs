@@ -1,6 +1,7 @@
 using KnoqReminder.App.Components;
 using KnoqReminder.App.Configurations;
 using KnoqReminder.Domain.Options;
+using KnoqReminder.Domain.Repositories;
 using KnoqReminder.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -11,18 +12,9 @@ class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.ConfigureAppOptions(builder.Configuration);
-
-        builder.Services.AddDbContextFactory<AppDbContext>((sp, ob) =>
-        {
-            var connectionString = sp.GetRequiredService<IOptions<IDbConnectionOptions>>().Value.ConnectionString;
-            ob.UseMySQL(connectionString);
-            if (builder.Environment.IsDevelopment())
-            {
-                ob.EnableDetailedErrors();
-                ob.EnableSensitiveDataLogging();
-            }
-        });
+        builder.Services
+            .ConfigureAppOptions(builder.Configuration)
+            .SetupRepository(builder.Environment);
 
         // Add services to the container.
         builder.Services.AddRazorComponents()
