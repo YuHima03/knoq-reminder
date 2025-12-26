@@ -55,7 +55,7 @@ public class ReminderPublisherImplement(
         using var tasks = webhooks.AsValueEnumerable()
             .Select(async w =>
             {
-                foreach (var msg in messages.Span)
+                foreach (var msg in messages.ArraySegment)
                 {
                     await discordWebhookPublisher.PublishDiscordWebhookMessageAsync(w.WebhookId, w.WebhookSecret, msg, cancellationToken).ConfigureAwait(false);
                 }
