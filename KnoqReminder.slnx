@@ -2,6 +2,7 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
+    <File Path="Directory.Packages.props" />
     <File Path="README.md" />
   </Folder>
   <Project Path="src/KnoqReminder.App/KnoqReminder.App.Client/KnoqReminder.App.Client.csproj" Id="9708ac6f-d54b-4b31-89e1-cd3029ba42dd" />
