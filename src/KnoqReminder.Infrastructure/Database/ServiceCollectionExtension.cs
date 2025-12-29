@@ -1,6 +1,5 @@
 using KnoqReminder.Domain.Options;
 using KnoqReminder.Domain.Repositories;
-using KnoqReminder.Infrastructure.Database;
 using KnoqReminder.Infrastructure.Database.Implements;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,9 +7,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace KnoqReminder.Infrastructure;
+namespace KnoqReminder.Infrastructure.Database;
 
-public static class Repository
+public static class ServiceCollectionExtension
 {
     public static IServiceCollection SetupRepository(this IServiceCollection services, IHostEnvironment? environment = null)
     {
