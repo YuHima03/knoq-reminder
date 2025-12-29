@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KnoqReminder.App.Configurations;
 
-static class Configuration
+static class ServiceCollectionExtension
 {
     public static IServiceCollection ConfigureAppOptions(this IServiceCollection services, IConfiguration config)
     {
