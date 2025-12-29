@@ -1,6 +1,6 @@
 using KnoqReminder.App.Components;
 using KnoqReminder.App.Configurations;
-using KnoqReminder.Infrastructure.Database;
+using KnoqReminder.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 class Program
