@@ -11,4 +11,18 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
   </ItemGroup>
 
+  <ItemGroup>
+    
+    <!-- [assembly: InternalsVisibleTo("KnoqReminder.App")] -->
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>KnoqReminder.App</_Parameter1>
+    </AssemblyAttribute>
+    
+    <!-- [assembly: InternalsVisibleTo("KnoqReminder.Infrastructure")] -->
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>KnoqReminder.Infrastructure</_Parameter1>
+      
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>
