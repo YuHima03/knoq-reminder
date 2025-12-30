@@ -9,6 +9,7 @@ static class ServiceCollectionExtension
     {
         return services
             .Configure<IDbConnectionOptions, MariaDbConnectionConfiguration>(config)
+            .Configure<IDefaultLocalizationOptions, DefaultLocalizationConfiguration>(config.GetSection(DefaultLocalizationConfiguration.Position))
             .Configure<IKnoqApiClientOptions, KnoqApiClientConfiguration>(config)
             .Configure<ITraqApiClientOptions, TraqApiClientConfiguration>(config)
             .Configure<ITraqBotOptions, TraqBotConfiguration>(config);
