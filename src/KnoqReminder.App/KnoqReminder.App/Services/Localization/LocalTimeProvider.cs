@@ -1,9 +1,13 @@
 using System.Runtime.CompilerServices;
+using KnoqReminder.Domain.Options;
 using KnoqReminder.Domain.Services.Localization;
+using Microsoft.Extensions.Options;
 
 namespace KnoqReminder.App.Services.Localization;
 
-sealed class LocalTimeProvider(TimeZoneInfo timeZoneInfo) : ILocalTimeProvider
+sealed partial class LocalTimeProvider(
+    IOptions<IDefaultLocalizationOptions> options
+    ) : ILocalTimeProvider
 {
     public DateTimeOffset LocalNow => ToLocalDateTimeOffset(DateTimeOffset.UtcNow);
 
@@ -11,7 +15,7 @@ sealed class LocalTimeProvider(TimeZoneInfo timeZoneInfo) : ILocalTimeProvider
 
     public TimeSpan TimeZoneOffset => TimeZoneInfo.BaseUtcOffset;
 
-    public TimeZoneInfo TimeZoneInfo => timeZoneInfo;
+    public TimeZoneInfo TimeZoneInfo { get; } = options.Value.TimeZoneInfo;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public DateTime ToLocalDateTime(DateTime utcDateTime)

@@ -1,5 +1,6 @@
 using KnoqReminder.App.Components;
 using KnoqReminder.App.Configurations;
+using KnoqReminder.App.Services.Localization;
 using KnoqReminder.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ class Program
 
         builder.Services
             .ConfigureAppOptions(builder.Configuration)
+            .SetupDefaultLocalization()
             .SetupRepository(builder.Environment);
 
         // Add services to the container.
