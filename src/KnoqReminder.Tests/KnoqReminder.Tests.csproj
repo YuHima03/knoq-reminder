@@ -32,4 +32,10 @@
     <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\KnoqReminder.App\KnoqReminder.App\KnoqReminder.App.csproj" />
+    <ProjectReference Include="..\KnoqReminder.Domain\KnoqReminder.Domain.csproj" />
+    <ProjectReference Include="..\KnoqReminder.Infrastructure\KnoqReminder.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

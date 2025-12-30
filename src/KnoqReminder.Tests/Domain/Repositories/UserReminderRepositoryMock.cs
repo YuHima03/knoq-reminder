@@ -1,0 +1,126 @@
+using System.Collections.Concurrent;
+using CommunityToolkit.Diagnostics;
+using KnoqReminder.Domain.Exceptions;
+using KnoqReminder.Domain.Repositories;
+using KnoqReminder.Domain.Repositories.Models;
+using KnoqReminder.Domain.Services.Reminder;
+using KnoqReminder.Utilities.Helpers;
+
+namespace KnoqReminder.Tests.Domain.Repositories;
+
+partial class RepositoryMock : IUserReminderRepository
+{
+    readonly ConcurrentDictionary<Guid, UserReminder> _items = [];
+
+    public async ValueTask<UserReminder> AddUserReminderAsync(UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken = default)
+    {
+        Guard.IsNotNull(item.UserId, nameof(item.UserId));
+        Guard.IsNotDefault(item.UserId.Value, nameof(item.UserId));
+        var now = DateTimeOffset.UtcNow;
+        var id = Guid.NewGuid();
+        lock (_items)
+        {
+            if (_items.Values.Any(x => x.UserId == item.UserId.Value))
+            {
+                ThrowHelper.ThrowInvalidOperationException("A user reminder for the specified user already exists.");
+            }
+        }
+        return _items[id] = new UserReminder(
+            id,
+            item.UserId.Value,
+            item.RemindsWhenAbsent ?? ReminderKind.None,
+            item.RemindsFreeEvents ?? ReminderKind.None,
+            item.AheadOfTimeReminderTimes ?? [],
+            item.DailyReminderTimes ?? [],
+            item.DestinationDiscordWebhooks ?? [],
+            item.DestinationTraqChannels ?? [],
+            now,
+            now
+        );
+    }
+
+    public async ValueTask DeleteUserRemindersAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        lock (_items)
+        {
+            foreach (var id in ids.Distinct())
+            {
+                _items.TryRemove(id, out _);
+            }
+        }
+    }
+
+    public void Dispose() { }
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+    public async ValueTask<UserAotReminder[]> GetUserAotRemindersAsync(AheadOfTimeReminderTime offsetFrom, AheadOfTimeReminderTime offsetTo, CancellationToken cancellationToken = default)
+    {
+        lock (_items)
+        {
+            return [.._items.Values
+                .SelectMany(r => r.AheadOfTimeReminderTimes
+                    .Where(off => off >= offsetFrom && off <= offsetTo)
+                    .Select(off => new UserAotReminder(
+                        r.Id,
+                        new ReminderDestination
+                        {
+                            DiscordWebhooks = r.DestinationDiscordWebhooks,
+                            TraqChannels = r.DestinationTraqChannels
+                        },
+                        off)))
+                ];
+        }
+    }
+
+    public async ValueTask<UserDailyReminder[]> GetUserDailyRemindersAsync(DailyReminderTime timeFrom, DailyReminderTime timeTo, CancellationToken cancellationToken = default)
+    {
+        lock (_items)
+        {
+            return [.. _items.Values
+                .SelectMany(r => r.DailyReminderTimes
+                    .Where(t => t >= timeFrom && t <= timeTo)
+                    .Select(t => new UserDailyReminder(
+                        r.Id,
+                        new ReminderDestination
+                        {
+                            DiscordWebhooks = r.DestinationDiscordWebhooks,
+                            TraqChannels = r.DestinationTraqChannels
+                        },
+                        t)))
+                ];
+        }
+    }
+
+    public async ValueTask<UserReminder> GetUserReminderAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return _items.TryGetValue(id, out var r) ? r : GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminder>();
+    }
+
+    public async ValueTask<UserReminder> GetUserReminderByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        lock (_items)
+        {
+            return _items.Values.FirstOrDefault(x => x.UserId == userId) ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminder>();
+        }
+    }
+
+    public async ValueTask<UserReminder> UpdateUserReminderAsync(Guid id, UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken = default)
+    {
+        return _items.AddOrUpdate(
+            key: id,
+            addValueFactory: _ => GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminder>(),
+            updateValueFactory: (_, existing) => new UserReminder(
+                existing.Id,
+                item.UserId ?? existing.UserId,
+                item.RemindsWhenAbsent ?? existing.RemindsWhenAbsent,
+                item.RemindsFreeEvents ?? existing.RemindsFreeEvents,
+                item.AheadOfTimeReminderTimes ?? existing.AheadOfTimeReminderTimes,
+                item.DailyReminderTimes ?? existing.DailyReminderTimes,
+                item.DestinationDiscordWebhooks ?? existing.DestinationDiscordWebhooks,
+                item.DestinationTraqChannels ?? existing.DestinationTraqChannels,
+                existing.CreatedAt,
+                DateTimeOffset.UtcNow)
+            );
+    }
+}
