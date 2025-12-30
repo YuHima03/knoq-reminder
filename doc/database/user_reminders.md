@@ -14,7 +14,7 @@ CREATE TABLE `user_reminders` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`)
+  UNIQUE KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ```
 
@@ -36,13 +36,14 @@ CREATE TABLE `user_reminders` (
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | PRIMARY | PRIMARY KEY | PRIMARY KEY (id) |
+| user_id | UNIQUE | UNIQUE KEY user_id (user_id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| user_id | KEY user_id (user_id) USING BTREE |
 | PRIMARY | PRIMARY KEY (id) USING BTREE |
+| user_id | UNIQUE KEY user_id (user_id) USING BTREE |
 
 ## Relations
 

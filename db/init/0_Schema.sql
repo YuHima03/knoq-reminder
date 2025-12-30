@@ -1,13 +1,11 @@
 CREATE TABLE `user_reminders` (
     `id`                    char(36)    NOT NULL    PRIMARY KEY,
-    `user_id`               char(36)    NOT NULL    COMMENT 'traQ user uuid',
-    `reminds_when_absent`   varchar(7)  NOT NULL    DEFAULT 'none'              COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',
-    `reminds_free_events`   varchar(7)  NOT NULL    DEFAULT 'none'              COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',
+    `user_id`               char(36)    NOT NULL    UNIQUE KEY      COMMENT 'traQ user uuid',
+    `reminds_when_absent`   varchar(7)  NOT NULL    DEFAULT 'none'  COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',
+    `reminds_free_events`   varchar(7)  NOT NULL    DEFAULT 'none'  COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',
     `created_at`            datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP,
     `updated_at`            datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP   ON UPDATE CURRENT_TIMESTAMP
 )   DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-ALTER TABLE `user_reminders` ADD INDEX (`user_id`);
 
 CREATE TABLE `ahead_of_time_reminders` (
     `id`            char(36)    NOT NULL    PRIMARY KEY,
