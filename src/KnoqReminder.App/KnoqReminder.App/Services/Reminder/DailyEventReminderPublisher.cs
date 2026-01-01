@@ -1,46 +1,32 @@
-using System.Text;
 using KnoqReminder.App.Helpers.Traq;
+using KnoqReminder.App.Services.Reminder.Helpers;
 using KnoqReminder.Domain.Repositories.Models;
 using KnoqReminder.Domain.Services.DiscordWebhook;
 using KnoqReminder.Domain.Services.Events;
-using KnoqReminder.Domain.Services.Localization;
 using KnoqReminder.Domain.Services.Reminder;
-using KnoqReminder.Domain.Services.Urls;
 using KnoqReminder.Utilities.Helpers;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.ObjectPool;
-using Traq;
 using ZLinq;
 
 namespace KnoqReminder.App.Services.Reminder;
 
-public class ReminderPublisherImplement(
-    IDiscordWebhookPublisher discordWebhookPublisher,
-    IKnoqUrlProvider knoqUrlProvider,
-    ILocalTimeProvider localTimeProvider,
-    TraqApiClient traq,
-    IMemoryCache cache,
-    ObjectPool<Traq.Models.PostMessageRequest> postMessageRequestPool,
-    ObjectPool<StringBuilder> stringBuilderPool,
-    ILogger<ReminderPublisherImplement> logger,
-    ILoggerFactory loggerFactory
-    )
-    : IReminderPublisher
+sealed partial class ReminderPublisher
 {
-    public ValueTask PublishAotReminderForUserAsync(Guid userId, ReminderDestination dest, ScheduledEvent[] events, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async ValueTask PublishDailyRemainderForUserAsync(Guid userId, ReminderDestination dest, ScheduledEvent[] events, CancellationToken cancellationToken = default)
+    public async ValueTask PublishDailyRemainderForUserAsync(
+        Guid userId,
+        ReminderDestination dest,
+        ScheduledEvent[] events,
+        CancellationToken cancellationToken = default)
     {
         await Task.WhenAll(
-            (dest.DiscordWebhooks.Length == 0) ? Task.CompletedTask : PublishDailyReminderForUserAsyncInternal_DiscordWebhook(dest.DiscordWebhooks, events, cancellationToken),
-            (dest.TraqChannels.Length == 0) ? Task.CompletedTask : PublishDailyReminderForUserAsyncInternal_Traq(userId, dest.TraqChannels, events, cancellationToken)
+            (dest.DiscordWebhooks.Length == 0) ? Task.CompletedTask : PublishDailyReminderToDiscordAsync(dest.DiscordWebhooks, events, cancellationToken),
+            (dest.TraqChannels.Length == 0) ? Task.CompletedTask : PublishDailyReminderToTraqAsync(userId, dest.TraqChannels, events, cancellationToken)
         );
     }
 
-    async Task PublishDailyReminderForUserAsyncInternal_DiscordWebhook(DestinationDiscordWebhook[] webhooks, ScheduledEvent[] events, CancellationToken cancellationToken = default)
+    async Task PublishDailyReminderToDiscordAsync(
+        DestinationDiscordWebhook[] webhooks,
+        ScheduledEvent[] events,
+        CancellationToken cancellationToken = default)
     {
         using var embedsArray = await DiscordWebhookReminderHelper.GetDiscordWebhookEmbedForEventsAsync(events, cache, knoqUrlProvider, loggerFactory, traq, cancellationToken);
         using var messages = embedsArray.Span.AsValueEnumerable()
@@ -64,7 +50,11 @@ public class ReminderPublisherImplement(
         await Task.WhenAll(tasks.Span);
     }
 
-    async Task PublishDailyReminderForUserAsyncInternal_Traq(Guid userId, DestinationTraqChannel[] channels, ScheduledEvent[] events, CancellationToken cancellationToken = default)
+    async Task PublishDailyReminderToTraqAsync(
+        Guid userId,
+        DestinationTraqChannel[] channels,
+        ScheduledEvent[] events,
+        CancellationToken cancellationToken = default)
     {
         var user = await traq.Users[userId].TryGetCachedAsync(cache, loggerFactory, cancellationToken: cancellationToken);
         if (user is null)

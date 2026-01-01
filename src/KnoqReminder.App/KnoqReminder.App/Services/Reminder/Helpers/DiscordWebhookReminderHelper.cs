@@ -9,7 +9,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Traq;
 using ZLinq;
 
-namespace KnoqReminder.App.Services.Reminder;
+namespace KnoqReminder.App.Services.Reminder.Helpers;
 
 static class DiscordWebhookReminderHelper
 {
