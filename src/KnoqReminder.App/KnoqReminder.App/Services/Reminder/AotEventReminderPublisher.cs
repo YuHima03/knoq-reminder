@@ -5,8 +5,16 @@ namespace KnoqReminder.App.Services.Reminder;
 
 sealed partial class ReminderPublisher
 {
-    public ValueTask PublishAotReminderForUserAsync(Guid userId, ReminderDestination dest, ScheduledEvent[] events, CancellationToken cancellationToken = default)
+    static string AotReminderTitleMarkdown => "⏰ イベント通知";
+
+    public async ValueTask PublishAotReminderForUserAsync(
+        Guid userId,
+        ReminderDestination dest,
+        ScheduledEvent[] events,
+        CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        await Task.WhenAll(
+            PublishDiscordWebhookWithEventsAsync(dest.DiscordWebhooks, "knoQ Reminder", AotReminderTitleMarkdown, events, cancellationToken),
+            PublishTraqMessageWithEventAsync(dest.TraqChannels, userId, AotReminderTitleMarkdown, events, cancellationToken));
     }
 }
