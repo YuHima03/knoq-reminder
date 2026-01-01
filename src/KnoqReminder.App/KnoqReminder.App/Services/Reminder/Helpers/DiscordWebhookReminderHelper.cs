@@ -17,6 +17,29 @@ static class DiscordWebhookReminderHelper
 
     public const int MaxDiscordWebhookEmbedsPerMessage = 10;
 
+    public static DiscordWebhookMessage[] CreateDiscordWebhookMessages(
+        string username,
+        string content,
+        ReadOnlySpan<DiscordWebhookMessage.Embed> embeds)
+    {
+        if (embeds.Length <= MaxDiscordWebhookEmbedsPerMessage)
+        {
+            return [new () {
+                Username = username,
+                Content = content,
+                Embeds = embeds.ToArray()
+            }];
+        }
+        return [.. embeds.AsValueEnumerable()
+            .Chunk(MaxDiscordWebhookEmbedsPerMessage)
+            .Select((ems, i) => new DiscordWebhookMessage
+            {
+                Username = username,
+                Content = (i == 0) ? content : null,
+                Embeds = ems
+            })];
+    }
+
     public static async ValueTask<PooledArray<DiscordWebhookMessage.Embed>> GetDiscordWebhookEmbedForEventsAsync(
         ScheduledEvent[] events,
         IMemoryCache cache,

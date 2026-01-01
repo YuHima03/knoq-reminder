@@ -1,5 +1,3 @@
-using System.Text;
-using KnoqReminder.Domain.Options;
 using KnoqReminder.Domain.Services.Reminder;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
