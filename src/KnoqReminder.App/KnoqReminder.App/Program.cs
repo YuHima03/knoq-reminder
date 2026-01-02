@@ -14,7 +14,7 @@ class Program
         builder.Services
             .ConfigureAppOptions(builder.Configuration)
             .SetupDefaultLocalization()
-            .SetupReminderServices()
+            .SetupReminderServices(builder.Configuration)
             .SetupRepository(builder.Environment);
 
         // Add services to the container.
