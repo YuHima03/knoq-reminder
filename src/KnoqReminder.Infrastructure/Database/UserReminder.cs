@@ -19,6 +19,13 @@ public partial class UserReminder
     public Guid UserId { get; set; }
 
     /// <summary>
+    /// daily to enable only daily reminders, always to enable all reminders
+    /// </summary>
+    [Column("reminds_when_pending")]
+    [StringLength(7)]
+    public string RemindsWhenPending { get; set; } = null!;
+
+    /// <summary>
     /// none to disable, daily to enable only daily reminders, always to enable all reminders
     /// </summary>
     [Column("reminds_when_absent")]

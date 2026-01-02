@@ -76,6 +76,9 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
             entity.Property(e => e.RemindsWhenAbsent)
                 .HasDefaultValueSql("'''none'''")
                 .HasComment("none to disable, daily to enable only daily reminders, always to enable all reminders");
+            entity.Property(e => e.RemindsWhenPending)
+                .HasDefaultValueSql("'''daily'''")
+                .HasComment("daily to enable only daily reminders, always to enable all reminders");
             entity.Property(e => e.UpdatedAt)
                 .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("'current_timestamp()'");
