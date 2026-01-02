@@ -1,6 +1,4 @@
-using KnoqReminder.Domain.Repositories.Models;
-
-namespace KnoqReminder.Domain.Services.Reminder;
+namespace KnoqReminder.Domain.Models;
 
 public class ReminderDestination
 {

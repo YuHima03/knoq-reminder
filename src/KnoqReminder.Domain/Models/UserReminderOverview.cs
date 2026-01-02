@@ -1,4 +1,4 @@
-namespace KnoqReminder.Domain.Reminder.Models;
+namespace KnoqReminder.Domain.Models;
 
 public sealed record UserReminderOverview(
     Guid Id,

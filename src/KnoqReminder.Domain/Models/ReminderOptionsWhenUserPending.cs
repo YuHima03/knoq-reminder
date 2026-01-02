@@ -1,4 +1,4 @@
-namespace KnoqReminder.Domain.Reminder.Models;
+namespace KnoqReminder.Domain.Models;
 
 /// <summary>
 /// Indicates which type of reminder to send for events which the user does not decide attendance yet.

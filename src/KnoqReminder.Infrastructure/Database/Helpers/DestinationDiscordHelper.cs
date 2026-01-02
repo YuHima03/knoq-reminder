@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using KnoqReminder.Domain.Repositories.Models;
+using KnoqReminder.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace KnoqReminder.Infrastructure.Database.Helpers;
@@ -12,13 +12,13 @@ static class DestinationDiscordHelper
         WebhookSecret = x.WebhookSecret,
     };
 
-    public static IQueryable<Domain.Reminder.Models.UserReminder> GroupJoinDiscordWebhooks(this IQueryable<Domain.Reminder.Models.UserReminder> @this, DbSet<DestinationsDiscord> destinationsDiscords)
+    public static IQueryable<Domain.Models.UserReminder> GroupJoinDiscordWebhooks(this IQueryable<Domain.Models.UserReminder> @this, DbSet<DestinationsDiscord> destinationsDiscords)
     {
         return @this.GroupJoin(
             destinationsDiscords.AsNoTracking(),
             ur => ur.Id,
             dw => dw.ReminderId,
-            (ur, dws) => new Domain.Reminder.Models.UserReminder(
+            (ur, dws) => new Domain.Models.UserReminder(
                 Id: ur.Id,
                 UserId: ur.UserId,
                 RemindsWhenPending: ur.RemindsWhenPending,

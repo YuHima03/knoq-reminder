@@ -1,8 +1,7 @@
 using CommunityToolkit.Diagnostics;
 using KnoqReminder.Domain.Exceptions;
-using KnoqReminder.Domain.Reminder.Models;
+using KnoqReminder.Domain.Models;
 using KnoqReminder.Domain.Repositories;
-using KnoqReminder.Domain.Repositories.Models;
 using KnoqReminder.Domain.Services.Reminder;
 using KnoqReminder.Utilities.Helpers;
 

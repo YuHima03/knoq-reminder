@@ -1,7 +1,7 @@
 using System.Text;
 using KnoqReminder.App.Helpers.Traq;
 using KnoqReminder.App.Services.Reminder.Helpers;
-using KnoqReminder.Domain.Repositories.Models;
+using KnoqReminder.Domain.Models;
 using KnoqReminder.Domain.Services.DiscordWebhook;
 using KnoqReminder.Domain.Services.Events;
 using KnoqReminder.Domain.Services.Localization;

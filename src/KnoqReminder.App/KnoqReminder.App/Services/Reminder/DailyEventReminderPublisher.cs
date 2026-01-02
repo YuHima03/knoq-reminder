@@ -1,3 +1,4 @@
+using KnoqReminder.Domain.Models;
 using KnoqReminder.Domain.Services.Events;
 using KnoqReminder.Domain.Services.Reminder;
 

@@ -1,7 +1,6 @@
+using KnoqReminder.Domain.Models;
 using KnoqReminder.Domain.Options;
-using KnoqReminder.Domain.Reminder.Models;
 using KnoqReminder.Domain.Repositories;
-using KnoqReminder.Domain.Repositories.Models;
 using KnoqReminder.Domain.Services.Events;
 using KnoqReminder.Domain.Services.Reminder;
 using Microsoft.Extensions.Caching.Memory;

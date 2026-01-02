@@ -1,6 +1,4 @@
-using KnoqReminder.Domain.Services.Reminder;
-
-namespace KnoqReminder.Domain.Repositories.Models;
+namespace KnoqReminder.Domain.Models;
 
 public record struct UserDailyReminder(
     Guid ReminderId,

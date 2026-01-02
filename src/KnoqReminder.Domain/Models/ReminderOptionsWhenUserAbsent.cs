@@ -1,9 +1,9 @@
-namespace KnoqReminder.Domain.Reminder.Models;
+namespace KnoqReminder.Domain.Models;
 
 /// <summary>
-/// Indicates which type of reminder to send for open events.
+/// Indicates which type of reminder to send for events when the user is absent.
 /// </summary>
-public enum ReminderOptionsForOpenEvents
+public enum ReminderOptionsWhenUserAbsent
 {
     /// <summary>
     /// Does not send reminders.

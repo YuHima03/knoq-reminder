@@ -1,6 +1,4 @@
-using KnoqReminder.Domain.Repositories.Models;
-
-namespace KnoqReminder.Domain.Reminder.Models;
+namespace KnoqReminder.Domain.Models;
 
 /// <summary>
 /// Represents a setting for event reminders to a user.

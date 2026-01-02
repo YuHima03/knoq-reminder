@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using KnoqReminder.Domain.Services.Reminder;
+using KnoqReminder.Domain.Models;
 using KnoqReminder.Utilities.Linq;
 using Microsoft.EntityFrameworkCore;
 

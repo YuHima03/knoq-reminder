@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using KnoqReminder.Domain.Repositories.Models;
+using KnoqReminder.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace KnoqReminder.Infrastructure.Database.Helpers;
@@ -11,13 +11,13 @@ static class DestinationTraqHelper
         ChannelId = x.ChannelId,
     };
 
-    public static IQueryable<Domain.Reminder.Models.UserReminder> GroupJoinTraqChannels(this IQueryable<Domain.Reminder.Models.UserReminder> @this, DbSet<DestinationsTraq> destinationsTraqs)
+    public static IQueryable<Domain.Models.UserReminder> GroupJoinTraqChannels(this IQueryable<Domain.Models.UserReminder> @this, DbSet<DestinationsTraq> destinationsTraqs)
     {
         return @this.GroupJoin(
             destinationsTraqs.AsNoTracking(),
             ur => ur.Id,
             tc => tc.ReminderId,
-            (ur, tcs) => new Domain.Reminder.Models.UserReminder(
+            (ur, tcs) => new Domain.Models.UserReminder(
                 Id: ur.Id,
                 UserId: ur.UserId,
                 RemindsWhenPending: ur.RemindsWhenPending,

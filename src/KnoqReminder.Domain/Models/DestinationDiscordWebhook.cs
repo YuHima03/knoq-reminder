@@ -1,4 +1,4 @@
-namespace KnoqReminder.Domain.Repositories.Models;
+namespace KnoqReminder.Domain.Models;
 
 public readonly struct DestinationDiscordWebhook : IComparable<DestinationDiscordWebhook>, IEquatable<DestinationDiscordWebhook>
 {

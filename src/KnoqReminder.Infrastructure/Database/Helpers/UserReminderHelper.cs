@@ -1,13 +1,12 @@
 using System.Linq.Expressions;
 using CommunityToolkit.Diagnostics;
-using KnoqReminder.Domain.Reminder.Models;
-using KnoqReminder.Domain.Repositories.Models;
+using KnoqReminder.Domain.Models;
 
 namespace KnoqReminder.Infrastructure.Database.Helpers;
 
 static partial class UserReminderHelper
 {
-    public static readonly Expression<Func<UserReminder, Domain.Reminder.Models.UserReminder>> DtoToDomainExpression = dto => new(
+    public static readonly Expression<Func<UserReminder, Domain.Models.UserReminder>> DtoToDomainExpression = dto => new(
         dto.Id,
         dto.UserId,
         ParseDtoStringToReminderOptionsWhenUserPending(dto.RemindsWhenPending),
@@ -28,7 +27,7 @@ static partial class UserReminderHelper
         ParseDtoStringToReminderOptionsForOpenEvents(dto.RemindsFreeEvents),
         dto.UpdatedAt);
 
-    public static Domain.Reminder.Models.UserReminder ToDomain(this UserReminder dto)
+    public static Domain.Models.UserReminder ToDomain(this UserReminder dto)
     {
         return new(
             dto.Id,
