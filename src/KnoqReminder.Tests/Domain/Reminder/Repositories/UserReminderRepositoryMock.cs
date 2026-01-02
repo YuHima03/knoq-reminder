@@ -112,9 +112,19 @@ sealed partial class RepositoryMock : IUserReminderRepository
         }
     }
 
-    public ValueTask<UserReminderOverview> GetUserReminderOverviewAsync(Guid id, CancellationToken cancellationToken = default)
+    public async ValueTask<UserReminderOverview> GetUserReminderOverviewAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        lock (_lock)
+        {
+            var item = _items.GetValueOrDefault(id) ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminder>();
+            return new UserReminderOverview(
+                item.Id,
+                item.UserId,
+                item.RemindsWhenPending,
+                item.RemindsWhenAbsent,
+                item.RemindsOpenEvents,
+                item.UpdatedAt);
+        }
     }
 
     public async ValueTask<UserReminder> UpdateUserReminderAsync(Guid id, UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken = default)
