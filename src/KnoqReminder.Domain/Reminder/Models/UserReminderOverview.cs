@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using KnoqReminder.Domain.Repositories.Models;
 
-namespace KnoqReminder.Domain.Reminder;
+namespace KnoqReminder.Domain.Reminder.Models;
 
 public sealed record UserReminderOverview(
     Guid Id,
