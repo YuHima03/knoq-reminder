@@ -7,7 +7,7 @@ sealed partial class ReminderPublisher
 {
     string DailyReminderTitleMarkdown => $"# 📆 {localTimeProvider.LocalToday.ToString(ReminderConstants.TodayDateOnlyFormat)} きょうのイベント";
 
-    public async ValueTask PublishDailyRemainderForUserAsync(
+    public async ValueTask PublishDailyReminderForUserAsync(
         Guid userId,
         ReminderDestination dest,
         ScheduledEvent[] events,
