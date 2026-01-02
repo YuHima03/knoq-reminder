@@ -18,11 +18,12 @@ static class DestinationDiscordHelper
             destinationsDiscords.AsNoTracking(),
             ur => ur.Id,
             dw => dw.ReminderId,
-            (ur, dws) => new Domain.Repositories.Models.UserReminder(
+            (ur, dws) => new Domain.Reminder.Models.UserReminder(
                 Id: ur.Id,
                 UserId: ur.UserId,
+                RemindsWhenPending: ur.RemindsWhenPending,
                 RemindsWhenAbsent: ur.RemindsWhenAbsent,
-                RemindsFreeEvents: ur.RemindsFreeEvents,
+                RemindsOpenEvents: ur.RemindsOpenEvents,
                 AheadOfTimeReminderTimes: ur.AheadOfTimeReminderTimes,
                 DailyReminderTimes: ur.DailyReminderTimes,
                 DestinationDiscordWebhooks: dws.Select(ToDomain).ToArray(),

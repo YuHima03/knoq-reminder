@@ -17,11 +17,12 @@ static class DestinationTraqHelper
             destinationsTraqs.AsNoTracking(),
             ur => ur.Id,
             tc => tc.ReminderId,
-            (ur, tcs) => new Domain.Repositories.Models.UserReminder(
+            (ur, tcs) => new Domain.Reminder.Models.UserReminder(
                 Id: ur.Id,
                 UserId: ur.UserId,
+                RemindsWhenPending: ur.RemindsWhenPending,
                 RemindsWhenAbsent: ur.RemindsWhenAbsent,
-                RemindsFreeEvents: ur.RemindsFreeEvents,
+                RemindsOpenEvents: ur.RemindsOpenEvents,
                 AheadOfTimeReminderTimes: ur.AheadOfTimeReminderTimes,
                 DailyReminderTimes: ur.DailyReminderTimes,
                 DestinationDiscordWebhooks: ur.DestinationDiscordWebhooks,
