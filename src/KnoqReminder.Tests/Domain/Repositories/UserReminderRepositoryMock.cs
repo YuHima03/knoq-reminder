@@ -63,6 +63,7 @@ sealed partial class RepositoryMock : IUserReminderRepository
                     .Where(off => off >= offsetFrom && off <= offsetTo)
                     .Select(off => new UserAotReminder(
                         r.Id,
+                        r.UserId,
                         new ReminderDestination
                         {
                             DiscordWebhooks = r.DestinationDiscordWebhooks,
@@ -82,6 +83,7 @@ sealed partial class RepositoryMock : IUserReminderRepository
                     .Where(t => t >= timeFrom && t <= timeTo)
                     .Select(t => new UserDailyReminder(
                         r.Id,
+                        r.UserId,
                         new ReminderDestination
                         {
                             DiscordWebhooks = r.DestinationDiscordWebhooks,

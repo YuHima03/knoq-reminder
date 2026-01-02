@@ -1,9 +1,12 @@
 using System.Buffers;
+using System.Threading;
 using KnoqReminder.Domain.Exceptions;
 using KnoqReminder.Domain.Repositories;
 using KnoqReminder.Domain.Repositories.Models;
+using KnoqReminder.Domain.Services.Reminder;
 using KnoqReminder.Infrastructure.Database.Helpers;
 using KnoqReminder.Utilities.Helpers;
+using KnoqReminder.Utilities.Linq;
 using Microsoft.EntityFrameworkCore;
 using ZLinq;
 
@@ -125,16 +128,20 @@ public partial class AppDbContext : IUserReminderRepository
             .GroupJoinDestinations(
                 DestinationsDiscords.AsNoTracking(),
                 DestinationsTraqs.AsNoTracking())
-            .SelectMany(t => t.Item1.Select(r => new UserAotReminder
-            {
-                ReminderId = r.ReminderId,
-                Destination = t.Item2,
-                Offset = new(r.Offset)
-            }))
+            .Join(
+                inner: UserReminders.AsNoTracking(),
+                outerKeySelector: x => x.Outer.Key,
+                innerKeySelector: y => y.Id,
+                resultSelector: (outer, inner) => DefaultJoinResult.Create(outer, inner.UserId).Flatten())
+            .SelectMany(x => x.Item1.Select(r => new UserAotReminder(
+                r.ReminderId,
+                x.Item3,
+                x.Item2,
+                new AheadOfTimeReminderTime(r.Offset))))
             .ToArrayAsync(cancellationToken);
     }
 
-    async ValueTask<UserDailyReminder[]> IUserReminderRepository.GetUserDailyRemindersAsync(DailyReminderTime timeFrom, DailyReminderTime timeTo, CancellationToken cancellationTokent)
+    async ValueTask<UserDailyReminder[]> IUserReminderRepository.GetUserDailyRemindersAsync(DailyReminderTime timeFrom, DailyReminderTime timeTo, CancellationToken cancellationToken)
     {
         var q = (timeFrom == timeTo)
             ? DailyReminders.AsNoTracking().Where(x => x.Time == timeFrom.TimeSpan)
@@ -145,13 +152,17 @@ public partial class AppDbContext : IUserReminderRepository
             .GroupJoinDestinations(
                 DestinationsDiscords.AsNoTracking(),
                 DestinationsTraqs.AsNoTracking())
-            .SelectMany(t => t.Item1.Select(r => new UserDailyReminder
-            {
-                ReminderId = r.ReminderId,
-                Destination = t.Item2,
-                RemindsAt = new(TimeOnly.FromTimeSpan(r.Time))
-            }))
-            .ToArrayAsync(cancellationTokent);
+            .Join(
+                inner: UserReminders.AsNoTracking(),
+                outerKeySelector: x => x.Outer.Key,
+                innerKeySelector: y => y.Id,
+                resultSelector: (outer, inner) => DefaultJoinResult.Create(outer, inner.UserId).Flatten())
+            .SelectMany(x => x.Item1.Select(r => new UserDailyReminder(
+                r.ReminderId,
+                x.Item3,
+                x.Item2,
+                new DailyReminderTime(TimeOnly.FromTimeSpan(r.Time)))))
+            .ToArrayAsync(cancellationToken);
     }
 
     async ValueTask<Domain.Repositories.Models.UserReminder> IUserReminderRepository.GetUserReminderAsync(Guid id, CancellationToken cancellationToken)
