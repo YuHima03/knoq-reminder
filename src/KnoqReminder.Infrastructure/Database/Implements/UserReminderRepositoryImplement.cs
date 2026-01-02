@@ -197,9 +197,13 @@ public partial class AppDbContext : IUserReminderRepository
         };
     }
 
-    ValueTask<UserReminderOverview> IUserReminderRepository.GetUserReminderOverviewAsync(Guid id, CancellationToken cancellationToken)
+    async ValueTask<UserReminderOverview> IUserReminderRepository.GetUserReminderOverviewAsync(Guid id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var reminder = await UserReminders.AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(UserReminderHelper.DtoToDomainOverviewExpression)
+            .FirstOrDefaultAsync(cancellationToken);
+        return reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminderOverview>();
     }
 
     async ValueTask<Domain.Reminder.Models.UserReminder> IUserReminderRepository.UpdateUserReminderAsync(Guid id, UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)

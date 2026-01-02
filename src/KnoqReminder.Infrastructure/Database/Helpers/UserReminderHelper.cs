@@ -21,6 +21,14 @@ static partial class UserReminderHelper
         dto.CreatedAt,
         dto.UpdatedAt);
 
+    public static readonly Expression<Func<UserReminder, UserReminderOverview>> DtoToDomainOverviewExpression = dto => new(
+        dto.Id,
+        dto.UserId,
+        ParseDtoStringToReminderOptionsWhenUserPending(dto.RemindsWhenPending),
+        ParseDtoStringToReminderOptionsWhenUserAbsent(dto.RemindsWhenAbsent),
+        ParseDtoStringToReminderOptionsForOpenEvents(dto.RemindsFreeEvents),
+        dto.UpdatedAt);
+
     public static Domain.Reminder.Models.UserReminder ToDomain(this UserReminder dto)
     {
         return new(
