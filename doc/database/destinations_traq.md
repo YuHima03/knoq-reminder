@@ -56,6 +56,7 @@ erDiagram
 "user_reminders" {
   char_36_ id PK
   char_36_ user_id
+  varchar_7_ reminds_when_pending
   varchar_7_ reminds_when_absent
   varchar_7_ reminds_free_events
   datetime created_at

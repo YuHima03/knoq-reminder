@@ -350,6 +350,13 @@
           "comment": "traQ user uuid"
         },
         {
+          "name": "reminds_when_pending",
+          "type": "varchar(7)",
+          "nullable": false,
+          "default": "'daily'",
+          "comment": "daily to enable only daily reminders, always to enable all reminders"
+        },
+        {
           "name": "reminds_when_absent",
           "type": "varchar(7)",
           "nullable": false,
@@ -415,7 +422,7 @@
           ]
         }
       ],
-      "def": "CREATE TABLE `user_reminders` (\n  `id` char(36) NOT NULL,\n  `user_id` char(36) NOT NULL COMMENT 'traQ user uuid',\n  `reminds_when_absent` varchar(7) NOT NULL DEFAULT 'none' COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',\n  `reminds_free_events` varchar(7) NOT NULL DEFAULT 'none' COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `user_id` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+      "def": "CREATE TABLE `user_reminders` (\n  `id` char(36) NOT NULL,\n  `user_id` char(36) NOT NULL COMMENT 'traQ user uuid',\n  `reminds_when_pending` varchar(7) NOT NULL DEFAULT 'daily' COMMENT 'daily to enable only daily reminders, always to enable all reminders',\n  `reminds_when_absent` varchar(7) NOT NULL DEFAULT 'none' COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',\n  `reminds_free_events` varchar(7) NOT NULL DEFAULT 'none' COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',\n  `created_at` datetime NOT NULL DEFAULT current_timestamp(),\n  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n  PRIMARY KEY (`id`),\n  UNIQUE KEY `user_id` (`user_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     }
   ],
   "relations": [

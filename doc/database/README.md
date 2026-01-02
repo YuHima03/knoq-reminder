@@ -8,7 +8,7 @@
 | [daily_reminders](daily_reminders.md) | 5 |  | BASE TABLE |
 | [destinations_discord](destinations_discord.md) | 5 |  | BASE TABLE |
 | [destinations_traq](destinations_traq.md) | 4 |  | BASE TABLE |
-| [user_reminders](user_reminders.md) | 6 |  | BASE TABLE |
+| [user_reminders](user_reminders.md) | 7 |  | BASE TABLE |
 
 ## Relations
 
@@ -50,6 +50,7 @@ erDiagram
 "user_reminders" {
   char_36_ id PK
   char_36_ user_id
+  varchar_7_ reminds_when_pending
   varchar_7_ reminds_when_absent
   varchar_7_ reminds_free_events
   datetime created_at

@@ -1,6 +1,7 @@
 CREATE TABLE `user_reminders` (
     `id`                    char(36)    NOT NULL    PRIMARY KEY,
     `user_id`               char(36)    NOT NULL    UNIQUE KEY      COMMENT 'traQ user uuid',
+    `reminds_when_pending`  varchar(7)  NOT NULL    DEFAULT 'daily' COMMENT 'daily to enable only daily reminders, always to enable all reminders',
     `reminds_when_absent`   varchar(7)  NOT NULL    DEFAULT 'none'  COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',
     `reminds_free_events`   varchar(7)  NOT NULL    DEFAULT 'none'  COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',
     `created_at`            datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP,

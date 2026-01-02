@@ -9,6 +9,7 @@
 CREATE TABLE `user_reminders` (
   `id` char(36) NOT NULL,
   `user_id` char(36) NOT NULL COMMENT 'traQ user uuid',
+  `reminds_when_pending` varchar(7) NOT NULL DEFAULT 'daily' COMMENT 'daily to enable only daily reminders, always to enable all reminders',
   `reminds_when_absent` varchar(7) NOT NULL DEFAULT 'none' COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',
   `reminds_free_events` varchar(7) NOT NULL DEFAULT 'none' COMMENT 'none to disable, daily to enable only daily reminders, always to enable all reminders',
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
@@ -26,6 +27,7 @@ CREATE TABLE `user_reminders` (
 | ---- | ---- | ------- | -------- | ---------------- | -------- | ------- | ------- |
 | id | char(36) |  | false |  | [ahead_of_time_reminders](ahead_of_time_reminders.md) [daily_reminders](daily_reminders.md) [destinations_discord](destinations_discord.md) [destinations_traq](destinations_traq.md) |  |  |
 | user_id | char(36) |  | false |  |  |  | traQ user uuid |
+| reminds_when_pending | varchar(7) | 'daily' | false |  |  |  | daily to enable only daily reminders, always to enable all reminders |
 | reminds_when_absent | varchar(7) | 'none' | false |  |  |  | none to disable, daily to enable only daily reminders, always to enable all reminders |
 | reminds_free_events | varchar(7) | 'none' | false |  |  |  | none to disable, daily to enable only daily reminders, always to enable all reminders |
 | created_at | datetime | current_timestamp() | false |  |  |  |  |
@@ -58,6 +60,7 @@ erDiagram
 "user_reminders" {
   char_36_ id PK
   char_36_ user_id
+  varchar_7_ reminds_when_pending
   varchar_7_ reminds_when_absent
   varchar_7_ reminds_free_events
   datetime created_at
