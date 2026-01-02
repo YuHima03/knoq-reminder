@@ -1,4 +1,5 @@
 using KnoqReminder.App.Configurations;
+using KnoqReminder.App.Helpers;
 using KnoqReminder.Domain.Options;
 using KnoqReminder.Domain.Services.Reminder;
 using KnoqReminder.Utilities.Options;
@@ -13,7 +14,7 @@ static class ServiceCollectionExtension
     {
         // Register dependencies
         services.AddMemoryCache();
-        services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
+        services.AddDefaultObjectPool();
         services.TryAddSingleton(sp =>
         {
             var provider = sp.GetRequiredService<ObjectPoolProvider>();

@@ -15,6 +15,7 @@
     <ProjectReference Include="..\..\KnoqReminder.Infrastructure\KnoqReminder.Infrastructure.csproj" />
     <ProjectReference Include="..\KnoqReminder.App.Client\KnoqReminder.App.Client.csproj" />
     <PackageReference Include="KnoqNet" />
+    <PackageReference Include="KnoqNet.Extensions.Authentication" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
     <PackageReference Include="Traq" />
     <PackageReference Include="ZLinq" />

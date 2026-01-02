@@ -7,6 +7,7 @@
     <PackageVersion Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="KnoqNet" Version="1.0.0-alpha.2" />
+    <PackageVersion Include="KnoqNet.Extensions.Authentication" Version="1.0.0-alpha.2" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.1" />

@@ -1,5 +1,7 @@
 using KnoqReminder.App.Components;
 using KnoqReminder.App.Configurations;
+using KnoqReminder.App.Services;
+using KnoqReminder.App.Services.DiscordWebhook;
 using KnoqReminder.App.Services.Localization;
 using KnoqReminder.App.Services.Reminder;
 using KnoqReminder.Infrastructure.Database;
@@ -14,8 +16,11 @@ class Program
         builder.Services
             .ConfigureAppOptions(builder.Configuration)
             .SetupDefaultLocalization(builder.Configuration)
+            .SetupDiscordWebhookPublisher(builder.Configuration)
+            .SetupKnoqClient(builder.Configuration)
             .SetupReminderServices(builder.Configuration)
-            .SetupRepository(builder.Configuration, builder.Environment);
+            .SetupRepository(builder.Configuration, builder.Environment)
+            .SetupTraqClient(builder.Configuration);
 
         // Add services to the container.
         builder.Services.AddRazorComponents()
