@@ -2,7 +2,6 @@ using System.Linq.Expressions;
 using CommunityToolkit.Diagnostics;
 using KnoqReminder.Domain.Reminder.Models;
 using KnoqReminder.Domain.Repositories.Models;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace KnoqReminder.Infrastructure.Database.Helpers;
 

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace KnoqReminder.Utilities.Linq;
 
 public static class DefaultJoinResult
