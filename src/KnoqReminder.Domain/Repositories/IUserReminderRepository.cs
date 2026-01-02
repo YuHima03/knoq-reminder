@@ -1,3 +1,4 @@
+using KnoqReminder.Domain.Reminder;
 using KnoqReminder.Domain.Repositories.Models;
 
 namespace KnoqReminder.Domain.Repositories;
@@ -33,6 +34,14 @@ public interface IUserReminderRepository : IRepositoryBase
     /// A user reminder with the specified ID does not exist.
     /// </exception>
     ValueTask<UserReminder> GetUserReminderAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves an overview of user reminder by its ID.
+    /// </summary>
+    /// <exception cref="Exceptions.RepositoryKeyNotFoundException">
+    /// A user reminder with the specified ID does not exist.
+    /// </exception>
+    ValueTask<UserReminderOverview> GetUserReminderOverviewAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a user reminder by the user ID.
