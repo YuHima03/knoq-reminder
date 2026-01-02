@@ -6,6 +6,8 @@ public record ScheduledEvent(
     string Place,
     Guid HostGroupId,
     string Description,
+    bool IsOpen,
+    Dictionary<Guid, EventAttendanceStatus> Attendees,
     DateTimeOffset StartsAt,
     DateTimeOffset EndsAt
     );
