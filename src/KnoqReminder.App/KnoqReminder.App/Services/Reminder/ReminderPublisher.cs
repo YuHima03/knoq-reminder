@@ -70,7 +70,7 @@ sealed partial class ReminderPublisher(
             .AppendLine()
             .AppendTraqUserMention(user.Name, user.Id.GetValueOrDefault()).AppendLine()
             .AppendLine();
-        await sb.AppendEventsTableAsync(events, cache, knoqUrlProvider, localTimeProvider, traq, cancellationToken);
+        await sb.AppendEventsTableAsync(events, cache, knoqUrlProvider, localTimeProvider, loggerFactory, traq, cancellationToken);
 
         var postReq = postMessageRequestPool.Get();
         postReq.Embed = false;

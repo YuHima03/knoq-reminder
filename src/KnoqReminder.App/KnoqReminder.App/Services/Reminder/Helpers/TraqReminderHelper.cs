@@ -1,4 +1,5 @@
 using System.Text;
+using KnoqReminder.App.Helpers.Traq;
 using KnoqReminder.Domain.Services.Events;
 using KnoqReminder.Domain.Services.Localization;
 using KnoqReminder.Domain.Services.Reminder;
@@ -17,6 +18,7 @@ static class TraqReminderHelper
         IMemoryCache cache,
         IKnoqUrlProvider knoqUrlProvider,
         ILocalTimeProvider localTimeProvider,
+        ILoggerFactory loggerFactory,
         TraqApiClient traq,
         CancellationToken cancellationToken = default)
     {
@@ -27,7 +29,7 @@ static class TraqReminderHelper
         var localToday = localTimeProvider.LocalToday;
         foreach (var e in events)
         {
-            var host = await traq.Groups[e.HostGroupId].GetAsync(cancellationToken: cancellationToken);
+            var host = await traq.Groups[e.HostGroupId].TryGetCachedAsync(cache, loggerFactory, null, cancellationToken);
             // Event name and host
             sb.Append($"| **[{e.Name.Truncate(ReminderConstants.MaxEventNameLength)}]({knoqUrlProvider.GetEventPageUrl(e.Id)})**\x20");
             if (host?.Name is string hostName)
