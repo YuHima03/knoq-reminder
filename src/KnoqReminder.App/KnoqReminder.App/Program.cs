@@ -13,9 +13,9 @@ class Program
 
         builder.Services
             .ConfigureAppOptions(builder.Configuration)
-            .SetupDefaultLocalization()
+            .SetupDefaultLocalization(builder.Configuration)
             .SetupReminderServices(builder.Configuration)
-            .SetupRepository(builder.Environment);
+            .SetupRepository(builder.Configuration, builder.Environment);
 
         // Add services to the container.
         builder.Services.AddRazorComponents()

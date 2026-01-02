@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Configuration;
 
-namespace KnoqReminder.App.Configurations;
+namespace KnoqReminder.Infrastructure.Database;
 
 public class MariaDbConnectionConfiguration : Domain.Options.IDbConnectionOptions
 {

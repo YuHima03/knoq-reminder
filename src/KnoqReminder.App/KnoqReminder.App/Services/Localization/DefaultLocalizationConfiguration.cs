@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using KnoqReminder.Domain.Options;
 
-namespace KnoqReminder.App.Configurations;
+namespace KnoqReminder.App.Services.Localization;
 
 class DefaultLocalizationConfiguration : IDefaultLocalizationOptions
 {

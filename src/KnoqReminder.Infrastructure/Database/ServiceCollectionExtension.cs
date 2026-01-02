@@ -1,7 +1,9 @@
 using KnoqReminder.Domain.Options;
 using KnoqReminder.Domain.Repositories;
 using KnoqReminder.Infrastructure.Database.Implements;
+using KnoqReminder.Utilities.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -11,8 +13,9 @@ namespace KnoqReminder.Infrastructure.Database;
 
 public static class ServiceCollectionExtension
 {
-    public static IServiceCollection SetupRepository(this IServiceCollection services, IHostEnvironment? environment = null)
+    public static IServiceCollection SetupRepository(this IServiceCollection services, IConfigurationRoot config, IHostEnvironment? environment = null)
     {
+        services.Configure<IDbConnectionOptions, MariaDbConnectionConfiguration>(config);
         services.AddDbContextFactory<AppDbContext>((sp, ob) =>
         {
             var connectionString = sp.GetRequiredService<IOptions<IDbConnectionOptions>>().Value.ConnectionString;
