@@ -1,3 +1,4 @@
+using KnoqReminder.App.Configurations;
 using KnoqReminder.Domain.Options;
 using KnoqReminder.Domain.Services.Localization;
 using KnoqReminder.Utilities.Options;

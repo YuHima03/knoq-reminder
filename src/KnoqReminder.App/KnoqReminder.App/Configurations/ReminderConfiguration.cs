@@ -1,6 +1,6 @@
 using KnoqReminder.Domain.Options;
 
-namespace KnoqReminder.App.Services.Reminder;
+namespace KnoqReminder.App.Configurations;
 
 sealed class ReminderConfiguration : IReminderOptions
 {
