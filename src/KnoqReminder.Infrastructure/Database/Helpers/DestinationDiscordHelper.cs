@@ -12,7 +12,7 @@ static class DestinationDiscordHelper
         WebhookSecret = x.WebhookSecret,
     };
 
-    public static IQueryable<Domain.Repositories.Models.UserReminder> GroupJoinDiscordWebhooks(this IQueryable<Domain.Repositories.Models.UserReminder> @this, DbSet<DestinationsDiscord> destinationsDiscords)
+    public static IQueryable<Domain.Reminder.Models.UserReminder> GroupJoinDiscordWebhooks(this IQueryable<Domain.Reminder.Models.UserReminder> @this, DbSet<DestinationsDiscord> destinationsDiscords)
     {
         return @this.GroupJoin(
             destinationsDiscords.AsNoTracking(),

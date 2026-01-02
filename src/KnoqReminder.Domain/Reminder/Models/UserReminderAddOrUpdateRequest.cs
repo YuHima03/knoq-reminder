@@ -1,4 +1,6 @@
-namespace KnoqReminder.Domain.Repositories.Models;
+using KnoqReminder.Domain.Repositories.Models;
+
+namespace KnoqReminder.Domain.Reminder.Models;
 
 /// <summary>
 /// Represents a configuration for adding a new item to or updating an existing item in a set of <see cref="UserReminder"/>s.
@@ -10,8 +12,9 @@ namespace KnoqReminder.Domain.Repositories.Models;
 /// <param name="DailyReminderTimes"></param>
 public record UserReminderAddOrUpdateRequest(
     Guid? UserId,
-    ReminderKind? RemindsWhenAbsent,
-    ReminderKind? RemindsFreeEvents,
+    ReminderOptionsWhenUserPending? RemindsWhenPending,
+    ReminderOptionsWhenUserAbsent? RemindsWhenAbsent,
+    ReminderOptionsForOpenEvents? RemindsOpenEvents,
     AheadOfTimeReminderTime[]? AheadOfTimeReminderTimes,
     DailyReminderTime[]? DailyReminderTimes,
     DestinationDiscordWebhook[]? DestinationDiscordWebhooks,

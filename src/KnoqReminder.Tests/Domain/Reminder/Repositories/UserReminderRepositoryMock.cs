@@ -1,11 +1,12 @@
 using CommunityToolkit.Diagnostics;
 using KnoqReminder.Domain.Exceptions;
+using KnoqReminder.Domain.Reminder.Models;
 using KnoqReminder.Domain.Repositories;
 using KnoqReminder.Domain.Repositories.Models;
 using KnoqReminder.Domain.Services.Reminder;
 using KnoqReminder.Utilities.Helpers;
 
-namespace KnoqReminder.Tests.Domain.Repositories;
+namespace KnoqReminder.Tests.Domain.Reminder.Repositories;
 
 sealed partial class RepositoryMock : IUserReminderRepository
 {
@@ -27,8 +28,9 @@ sealed partial class RepositoryMock : IUserReminderRepository
             return _items[id] = new UserReminder(
                 id,
                 item.UserId.Value,
-                item.RemindsWhenAbsent ?? ReminderKind.None,
-                item.RemindsFreeEvents ?? ReminderKind.None,
+                item.RemindsWhenPending.GetValueOrDefault(),
+                item.RemindsWhenAbsent.GetValueOrDefault(),
+                item.RemindsOpenEvents.GetValueOrDefault(),
                 item.AheadOfTimeReminderTimes ?? [],
                 item.DailyReminderTimes ?? [],
                 item.DestinationDiscordWebhooks ?? [],
@@ -110,6 +112,11 @@ sealed partial class RepositoryMock : IUserReminderRepository
         }
     }
 
+    public ValueTask<UserReminderOverview> GetUserReminderOverviewAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public async ValueTask<UserReminder> UpdateUserReminderAsync(Guid id, UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken = default)
     {
         lock (_lock)
@@ -121,8 +128,9 @@ sealed partial class RepositoryMock : IUserReminderRepository
             return _items[id] = new UserReminder(
                 existing.Id,
                 item.UserId ?? existing.UserId,
+                item.RemindsWhenPending ?? existing.RemindsWhenPending,
                 item.RemindsWhenAbsent ?? existing.RemindsWhenAbsent,
-                item.RemindsFreeEvents ?? existing.RemindsFreeEvents,
+                item.RemindsOpenEvents ?? existing.RemindsOpenEvents,
                 item.AheadOfTimeReminderTimes ?? existing.AheadOfTimeReminderTimes,
                 item.DailyReminderTimes ?? existing.DailyReminderTimes,
                 item.DestinationDiscordWebhooks ?? existing.DestinationDiscordWebhooks,

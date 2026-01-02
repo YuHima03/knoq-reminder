@@ -1,9 +1,8 @@
 using System.Buffers;
-using System.Threading;
 using KnoqReminder.Domain.Exceptions;
+using KnoqReminder.Domain.Reminder.Models;
 using KnoqReminder.Domain.Repositories;
 using KnoqReminder.Domain.Repositories.Models;
-using KnoqReminder.Domain.Services.Reminder;
 using KnoqReminder.Infrastructure.Database.Helpers;
 using KnoqReminder.Utilities.Helpers;
 using KnoqReminder.Utilities.Linq;
@@ -14,7 +13,7 @@ namespace KnoqReminder.Infrastructure.Database;
 
 public partial class AppDbContext : IUserReminderRepository
 {
-    async ValueTask<Domain.Repositories.Models.UserReminder> IUserReminderRepository.AddUserReminderAsync(UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)
+    async ValueTask<Domain.Reminder.Models.UserReminder> IUserReminderRepository.AddUserReminderAsync(UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)
     {
         var reminderId = Guid.CreateVersion7();
         if (item.AheadOfTimeReminderTimes is { Length: > 0 } aotReminders)
@@ -68,8 +67,9 @@ public partial class AppDbContext : IUserReminderRepository
         {
             Id = reminderId,
             UserId = item.UserId.GetValueOrDefault(),
-            RemindsWhenAbsent = (item.RemindsWhenAbsent ?? ReminderKind.None).ToString(),
-            RemindsFreeEvents = (item.RemindsFreeEvents ?? ReminderKind.None).ToString(),
+            RemindsWhenPending = item.RemindsWhenPending.GetValueOrDefault().ToDtoString(),
+            RemindsWhenAbsent = item.RemindsWhenAbsent.GetValueOrDefault().ToDtoString(),
+            RemindsFreeEvents = item.RemindsOpenEvents.GetValueOrDefault().ToDtoString(),
         };
         UserReminders.Add(reminder);
         await SaveChangesAsync(cancellationToken);
@@ -165,21 +165,21 @@ public partial class AppDbContext : IUserReminderRepository
             .ToArrayAsync(cancellationToken);
     }
 
-    async ValueTask<Domain.Repositories.Models.UserReminder> IUserReminderRepository.GetUserReminderAsync(Guid id, CancellationToken cancellationToken)
+    async ValueTask<Domain.Reminder.Models.UserReminder> IUserReminderRepository.GetUserReminderAsync(Guid id, CancellationToken cancellationToken)
     {
         var reminder = await UserReminders.AsNoTracking()
             .Where(x => x.Id == id)
             .Select(UserReminderHelper.DtoToDomainExpression)
             .FirstOrDefaultAsync(cancellationToken);
         var (discordWebhooks, traqChannels) = await GetDestinationsAsync(id, cancellationToken);
-        return reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Repositories.Models.UserReminder>() with
+        return reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Reminder.Models.UserReminder>() with
         {
             DestinationDiscordWebhooks = discordWebhooks,
             DestinationTraqChannels = traqChannels
         };
     }
 
-    async ValueTask<Domain.Repositories.Models.UserReminder> IUserReminderRepository.GetUserReminderByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    async ValueTask<Domain.Reminder.Models.UserReminder> IUserReminderRepository.GetUserReminderByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var reminder = await UserReminders.AsNoTracking()
             .Where(x => x.UserId == userId)
@@ -187,7 +187,7 @@ public partial class AppDbContext : IUserReminderRepository
             .FirstOrDefaultAsync(cancellationToken);
         if (reminder is null)
         {
-            return GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Repositories.Models.UserReminder>();
+            return GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Reminder.Models.UserReminder>();
         }
         var (discordWebhooks, traqChannels) = await GetDestinationsAsync(reminder.Id, cancellationToken);
         return reminder with
@@ -197,20 +197,29 @@ public partial class AppDbContext : IUserReminderRepository
         };
     }
 
-    async ValueTask<Domain.Repositories.Models.UserReminder> IUserReminderRepository.UpdateUserReminderAsync(Guid id, UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)
+    ValueTask<UserReminderOverview> IUserReminderRepository.GetUserReminderOverviewAsync(Guid id, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    async ValueTask<Domain.Reminder.Models.UserReminder> IUserReminderRepository.UpdateUserReminderAsync(Guid id, UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)
     {
         var entity = await UserReminders.Where(x => x.Id == id).SingleOrDefaultAsync(cancellationToken) ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminder>();
         if (item.UserId is not null)
         {
             entity.UserId = item.UserId.Value;
         }
+        if (item.RemindsWhenPending is not null)
+        {
+            entity.RemindsWhenPending = item.RemindsWhenPending.Value.ToDtoString();
+        }
         if (item.RemindsWhenAbsent is not null)
         {
-            entity.RemindsWhenAbsent = item.RemindsWhenAbsent.Value.ToString().ToLowerInvariant();
+            entity.RemindsWhenAbsent = item.RemindsWhenAbsent.Value.ToDtoString();
         }
-        if (item.RemindsFreeEvents is not null)
+        if (item.RemindsOpenEvents is not null)
         {
-            entity.RemindsFreeEvents = item.RemindsFreeEvents.Value.ToString().ToLowerInvariant();
+            entity.RemindsFreeEvents = item.RemindsOpenEvents.Value.ToDtoString();
         }
         if (item.AheadOfTimeReminderTimes is not null)
         {

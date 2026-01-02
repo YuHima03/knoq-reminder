@@ -1,7 +1,7 @@
 using CommunityToolkit.Diagnostics;
 using KnoqReminder.Domain.Repositories;
 
-namespace KnoqReminder.Tests.Domain.Repositories;
+namespace KnoqReminder.Tests.Domain.Reminder.Repositories;
 
 sealed class RepositoryProviderMock : IRepositoryProvider
 {

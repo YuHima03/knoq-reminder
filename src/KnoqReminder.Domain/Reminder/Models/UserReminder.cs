@@ -1,4 +1,6 @@
-namespace KnoqReminder.Domain.Repositories.Models;
+using KnoqReminder.Domain.Repositories.Models;
+
+namespace KnoqReminder.Domain.Reminder.Models;
 
 /// <summary>
 /// Represents a setting for event reminders to a user.
@@ -14,8 +16,9 @@ namespace KnoqReminder.Domain.Repositories.Models;
 public record UserReminder(
     Guid Id,
     Guid UserId,
-    ReminderKind RemindsWhenAbsent,
-    ReminderKind RemindsFreeEvents,
+    ReminderOptionsWhenUserPending RemindsWhenPending,
+    ReminderOptionsWhenUserAbsent RemindsWhenAbsent,
+    ReminderOptionsForOpenEvents RemindsOpenEvents,
     AheadOfTimeReminderTime[] AheadOfTimeReminderTimes,
     DailyReminderTime[] DailyReminderTimes,
     DestinationDiscordWebhook[] DestinationDiscordWebhooks,

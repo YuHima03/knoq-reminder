@@ -11,7 +11,7 @@ static class DestinationTraqHelper
         ChannelId = x.ChannelId,
     };
 
-    public static IQueryable<Domain.Repositories.Models.UserReminder> GroupJoinTraqChannels(this IQueryable<Domain.Repositories.Models.UserReminder> @this, DbSet<DestinationsTraq> destinationsTraqs)
+    public static IQueryable<Domain.Reminder.Models.UserReminder> GroupJoinTraqChannels(this IQueryable<Domain.Reminder.Models.UserReminder> @this, DbSet<DestinationsTraq> destinationsTraqs)
     {
         return @this.GroupJoin(
             destinationsTraqs.AsNoTracking(),
