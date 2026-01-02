@@ -18,6 +18,7 @@ static class ServiceCollectionExtension
             return provider.CreateStringBuilderPool();
         });
         services.TryAddSingleton<IReminderPublisher, ReminderPublisher>();
+        services.TryAddSingleton<ReminderScheduler>();
         return services;
     }
 }

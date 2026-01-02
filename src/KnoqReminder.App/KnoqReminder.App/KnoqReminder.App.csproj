@@ -17,6 +17,7 @@
     <PackageReference Include="KnoqNet" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
     <PackageReference Include="Traq" />
+    <PackageReference Include="ZLinq" />
   </ItemGroup>
 
   <ItemGroup>
