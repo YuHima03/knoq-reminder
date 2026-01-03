@@ -20,10 +20,10 @@ static class ServiceCollectionExtension
             var provider = sp.GetRequiredService<ObjectPoolProvider>();
             return provider.CreateStringBuilderPool();
         });
-        // Regiser services and options
+        // Register services and options
         services.Configure<IReminderOptions, ReminderConfiguration>(configuration.GetSection(ReminderConfiguration.Position));
         services.TryAddSingleton<IReminderPublisher, ReminderPublisher>();
-        services.TryAddSingleton<ReminderScheduler>();
+        services.AddHostedService<ReminderScheduler>();
         return services;
     }
 }
