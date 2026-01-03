@@ -2,9 +2,9 @@ namespace KnoqReminder.Domain.Models;
 
 public readonly struct DestinationDiscordWebhook : IComparable<DestinationDiscordWebhook>, IEquatable<DestinationDiscordWebhook>
 {
-    public string WebhookId { get; init; }
+    public required string WebhookId { get; init; }
 
-    public string WebhookSecret { get; init; }
+    public required string WebhookSecret { get; init; }
 
     public int CompareTo(DestinationDiscordWebhook other)
     {
