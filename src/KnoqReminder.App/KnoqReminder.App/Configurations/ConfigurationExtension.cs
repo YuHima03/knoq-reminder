@@ -17,7 +17,8 @@ static class ConfigurationExtension
                 }
                 GenericThrowHelper.Throw<FileNotFoundException>($"Configuration file not found: {fullPath}");
             }
-            builder.AddIniStream(File.OpenRead(fullPath));
+            using var stream = File.OpenRead(fullPath);
+            builder.AddIniStream(stream);
         }
         return builder;
     }
