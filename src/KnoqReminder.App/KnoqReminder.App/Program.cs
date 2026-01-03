@@ -2,6 +2,7 @@ using KnoqReminder.App.Components;
 using KnoqReminder.App.Configurations;
 using KnoqReminder.App.Services;
 using KnoqReminder.App.Services.DiscordWebhook;
+using KnoqReminder.App.Services.Events;
 using KnoqReminder.App.Services.Localization;
 using KnoqReminder.App.Services.Reminder;
 using KnoqReminder.Infrastructure.Database;
@@ -17,6 +18,7 @@ class Program
             .ConfigureAppOptions(builder.Configuration)
             .SetupDefaultLocalization(builder.Configuration)
             .SetupDiscordWebhookPublisher(builder.Configuration)
+            .SetupEventProvider()
             .SetupKnoqClient(builder.Configuration)
             .SetupReminderServices(builder.Configuration)
             .SetupRepository(builder.Configuration, builder.Environment)
