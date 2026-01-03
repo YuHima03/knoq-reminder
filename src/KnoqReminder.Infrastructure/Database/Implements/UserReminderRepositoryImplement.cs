@@ -269,6 +269,10 @@ public partial class AppDbContext : IUserReminderRepository
             );
         }
         await SaveChangesAsync(cancellationToken);
-        return entity.ToDomain();
+        return entity.ToDomain() with
+        {
+            DestinationDiscordWebhooks = item.DestinationDiscordWebhooks ?? [],
+            DestinationTraqChannels= item.DestinationTraqChannels ?? []
+        };
     }
 }
