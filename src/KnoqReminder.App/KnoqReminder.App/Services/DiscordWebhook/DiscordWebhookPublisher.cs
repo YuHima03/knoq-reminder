@@ -19,9 +19,9 @@ sealed class DiscordWebhookPublisher(
     {
         try
         {
-            var content = JsonContent.Create(message, DiscordWebhookJsonSerializerContext.Default.DiscordWebhookMessage, JsonMediaTypeHeader);
+            using var content = JsonContent.Create(message, DiscordWebhookJsonSerializerContext.Default.DiscordWebhookMessage, JsonMediaTypeHeader);
             using var client = httpClientFactory.CreateClient();
-            var response = await client.PostAsync(new Uri(options.Value.WebhookBaseUrl!, $"{webhookId}/{webhookSecret}"), content, cancellationToken);
+            using var response = await client.PostAsync(new Uri(options.Value.WebhookBaseUrl!, $"{webhookId}/{webhookSecret}"), content, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogError_DiscordWebhookResponse(response.StatusCode, response.Content);
