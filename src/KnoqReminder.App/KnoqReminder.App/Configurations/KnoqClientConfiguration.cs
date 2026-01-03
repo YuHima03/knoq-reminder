@@ -9,14 +9,14 @@ public class KnoqClientConfiguration : IKnoqClientOptions
     [ConfigurationKeyName(EnvironmentPrefix + "API_BASE_ADDRESS")]
     public string ApiBaseUrl
     {
-        get => field;
+        get;
         set => field = Uri.IsWellFormedUriString(value, UriKind.Absolute) ? value : string.Empty;
     } = string.Empty;
 
     [ConfigurationKeyName(EnvironmentPrefix + "WEB_PAGE_BASE_ADDRESS")]
     public string WebPageBaseUrl
     {
-        get => field;
+        get;
         set => field = Uri.IsWellFormedUriString(value, UriKind.Absolute) ? value : string.Empty;
     } = string.Empty;
 

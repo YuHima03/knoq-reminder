@@ -9,7 +9,7 @@ sealed class DiscordWebhookConfiguration : IDiscordWebhookOptions
     [ConfigurationKeyName("baseUrl")]
     public string BaseUrlString
     {
-        get => field;
+        get;
         set
         {
             if (Uri.TryCreate(value, UriKind.Absolute, out _baseUrl))
