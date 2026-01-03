@@ -4,6 +4,7 @@ static class StringHelper
 {
     public static string Truncate(this string s, int maxLength)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(maxLength);
         if (s is null || maxLength == 0)
         {
             return string.Empty;
