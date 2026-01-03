@@ -14,6 +14,10 @@ class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Configuration
+            .AddEnvFiles(true, ".env", $"{builder.Environment.EnvironmentName}.env")
+            .AddEnvFiles(false, builder.Configuration["env-files"]?.Split(';'));
+
         builder.Services
             .ConfigureAppOptions(builder.Configuration)
             .SetupDefaultLocalization(builder.Configuration)
