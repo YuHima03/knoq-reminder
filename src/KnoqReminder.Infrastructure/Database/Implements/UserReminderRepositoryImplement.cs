@@ -272,7 +272,7 @@ public partial class AppDbContext : IUserReminderRepository
         return entity.ToDomain() with
         {
             DestinationDiscordWebhooks = item.DestinationDiscordWebhooks ?? [],
-            DestinationTraqChannels= item.DestinationTraqChannels ?? []
+            DestinationTraqChannels = item.DestinationTraqChannels ?? []
         };
     }
 }
