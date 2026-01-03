@@ -12,12 +12,10 @@ namespace KnoqReminder.App.Services.Reminder;
 
 sealed partial class ReminderScheduler(
     IOptions<IReminderOptions> options,
-    IMemoryCache cache,
     IEventProvider eventProvider,
     ILogger<ReminderScheduler> logger,
     IReminderPublisher reminderPublisher,
-    TraqApiClient traq,
-    IUserReminderRepository userReminderRepository
+    IRepositoryProvider repositories
     )
     : BackgroundService
 {
@@ -46,11 +44,13 @@ sealed partial class ReminderScheduler(
         var utcTimeMinute = utcTime - TimeSpan.FromTicks(utcTime.Ticks % TimeSpan.TicksPerMinute);
         var eventsToday = await eventProvider.GetEventsAsync(utcTimeMinute, utcTimeMinute.AddDays(1), cancellationToken).ConfigureAwait(false);
 
-        var dailyReminders = (await userReminderRepository.GetUserDailyRemindersAsync(TimeOnly.FromDateTime(utcTimeMinute.UtcDateTime), cancellationToken).ConfigureAwait(false))
+        var repo = await repositories.CreateRepositoryAsync<IUserReminderRepository>(cancellationToken).ConfigureAwait(false);
+
+        var dailyReminders = (await repo.GetUserDailyRemindersAsync(TimeOnly.FromDateTime(utcTimeMinute.UtcDateTime), cancellationToken).ConfigureAwait(false))
             .ToAsyncEnumerable()
             .Select(async (dailyReminder, ct) =>
             {
-                var reminderOverview = await userReminderRepository.GetUserReminderOverviewAsync(dailyReminder.ReminderId, ct).ConfigureAwait(false);
+                var reminderOverview = await repo.GetUserReminderOverviewAsync(dailyReminder.ReminderId, ct).ConfigureAwait(false);
                 var eventsToRemind = FilterEvents(
                     eventsToday,
                     dailyReminder.UserId,
@@ -67,14 +67,14 @@ sealed partial class ReminderScheduler(
         var aotReminders = eventsToday.ToAsyncEnumerable()
             .SelectMany(async (e, ct) =>
             {
-                var aotReminders = await userReminderRepository.GetUserAotRemindersAsync(e.StartsAt - utcTimeMinute, ct).ConfigureAwait(false);
+                var aotReminders = await repo.GetUserAotRemindersAsync(e.StartsAt - utcTimeMinute, ct).ConfigureAwait(false);
                 return aotReminders.Select(r => (AotReminder: r, Event: e));
             })
             .GroupBy(x => x.AotReminder.ReminderId)
             .Select(async (g, ct) =>
             {
                 var aotReminder = g.First().AotReminder;
-                var reminderOverview = await userReminderRepository.GetUserReminderOverviewAsync(aotReminder.ReminderId, ct).ConfigureAwait(false);
+                var reminderOverview = await repo.GetUserReminderOverviewAsync(aotReminder.ReminderId, ct).ConfigureAwait(false);
                 var eventsToRemind = FilterEvents(
                     g.Select(x => x.Event),
                     aotReminder.UserId,
