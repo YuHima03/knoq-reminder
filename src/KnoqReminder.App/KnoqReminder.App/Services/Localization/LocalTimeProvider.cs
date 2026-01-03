@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using CommunityToolkit.Diagnostics;
 using KnoqReminder.Domain.Options;
 using KnoqReminder.Domain.Services.Localization;
 using Microsoft.Extensions.Options;
@@ -20,6 +21,10 @@ sealed partial class LocalTimeProvider(
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public DateTime ToLocalDateTime(DateTime utcDateTime)
     {
+        if (utcDateTime.Kind != DateTimeKind.Utc)
+        {
+            ThrowHelper.ThrowArgumentException(nameof(utcDateTime), "The provided DateTime must be in UTC.");
+        }
         return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, TimeZoneInfo);
     }
 
@@ -33,6 +38,10 @@ sealed partial class LocalTimeProvider(
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public DateTime ToUtcDateTime(DateTime localDateTime)
     {
+        if (localDateTime.Kind == DateTimeKind.Utc)
+        {
+            return localDateTime;
+        }
         return TimeZoneInfo.ConvertTimeToUtc(localDateTime, TimeZoneInfo);
     }
 }
