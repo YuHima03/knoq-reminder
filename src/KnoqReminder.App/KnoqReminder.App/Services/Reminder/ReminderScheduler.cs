@@ -26,6 +26,8 @@ sealed partial class ReminderScheduler(
             var utcNow = DateTimeOffset.UtcNow;
             if (lastRunAt.AddMinutes(1) <= utcNow) // Runs every minute
             {
+                // No `using` to keep it alive during the task.
+                // The object will be disposed on finalization by the GC.
                 CancellationTokenSource cts = new(options.Value.RemindingTaskTimeout);
                 var ct = cts.Token;
                 ct.Register(() => LoggerExtensions.LogWarning_ReminderTimeOut(logger, options.Value.RemindingTaskTimeout));
