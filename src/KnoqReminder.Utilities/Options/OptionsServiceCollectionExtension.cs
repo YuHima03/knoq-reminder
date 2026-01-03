@@ -7,6 +7,14 @@ namespace KnoqReminder.Utilities.Options;
 
 public static class OptionsServiceCollectionExtension
 {
+    public static OptionsBuilder<TOptionsImplement> AddOptions<TOptions, TOptionsImplement>(this IServiceCollection services)
+        where TOptions : class
+        where TOptionsImplement : class, TOptions
+    {
+        services.TryAddSingleton<IOptions<TOptions>>(sp => sp.GetRequiredService<IOptions<TOptionsImplement>>());
+        return services.AddOptions<TOptionsImplement>();
+    }
+
     /// <summary>
     /// Registers a <typeparamref name="TOptionsImplement"/> configuration as of the <typeparamref name="TOptions"/> type.
     /// </summary>

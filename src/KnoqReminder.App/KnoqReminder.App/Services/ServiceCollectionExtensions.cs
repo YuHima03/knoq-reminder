@@ -14,12 +14,15 @@ static class ServiceCollectionExtensions
 {
     public static IServiceCollection SetupKnoqClient(this IServiceCollection services, IConfigurationRoot config)
     {
-        services.Configure<IKnoqClientOptions, KnoqClientConfiguration>(config);
+        services.AddOptions<IKnoqClientOptions, KnoqClientConfiguration>()
+            .Bind(config)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         services.AddAuthenticatedKnoqApiClient(
             configureKnoq: (sp, o) =>
             {
                 var options = sp.GetRequiredService<IOptions<IKnoqClientOptions>>().Value;
-                o.BaseAddress = options.ApiBaseUrl;
+                o.BaseAddress = options.ApiBaseUrl.OriginalString;
             },
             configureTraqAuth: (sp, auth) =>
             {
@@ -32,11 +35,14 @@ static class ServiceCollectionExtensions
 
     public static IServiceCollection SetupTraqClient(this IServiceCollection services, IConfigurationRoot config)
     {
-        services.Configure<ITraqApiClientOptions, TraqApiClientConfiguration>(config);
+        services.AddOptions<ITraqClientOptions, TraqClientConfiguration>()
+            .Bind(config)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         services.AddTraqApiClient((sp, o) =>
         {
-            var options = sp.GetRequiredService<IOptions<ITraqApiClientOptions>>().Value;
-            o.BaseAddress = options.BaseUrl;
+            var options = sp.GetRequiredService<IOptions<ITraqClientOptions>>().Value;
+            o.BaseAddress = options.ApiBaseUrl.OriginalString;
             o.BearerAuthToken = options.AccessToken;
         });
         return services;

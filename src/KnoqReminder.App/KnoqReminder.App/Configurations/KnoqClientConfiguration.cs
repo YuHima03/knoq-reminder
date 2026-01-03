@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using KnoqReminder.Domain.Options;
 
 namespace KnoqReminder.App.Configurations;
@@ -6,23 +8,27 @@ public class KnoqClientConfiguration : IKnoqClientOptions
 {
     public const string EnvironmentPrefix = "KNOQ_";
 
-    [ConfigurationKeyName(EnvironmentPrefix + "API_BASE_ADDRESS")]
-    public string ApiBaseUrl
-    {
-        get;
-        set => field = Uri.IsWellFormedUriString(value, UriKind.Absolute) ? value : string.Empty;
-    } = string.Empty;
+    public const string Position = "Knoq";
 
-    [ConfigurationKeyName(EnvironmentPrefix + "WEB_PAGE_BASE_ADDRESS")]
-    public string WebPageBaseUrl
-    {
-        get;
-        set => field = Uri.IsWellFormedUriString(value, UriKind.Absolute) ? value : string.Empty;
-    } = string.Empty;
+    [ConfigurationKeyName($"{Position}:BaseUrl:Api")]
+    [NotNull]
+    [Required]
+    public Uri? ApiBaseUrl { get; set; }
+
+    [ConfigurationKeyName($"{Position}:BaseUrl:WebPage")]
+    [NotNull]
+    [Required]
+    public Uri? WebPageBaseUrl { get; set; }
 
     [ConfigurationKeyName(EnvironmentPrefix + "USERNAME")]
-    public string Username { get; set; } = string.Empty;
+    [NotNull]
+    [Required(AllowEmptyStrings = false,
+        ErrorMessage = $"The configuration {EnvironmentPrefix}USERNAME is not set.")]
+    public string? Username { get; set; }
 
     [ConfigurationKeyName(EnvironmentPrefix + "PASSWORD")]
-    public string Password { get; set; } = string.Empty;
+    [NotNull]
+    [Required(AllowEmptyStrings = false,
+        ErrorMessage = $"The configuration {EnvironmentPrefix}PASSWORD is not set.")]
+    public string? Password { get; set; }
 }
