@@ -26,7 +26,8 @@ sealed partial class LocalTimeProvider(
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public DateTimeOffset ToLocalDateTimeOffset(DateTimeOffset dateTimeOffset)
     {
-        return dateTimeOffset.ToOffset(TimeZoneOffset);
+        var localDateTime = ToLocalDateTime(dateTimeOffset.UtcDateTime);
+        return new DateTimeOffset(localDateTime, TimeZoneInfo.BaseUtcOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
