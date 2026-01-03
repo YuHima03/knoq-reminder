@@ -9,7 +9,7 @@ sealed class KnoqUrlProvider(
     )
     : IKnoqUrlProvider
 {
-    public Uri BaseUrl { get; } = options.Value.ApiBaseUrl;
+    public Uri BaseUrl { get; } = options.Value.WebPageBaseUrl;
 
     public Uri GetEventPageUrl(Guid eventId)
     {
