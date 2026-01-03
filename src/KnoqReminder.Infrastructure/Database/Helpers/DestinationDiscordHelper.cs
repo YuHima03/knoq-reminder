@@ -6,7 +6,7 @@ namespace KnoqReminder.Infrastructure.Database.Helpers;
 
 static class DestinationDiscordHelper
 {
-    public static Expression<Func<DestinationsDiscord, DestinationDiscordWebhook>> DtoToDomainExpression = x => new DestinationDiscordWebhook
+    public static readonly Expression<Func<DestinationsDiscord, DestinationDiscordWebhook>> DtoToDomainExpression = x => new DestinationDiscordWebhook
     {
         WebhookId = x.WebhookId,
         WebhookSecret = x.WebhookSecret,
