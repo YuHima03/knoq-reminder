@@ -20,11 +20,14 @@ sealed class DiscordWebhookPublisher(
         try
         {
             using var content = JsonContent.Create(message, DiscordWebhookJsonSerializerContext.Default.DiscordWebhookMessage, JsonMediaTypeHeader);
-            using var client = httpClientFactory.CreateClient();
+            var client = httpClientFactory.CreateClient();
             using var response = await client.PostAsync(new Uri(options.Value.WebhookBaseUrl!, $"{webhookId}/{webhookSecret}"), content, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogError_DiscordWebhookResponse(response.StatusCode, response.Content);
+                if (logger.IsEnabled(LogLevel.Error))
+                {
+                    logger.LogError_DiscordWebhookResponse(response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
+                }
             }
         }
         catch (Exception ex)
@@ -37,7 +40,7 @@ sealed class DiscordWebhookPublisher(
 static partial class MessageLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "Discord webhook returned {StatusCode} -> {Response}")]
-    public static partial void LogError_DiscordWebhookResponse(this ILogger logger, System.Net.HttpStatusCode statusCode, HttpContent response);
+    public static partial void LogError_DiscordWebhookResponse(this ILogger logger, System.Net.HttpStatusCode statusCode, string response);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send discord webhook")]
     public static partial void LogError_FailedToSendDiscordWebhook(this ILogger logger, Exception ex);
