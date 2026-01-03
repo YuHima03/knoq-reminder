@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using KnoqReminder.Domain.Options;
 using KnoqReminder.Utilities.Validation;
 
