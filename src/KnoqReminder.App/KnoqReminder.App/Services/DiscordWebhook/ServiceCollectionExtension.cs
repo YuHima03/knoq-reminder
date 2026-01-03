@@ -11,7 +11,10 @@ static class ServiceCollectionExtension
     public static IServiceCollection SetupDiscordWebhookPublisher(this IServiceCollection services, IConfigurationRoot config)
     {
         services.AddHttpClient();
-        services.Configure<IDiscordWebhookOptions, DiscordWebhookConfiguration>(config.GetSection(DiscordWebhookConfiguration.Position));
+        services.AddOptions<IDiscordWebhookOptions, DiscordWebhookConfiguration>()
+            .Bind(config.GetSection(DiscordWebhookConfiguration.Position))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         services.TryAddSingleton<IDiscordWebhookPublisher, DiscordWebhookPublisher>();
         return services;
     }

@@ -22,7 +22,6 @@ sealed partial class ReminderPublisher(
     IMemoryCache cache,
     ObjectPool<Traq.Models.PostMessageRequest> postMessageRequestPool,
     ObjectPool<StringBuilder> stringBuilderPool,
-    ILogger<ReminderPublisher> logger,
     ILoggerFactory loggerFactory
     )
     : IReminderPublisher

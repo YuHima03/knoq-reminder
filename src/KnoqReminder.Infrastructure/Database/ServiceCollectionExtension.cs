@@ -15,7 +15,10 @@ public static class ServiceCollectionExtension
 {
     public static IServiceCollection SetupRepository(this IServiceCollection services, IConfigurationRoot config, IHostEnvironment? environment = null)
     {
-        services.Configure<IDbConnectionOptions, MariaDbConnectionConfiguration>(config);
+        services.AddOptions<IDbConnectionOptions, MariaDbConnectionConfiguration>()
+            .Bind(config)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         services.AddDbContextFactory<AppDbContext>((sp, ob) =>
         {
             var connectionString = sp.GetRequiredService<IOptions<IDbConnectionOptions>>().Value.ConnectionString;

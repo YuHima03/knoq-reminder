@@ -7,7 +7,10 @@ static class ServiceCollectionExtension
 {
     public static IServiceCollection ConfigureAppOptions(this IServiceCollection services, IConfigurationRoot config)
     {
-        return services
-            .Configure<ITraqBotOptions, TraqBotConfiguration>(config);
+        services.AddOptions<ITraqBotOptions, TraqBotConfiguration>()
+            .Bind(config)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+        return services;
     }
 }

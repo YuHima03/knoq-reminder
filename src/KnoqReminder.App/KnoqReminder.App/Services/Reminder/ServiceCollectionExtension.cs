@@ -21,7 +21,10 @@ static class ServiceCollectionExtension
             return provider.CreateStringBuilderPool();
         });
         // Register services and options
-        services.Configure<IReminderOptions, ReminderConfiguration>(configuration.GetSection(ReminderConfiguration.Position));
+        services.AddOptions<IReminderOptions, ReminderConfiguration>()
+            .Bind(configuration.GetSection(ReminderConfiguration.Position))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         services.TryAddSingleton<IReminderPublisher, ReminderPublisher>();
         services.AddHostedService<ReminderScheduler>();
         return services;

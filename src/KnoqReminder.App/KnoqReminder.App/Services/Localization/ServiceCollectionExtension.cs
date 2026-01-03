@@ -10,7 +10,10 @@ static class ServiceCollectionExtension
 {
     public static IServiceCollection SetupDefaultLocalization(this IServiceCollection services, IConfigurationRoot config)
     {
-        services.Configure<IDefaultLocalizationOptions, DefaultLocalizationConfiguration>(config.GetSection(DefaultLocalizationConfiguration.Position));
+        services.AddOptions<IDefaultLocalizationOptions, DefaultLocalizationConfiguration>()
+            .Bind(config.GetSection(DefaultLocalizationConfiguration.Position))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         services.TryAddSingleton<ILocalTimeProvider, LocalTimeProvider>();
         return services;
     }
