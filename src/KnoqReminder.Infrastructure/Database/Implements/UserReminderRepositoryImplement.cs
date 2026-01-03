@@ -171,7 +171,7 @@ public partial class AppDbContext : IUserReminderRepository
             .Select(UserReminderHelper.DtoToDomainExpression)
             .FirstOrDefaultAsync(cancellationToken);
         var (discordWebhooks, traqChannels) = await GetDestinationsAsync(id, cancellationToken);
-        return reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Models.UserReminder>() with
+        return (reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Models.UserReminder>()) with
         {
             DestinationDiscordWebhooks = discordWebhooks,
             DestinationTraqChannels = traqChannels
