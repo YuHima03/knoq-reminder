@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using KnoqReminder.Domain.Services.Events;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -10,6 +9,6 @@ static class ServiceCollectionExtension
     {
         services.AddMemoryCache();
         services.TryAddSingleton<IEventProvider, EventProvider>();
-        return services; 
+        return services;
     }
 }

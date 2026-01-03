@@ -3,9 +3,7 @@ using KnoqReminder.Domain.Options;
 using KnoqReminder.Domain.Repositories;
 using KnoqReminder.Domain.Services.Events;
 using KnoqReminder.Domain.Services.Reminder;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Traq;
 using ZLinq;
 
 namespace KnoqReminder.App.Services.Reminder;
