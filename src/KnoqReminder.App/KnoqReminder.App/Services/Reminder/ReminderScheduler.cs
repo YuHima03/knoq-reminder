@@ -20,6 +20,7 @@ sealed partial class ReminderScheduler(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var lastRunAt = DateTimeOffset.MinValue;
+        await Task.Delay(options.Value.FirstRemindingTaskDelay, stoppingToken);
         using PeriodicTimer timer = new(TimeSpan.FromSeconds(20));
         do
         {
