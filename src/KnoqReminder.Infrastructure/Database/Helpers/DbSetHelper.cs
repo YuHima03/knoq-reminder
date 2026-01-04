@@ -132,12 +132,12 @@ file static class DbSetHelperFileInternal
     }
 }
 
-file readonly struct IndexedValue<T>(int index, T Value)
+file readonly struct IndexedValue<T>(int index, T value)
     where T : struct, IComparable<T>
 {
     public int Index { get; init; } = index;
 
-    public T Value { get; init; } = Value;
+    public T Value { get; init; } = value;
 
     public void Deconstruct(out int index, out T value)
     {
