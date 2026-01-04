@@ -23,7 +23,7 @@ static class DbSetHelper
         Guard.IsNotNull(dbSet);
         Guard.IsNotNull(valueConverter);
         Guard.IsNotNull(entityFactory);
-        if ((newState.Length + previousState.Length) * Unsafe.SizeOf<IndexedValue<TValue>>() <= MaxStackAllocationBytes)
+        if (((long)newState.Length + previousState.Length) * Unsafe.SizeOf<IndexedValue<TValue>>() <= MaxStackAllocationBytes)
         {
             Span<IndexedValue<TValue>> buffer = stackalloc IndexedValue<TValue>[newState.Length + previousState.Length];
             DbSetHelperFileInternal.ApplyChangesCore(dbSet, newState, previousState, buffer, valueConverter, entityFactory);
@@ -132,12 +132,12 @@ file static class DbSetHelperFileInternal
     }
 }
 
-file readonly struct IndexedValue<T>(int index, T value)
+file readonly struct IndexedValue<T>(int index, T Value)
     where T : struct, IComparable<T>
 {
     public int Index { get; init; } = index;
 
-    public T Value { get; init; } = value;
+    public T Value { get; init; } = Value;
 
     public void Deconstruct(out int index, out T value)
     {
