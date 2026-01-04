@@ -6,9 +6,9 @@ namespace KnoqReminder.App.Configurations;
 
 sealed class DiscordWebhookConfiguration : IDiscordWebhookOptions
 {
-    public const string Position = "discord:webhooks";
+    public const string Position = "Discord:Webhooks";
 
-    [ConfigurationKeyName("baseUrl")]
+    [ConfigurationKeyName("BaseUrl")]
     [NotNull]
     [Required]
     public Uri? WebhookBaseUrl { get; set; }
