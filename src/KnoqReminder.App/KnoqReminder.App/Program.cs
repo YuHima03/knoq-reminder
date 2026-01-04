@@ -1,9 +1,12 @@
 using KnoqReminder.App.Components;
 using KnoqReminder.App.Configurations;
-using KnoqReminder.Domain.Options;
+using KnoqReminder.App.Services;
+using KnoqReminder.App.Services.DiscordWebhook;
+using KnoqReminder.App.Services.Events;
+using KnoqReminder.App.Services.Localization;
+using KnoqReminder.App.Services.Reminder;
 using KnoqReminder.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 class Program
 {
@@ -11,18 +14,19 @@ class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.ConfigureAppOptions(builder.Configuration);
+        builder.Configuration
+            .AddEnvFiles(true, ".env", $"{builder.Environment.EnvironmentName}.env")
+            .AddEnvFiles(false, builder.Configuration["env-files"]?.Split(';'));
 
-        builder.Services.AddDbContextFactory<AppDbContext>((sp, ob) =>
-        {
-            var connectionString = sp.GetRequiredService<IOptions<IDbConnectionOptions>>().Value.ConnectionString;
-            ob.UseMySQL(connectionString);
-            if (builder.Environment.IsDevelopment())
-            {
-                ob.EnableDetailedErrors();
-                ob.EnableSensitiveDataLogging();
-            }
-        });
+        builder.Services
+            .ConfigureAppOptions(builder.Configuration)
+            .SetupDefaultLocalization(builder.Configuration)
+            .SetupDiscordWebhookPublisher(builder.Configuration)
+            .SetupEventProvider()
+            .SetupKnoqClient(builder.Configuration)
+            .SetupReminderServices(builder.Configuration)
+            .SetupRepository(builder.Configuration, builder.Environment)
+            .SetupTraqClient(builder.Configuration);
 
         // Add services to the container.
         builder.Services.AddRazorComponents()

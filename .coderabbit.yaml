@@ -1,0 +1,12 @@
+language: "ja-JP"
+early_access: false
+reviews:
+  profile: "chill"
+  poem: true
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+    base_branches:
+      - main
+      - develop

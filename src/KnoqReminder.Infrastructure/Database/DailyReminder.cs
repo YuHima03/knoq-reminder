@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace KnoqReminder.Infrastructure.Database;
 
 [Table("daily_reminders")]
-[Index("ReminderId", Name = "reminder_id")]
+[Index("ReminderId", "Time", Name = "reminder_id", IsUnique = true)]
 [Index("Time", Name = "time")]
 public partial class DailyReminder
 {

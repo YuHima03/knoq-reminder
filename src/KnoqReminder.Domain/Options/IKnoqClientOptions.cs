@@ -1,8 +1,10 @@
 namespace KnoqReminder.Domain.Options;
 
-public interface IKnoqApiClientOptions
+public interface IKnoqClientOptions
 {
-    string BaseUrl { get; }
+    Uri ApiBaseUrl { get; }
+
+    Uri WebPageBaseUrl { get; }
 
     string Username { get; }
 

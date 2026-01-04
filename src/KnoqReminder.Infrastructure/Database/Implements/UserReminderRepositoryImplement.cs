@@ -1,12 +1,10 @@
 using System.Buffers;
-using System.Runtime.CompilerServices;
-using CommunityToolkit.Diagnostics;
 using KnoqReminder.Domain.Exceptions;
 using KnoqReminder.Domain.Models;
 using KnoqReminder.Domain.Repositories;
-using KnoqReminder.Infrastructure.Database.Converters;
-using KnoqReminder.Utilities;
+using KnoqReminder.Infrastructure.Database.Helpers;
 using KnoqReminder.Utilities.Helpers;
+using KnoqReminder.Utilities.Linq;
 using Microsoft.EntityFrameworkCore;
 using ZLinq;
 
@@ -17,28 +15,70 @@ public partial class AppDbContext : IUserReminderRepository
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.AddUserReminderAsync(UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)
     {
         var reminderId = Guid.CreateVersion7();
+        if (item.AheadOfTimeReminderTimes is { Length: > 0 } aotReminders)
+        {
+            AheadOfTimeReminders.AddRange(
+                aotReminders.Distinct()
+                    .Select(x => new AheadOfTimeReminder
+                    {
+                        Id = Guid.CreateVersion7(),
+                        ReminderId = reminderId,
+                        Offset = x.TimeSpan
+                    })
+            );
+        }
+        if (item.DailyReminderTimes is { Length: > 0 } dailyReminders)
+        {
+            DailyReminders.AddRange(
+                dailyReminders.Distinct()
+                    .Select(x => new DailyReminder
+                    {
+                        Id = Guid.CreateVersion7(),
+                        ReminderId = reminderId,
+                        Time = x.TimeSpan
+                    })
+            );
+        }
+        if (item.DestinationDiscordWebhooks is { Length: > 0 } discordWebhooks)
+        {
+            DestinationsDiscords.AddRange(
+                discordWebhooks.DistinctBy(x => x.WebhookId)
+                    .Select(x => new DestinationsDiscord
+                    {
+                        ReminderId = reminderId,
+                        WebhookId = x.WebhookId,
+                        WebhookSecret = x.WebhookSecret
+                    })
+            );
+        }
+        if (item.DestinationTraqChannels is { Length: > 0 } traqChannels)
+        {
+            DestinationsTraqs.AddRange(
+                traqChannels.DistinctBy(x => x.ChannelId)
+                    .Select(x => new DestinationsTraq
+                    {
+                        ReminderId = reminderId,
+                        ChannelId = x.ChannelId
+                    })
+            );
+        }
         UserReminder reminder = new()
         {
             Id = reminderId,
             UserId = item.UserId.GetValueOrDefault(),
-            RemindsWhenAbsent = (item.RemindsWhenAbsent ?? ReminderKind.None).ToString(),
-            RemindsFreeEvents = (item.RemindsFreeEvents ?? ReminderKind.None).ToString(),
-            AheadOfTimeReminders = [.. (item.AheadOfTimeReminderTimes ?? []).Distinct().Select(x => new AheadOfTimeReminder
-            {
-                Id = Guid.CreateVersion7(),
-                ReminderId = reminderId,
-                Duration = x.TimeSpan
-            })],
-            DailyReminders = [.. (item.DailyReminderTimes ?? []).Distinct().Select(x => new DailyReminder
-            {
-                Id = Guid.CreateVersion7(),
-                ReminderId = reminderId,
-                Time = x.TimeSpan
-            })],
+            RemindsWhenPending = item.RemindsWhenPending.GetValueOrDefault().ToDtoString(),
+            RemindsWhenAbsent = item.RemindsWhenAbsent.GetValueOrDefault().ToDtoString(),
+            RemindsFreeEvents = item.RemindsOpenEvents.GetValueOrDefault().ToDtoString(),
         };
         UserReminders.Add(reminder);
         await SaveChangesAsync(cancellationToken);
-        return reminder.ToDomain();
+        return reminder.ToDomain() with
+        {
+            AheadOfTimeReminderTimes = item.AheadOfTimeReminderTimes?.AsValueEnumerable().Distinct().ToArray() ?? [],
+            DailyReminderTimes = item.DailyReminderTimes?.AsValueEnumerable().Distinct().ToArray() ?? [],
+            DestinationDiscordWebhooks = item.DestinationDiscordWebhooks?.AsValueEnumerable().DistinctBy(x => x.WebhookId).ToArray() ?? [],
+            DestinationTraqChannels = item.DestinationTraqChannels?.AsValueEnumerable().DistinctBy(x => x.ChannelId).ToArray() ?? []
+        };
     }
 
     async ValueTask IUserReminderRepository.DeleteUserRemindersAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken)
@@ -63,40 +103,106 @@ public partial class AppDbContext : IUserReminderRepository
         }
     }
 
+    async ValueTask<(DestinationDiscordWebhook[], DestinationTraqChannel[])> GetDestinationsAsync(Guid reminderId, CancellationToken cancellationToken = default)
+    {
+        var discordWebhooks = await DestinationsDiscords.AsNoTracking()
+            .Where(x => x.ReminderId == reminderId)
+            .Select(DestinationDiscordHelper.DtoToDomainExpression)
+            .ToArrayAsync(cancellationToken);
+        var traqChannels = await DestinationsTraqs.AsNoTracking()
+            .Where(x => x.ReminderId == reminderId)
+            .Select(DestinationTraqHelper.DtoToDomainExpression)
+            .ToArrayAsync(cancellationToken);
+        return (discordWebhooks, traqChannels);
+    }
+
+    async ValueTask<UserAotReminder[]> IUserReminderRepository.GetUserAotRemindersAsync(AheadOfTimeReminderTime offsetFrom, AheadOfTimeReminderTime offsetTo, CancellationToken cancellationToken)
+    {
+        var q = (offsetFrom == offsetTo)
+            ? AheadOfTimeReminders.AsNoTracking().Where(x => x.Offset == offsetFrom.TimeSpan)
+            : AheadOfTimeReminders.AsNoTracking().Where(x => offsetFrom.TimeSpan <= x.Offset && x.Offset <= offsetTo.TimeSpan);
+        return await q
+            .OrderBy(r => r.Offset)
+            .GroupBy(r => r.ReminderId)
+            .GroupJoinDestinations(
+                DestinationsDiscords.AsNoTracking(),
+                DestinationsTraqs.AsNoTracking())
+            .Join(
+                inner: UserReminders.AsNoTracking(),
+                outerKeySelector: x => x.Outer.Key,
+                innerKeySelector: y => y.Id,
+                resultSelector: (outer, inner) => DefaultJoinResult.Create(outer, inner.UserId).Flatten())
+            .SelectMany(x => x.Item1.Select(r => new UserAotReminder(
+                r.ReminderId,
+                x.Item3,
+                x.Item2,
+                new AheadOfTimeReminderTime(r.Offset))))
+            .ToArrayAsync(cancellationToken);
+    }
+
+    async ValueTask<UserDailyReminder[]> IUserReminderRepository.GetUserDailyRemindersAsync(DailyReminderTime timeFrom, DailyReminderTime timeTo, CancellationToken cancellationToken)
+    {
+        var q = (timeFrom == timeTo)
+            ? DailyReminders.AsNoTracking().Where(x => x.Time == timeFrom.TimeSpan)
+            : DailyReminders.AsNoTracking().Where(x => timeFrom.TimeSpan <= x.Time && x.Time <= timeTo.TimeSpan);
+        return await q
+            .OrderBy(r => r.Time)
+            .GroupBy(r => r.ReminderId)
+            .GroupJoinDestinations(
+                DestinationsDiscords.AsNoTracking(),
+                DestinationsTraqs.AsNoTracking())
+            .Join(
+                inner: UserReminders.AsNoTracking(),
+                outerKeySelector: x => x.Outer.Key,
+                innerKeySelector: y => y.Id,
+                resultSelector: (outer, inner) => DefaultJoinResult.Create(outer, inner.UserId).Flatten())
+            .SelectMany(x => x.Item1.Select(r => new UserDailyReminder(
+                r.ReminderId,
+                x.Item3,
+                x.Item2,
+                new DailyReminderTime(TimeOnly.FromTimeSpan(r.Time)))))
+            .ToArrayAsync(cancellationToken);
+    }
+
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.GetUserReminderAsync(Guid id, CancellationToken cancellationToken)
     {
         var reminder = await UserReminders.AsNoTracking()
             .Where(x => x.Id == id)
-            .Select(UserReminderConverter.DtoToDomainExpression)
+            .Select(UserReminderHelper.DtoToDomainExpression)
             .FirstOrDefaultAsync(cancellationToken);
-        return reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Models.UserReminder>();
+        var (discordWebhooks, traqChannels) = await GetDestinationsAsync(id, cancellationToken);
+        return (reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Models.UserReminder>()) with
+        {
+            DestinationDiscordWebhooks = discordWebhooks,
+            DestinationTraqChannels = traqChannels
+        };
     }
 
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.GetUserReminderByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var reminder = await UserReminders.AsNoTracking()
             .Where(x => x.UserId == userId)
-            .Select(UserReminderConverter.DtoToDomainExpression)
+            .Select(UserReminderHelper.DtoToDomainExpression)
             .FirstOrDefaultAsync(cancellationToken);
-        return reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Models.UserReminder>();
+        if (reminder is null)
+        {
+            return GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Models.UserReminder>();
+        }
+        var (discordWebhooks, traqChannels) = await GetDestinationsAsync(reminder.Id, cancellationToken);
+        return reminder with
+        {
+            DestinationDiscordWebhooks = discordWebhooks,
+            DestinationTraqChannels = traqChannels
+        };
     }
 
-    async ValueTask<Domain.Models.UserReminder[]> IUserReminderRepository.GetUserRemindersByAotReminderTimeAsync(AheadOfTimeReminderTime timeFrom, AheadOfTimeReminderTime timeTo, CancellationToken cancellationToken)
+    async ValueTask<UserReminderOverview> IUserReminderRepository.GetUserReminderOverviewAsync(Guid id, CancellationToken cancellationToken)
     {
-        Guard.IsLessThanOrEqualTo(timeFrom, timeTo);
-        return await UserReminders.AsNoTracking()
-            .Where(x => x.AheadOfTimeReminders.Any(y => timeFrom.TimeSpan <= y.Duration && y.Duration <= timeTo.TimeSpan))
-            .Select(UserReminderConverter.DtoToDomainExpression)
-            .ToArrayAsync(cancellationToken);
-    }
-
-    async ValueTask<Domain.Models.UserReminder[]> IUserReminderRepository.GetUserRemindersByDailyReminderTimeAsync(DailyReminderTime timeFrom, DailyReminderTime timeTo, CancellationToken cancellationToken)
-    {
-        Guard.IsLessThanOrEqualTo(timeFrom, timeTo);
-        return await UserReminders.AsNoTracking()
-            .Where(x => x.DailyReminders.Any(y => timeFrom.TimeSpan <= y.Time && y.Time <= timeTo.TimeSpan))
-            .Select(UserReminderConverter.DtoToDomainExpression)
-            .ToArrayAsync(cancellationToken);
+        var reminder = await UserReminders.AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(UserReminderHelper.DtoToDomainOverviewExpression)
+            .FirstOrDefaultAsync(cancellationToken);
+        return reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminderOverview>();
     }
 
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.UpdateUserReminderAsync(Guid id, UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)
@@ -106,119 +212,67 @@ public partial class AppDbContext : IUserReminderRepository
         {
             entity.UserId = item.UserId.Value;
         }
+        if (item.RemindsWhenPending is not null)
+        {
+            entity.RemindsWhenPending = item.RemindsWhenPending.Value.ToDtoString();
+        }
         if (item.RemindsWhenAbsent is not null)
         {
-            entity.RemindsWhenAbsent = item.RemindsWhenAbsent.Value.ToString();
+            entity.RemindsWhenAbsent = item.RemindsWhenAbsent.Value.ToDtoString();
         }
-        if (item.RemindsFreeEvents is not null)
+        if (item.RemindsOpenEvents is not null)
         {
-            entity.RemindsFreeEvents = item.RemindsFreeEvents.Value.ToString();
+            entity.RemindsFreeEvents = item.RemindsOpenEvents.Value.ToDtoString();
         }
         if (item.AheadOfTimeReminderTimes is not null)
         {
-            using var current = entity.AheadOfTimeReminders.AsValueEnumerable()
-                .Select(x => new AheadOfTimeReminderTime(x.Duration))
-                .ToArrayPool();
-            using var diff = EnumerableHelper.CompareTo<AheadOfTimeReminderTime>(item.AheadOfTimeReminderTimes, current.Span);
-            foreach (var (x, d) in diff.Span)
-            {
-                if (d == EnumerableHelper.Difference.Add)
-                {
-                    AheadOfTimeReminders.Add(new()
-                    {
-                        Id = Guid.CreateVersion7(),
-                        ReminderId = id,
-                        Duration = x.TimeSpan
-                    });
-                }
-                else if (d == EnumerableHelper.Difference.Remove)
-                {
-                    AheadOfTimeReminders.Remove(entity.AheadOfTimeReminders.First(y => y.Duration == x.TimeSpan));
-                }
-            }
+            using var prev = entity.AheadOfTimeReminders.AsValueEnumerable().ToArrayPool();
+            AheadOfTimeReminders.ApplyChanges(
+                item.AheadOfTimeReminderTimes,
+                prev.Span,
+                e => new AheadOfTimeReminderTime(e.Offset),
+                v => new AheadOfTimeReminder { Id = Guid.CreateVersion7(), ReminderId = id, Offset = v.TimeSpan }
+            );
         }
         if (item.DailyReminderTimes is not null)
         {
-            using var current = entity.DailyReminders.AsValueEnumerable()
-                .Select(x => new DailyReminderTime(TimeOnly.FromTimeSpan(x.Time)))
-                .ToArrayPool();
-            using var diff = EnumerableHelper.CompareTo<DailyReminderTime>(item.DailyReminderTimes, current.Span);
-            foreach (var (x, d) in diff.Span)
-            {
-                if (d == EnumerableHelper.Difference.Add)
-                {
-                    DailyReminders.Add(new DailyReminder()
-                    {
-                        Id = Guid.CreateVersion7(),
-                        ReminderId = id,
-                        Time = x.TimeSpan
-                    });
-                }
-                else if (d == EnumerableHelper.Difference.Remove)
-                {
-                    DailyReminders.Remove(entity.DailyReminders.First(y => y.Time == x.TimeSpan));
-                }
-            }
+            using var prev = entity.DailyReminders.AsValueEnumerable().ToArrayPool();
+            DailyReminders.ApplyChanges(
+                item.DailyReminderTimes,
+                prev.Span,
+                e => new DailyReminderTime(TimeOnly.FromTimeSpan(e.Time)),
+                v => new DailyReminder { Id = Guid.CreateVersion7(), ReminderId = id, Time = v.TimeSpan }
+            );
+        }
+        if (item.DestinationDiscordWebhooks is not null)
+        {
+            var prev = await DestinationsDiscords.AsNoTracking()
+                .Where(x => x.ReminderId == id)
+                .ToArrayAsync(cancellationToken);
+            DestinationsDiscords.ApplyChangesSlow(
+                item.DestinationDiscordWebhooks,
+                prev.AsSpan(),
+                e => new DestinationDiscordWebhook { WebhookId = e.WebhookId, WebhookSecret = e.WebhookSecret },
+                v => new DestinationsDiscord { ReminderId = id, WebhookId = v.WebhookId, WebhookSecret = v.WebhookSecret }
+            );
+        }
+        if (item.DestinationTraqChannels is not null)
+        {
+            var prev = await DestinationsTraqs.AsNoTracking()
+                .Where(x => x.ReminderId == id)
+                .ToArrayAsync(cancellationToken);
+            DestinationsTraqs.ApplyChanges(
+                item.DestinationTraqChannels,
+                prev.AsSpan(),
+                e => new DestinationTraqChannel { ChannelId = e.ChannelId },
+                v => new DestinationsTraq { ReminderId = id, ChannelId = v.ChannelId }
+            );
         }
         await SaveChangesAsync(cancellationToken);
-        return entity.ToDomain();
-    }
-}
-
-file static class EnumerableHelper
-{
-    public enum Difference { Zero = 0, Add = 1, Remove = -1 }
-
-    const int MaxStackAllocationBytes = 1024;
-
-    public static RentArray<(T, Difference)> CompareTo<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other) where T : unmanaged, IEquatable<T>
-    {
-        if (other.Length * 2 * Unsafe.SizeOf<T>() <= MaxStackAllocationBytes)
+        return entity.ToDomain() with
         {
-            Span<T> bufOther = stackalloc T[other.Length];
-            Span<T?> bufOtherRemains = stackalloc T?[other.Length];
-            other.CopyTo(bufOther);
-            return execCore(span, bufOther, bufOtherRemains);
-        }
-        else
-        {
-            using var bufOtherArray = RentArray.RentAndCreate<T>(other.Length);
-            using var bufOtherRemainsArray = RentArray.RentAndCreate<T?>(other.Length);
-            Span<T> bufOther = bufOtherArray.Span;
-            Span<T?> bufOtherRemains = bufOtherRemainsArray.Span;
-            other.CopyTo(bufOther);
-            return execCore(span, bufOther, bufOtherRemains);
-        }
-
-        static RentArray<(T, Difference)> execCore(scoped ReadOnlySpan<T> @this, scoped Span<T> other, scoped Span<T?> otherRemains)
-        {
-            var comparer = Comparer<T>.Default;
-            other.Sort(comparer);
-            other.AsValueEnumerable().Select(x => new T?(x)).CopyTo(otherRemains);
-
-            var result = RentArray.RentAndCreate<(T, Difference)>(@this.Length + other.Length);
-            var resSpan = result.Span;
-            for (int i = 0; i < @this.Length; i++)
-            {
-                var x = @this[i];
-                var otherIdx = other.BinarySearch(x, comparer);
-                if (otherIdx >= 0)
-                {
-                    resSpan[i] = (x, Difference.Zero);
-                    otherRemains[otherIdx] = null;
-                }
-                else
-                {
-                    resSpan[i] = (x, Difference.Add);
-                }
-            }
-            int remCnt = 0;
-            Span<(T, Difference)> remSpan = resSpan[@this.Length..];
-            foreach (var x in otherRemains.AsValueEnumerable().Where(y => y is not null))
-            {
-                remSpan[remCnt++] = (x!.Value, Difference.Remove);
-            }
-            return result.Resize(@this.Length + remCnt);
-        }
+            DestinationDiscordWebhooks = item.DestinationDiscordWebhooks ?? [],
+            DestinationTraqChannels = item.DestinationTraqChannels ?? []
+        };
     }
 }

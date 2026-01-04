@@ -1,0 +1,23 @@
+<Project>
+  
+  <!-- Basic settings for building -->
+  <PropertyGroup>
+    <LangVersion>14.0</LangVersion>
+  </PropertyGroup>
+
+  <!-- Assembly attributes -->
+  <ItemGroup>
+    
+    <!-- AssemblyCopyrightAttribute(string copyright) -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyCopyrightAttribute">
+      <_Parameter1>(c) 2025 Yusuke Toyoda</_Parameter1>
+    </AssemblyAttribute>
+
+    <!-- InternalsVisibleToAttribute(string assemblyName) -->
+    <AssemblyAttribute Condition="'$(ProjectName)' != 'KnoqReminder.Tests'" Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>KnoqReminder.Tests</_Parameter1>
+    </AssemblyAttribute>
+    
+  </ItemGroup>
+  
+</Project>

@@ -1,8 +1,8 @@
 namespace KnoqReminder.Domain.Options;
 
-public interface ITraqApiClientOptions
+public interface ITraqClientOptions
 {
-    string BaseUrl { get; }
+    Uri ApiBaseUrl { get; }
 
     string AccessToken { get; }
 }

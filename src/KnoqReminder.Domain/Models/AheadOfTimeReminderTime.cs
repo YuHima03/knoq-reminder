@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Diagnostics;
 
@@ -9,9 +10,14 @@ namespace KnoqReminder.Domain.Models;
 /// </summary>
 public readonly struct AheadOfTimeReminderTime : IComparable<AheadOfTimeReminderTime>, IEquatable<AheadOfTimeReminderTime>
 {
+    [StringSyntax(StringSyntaxAttribute.TimeSpanFormat)]
     const string TimeSpanFormat = "HH:mm";
 
     readonly TimeSpan _timeSpan;
+
+    public static readonly AheadOfTimeReminderTime Zero = new(TimeSpan.Zero);
+    public static readonly AheadOfTimeReminderTime MaxValue = new(TimeSpan.FromHours(24));
+    public static readonly AheadOfTimeReminderTime MinValue = Zero;
 
     public int Hours => _timeSpan.Hours;
 

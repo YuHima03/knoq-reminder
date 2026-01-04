@@ -14,10 +14,13 @@ namespace KnoqReminder.Domain.Models;
 public record UserReminder(
     Guid Id,
     Guid UserId,
-    ReminderKind RemindsWhenAbsent,
-    ReminderKind RemindsFreeEvents,
+    ReminderOptionsWhenUserPending RemindsWhenPending,
+    ReminderOptionsWhenUserAbsent RemindsWhenAbsent,
+    ReminderOptionsForOpenEvents RemindsOpenEvents,
     AheadOfTimeReminderTime[] AheadOfTimeReminderTimes,
     DailyReminderTime[] DailyReminderTimes,
+    DestinationDiscordWebhook[] DestinationDiscordWebhooks,
+    DestinationTraqChannel[] DestinationTraqChannels,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt
     );

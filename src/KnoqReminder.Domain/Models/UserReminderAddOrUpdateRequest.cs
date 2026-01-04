@@ -10,8 +10,11 @@ namespace KnoqReminder.Domain.Models;
 /// <param name="DailyReminderTimes"></param>
 public record UserReminderAddOrUpdateRequest(
     Guid? UserId,
-    ReminderKind? RemindsWhenAbsent,
-    ReminderKind? RemindsFreeEvents,
+    ReminderOptionsWhenUserPending? RemindsWhenPending,
+    ReminderOptionsWhenUserAbsent? RemindsWhenAbsent,
+    ReminderOptionsForOpenEvents? RemindsOpenEvents,
     AheadOfTimeReminderTime[]? AheadOfTimeReminderTimes,
-    DailyReminderTime[]? DailyReminderTimes
+    DailyReminderTime[]? DailyReminderTimes,
+    DestinationDiscordWebhook[]? DestinationDiscordWebhooks,
+    DestinationTraqChannel[]? DestinationTraqChannels
     );
