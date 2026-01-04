@@ -21,6 +21,7 @@ public class MariaDbConnectionConfiguration : Domain.Options.IDbConnectionOption
 
     [ConfigurationKeyName(EnvironmentPrefix + "DATABASE")]
     public string? Database { get; set; }
+
     public string ConnectionString => _connectionString ??= BuildConnectionString();
     string? _connectionString = null;
 

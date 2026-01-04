@@ -11,14 +11,12 @@ class DefaultLocalizationConfiguration : IDefaultLocalizationOptions
     [ConfigurationKeyName("Culture")]
     public string? CultureName { get; set; }
 
-    [NotNull]
-    public CultureInfo? CultureInfo => field ??= (TryGetCulture(CultureName, out var ci) ? ci : CultureInfo.InvariantCulture);
+    CultureInfo IDefaultLocalizationOptions.CultureInfo => TryGetCulture(CultureName, out var ci) ? ci : CultureInfo.InvariantCulture;
 
     [ConfigurationKeyName("TimeZone")]
     public string? TimeZoneId { get; set; }
 
-    [NotNull]
-    public TimeZoneInfo? TimeZoneInfo => field ??= (TryGetTimeZone(TimeZoneId, out var tzi) ? tzi : TimeZoneInfo.Utc);
+    TimeZoneInfo IDefaultLocalizationOptions.TimeZoneInfo => TryGetTimeZone(TimeZoneId, out var tzi) ? tzi : TimeZoneInfo.Utc;
 
     static bool TryGetCulture(string? name, [MaybeNullWhen(false)] out CultureInfo ci)
     {
