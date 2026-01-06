@@ -6,29 +6,27 @@ namespace KnoqReminder.App.Configurations;
 
 public class KnoqClientConfiguration : IKnoqClientOptions
 {
-    public const string EnvironmentPrefix = "KNOQ_";
-
     public const string Position = "Knoq";
 
-    [ConfigurationKeyName($"{Position}:BaseUrl:Api")]
+    [ConfigurationKeyName("BaseUrl:Api")]
     [NotNull]
     [Required]
     public Uri? ApiBaseUrl { get; set; }
 
-    [ConfigurationKeyName($"{Position}:BaseUrl:WebPage")]
+    [ConfigurationKeyName("BaseUrl:WebPage")]
     [NotNull]
     [Required]
     public Uri? WebPageBaseUrl { get; set; }
 
-    [ConfigurationKeyName(EnvironmentPrefix + "USERNAME")]
+    [ConfigurationKeyName("Username")]
     [NotNull]
     [Required(AllowEmptyStrings = false,
-        ErrorMessage = $"The configuration {EnvironmentPrefix}USERNAME is not set.")]
+        ErrorMessage = $"The configuration {Position}:Username is not set.")]
     public string? Username { get; set; }
 
-    [ConfigurationKeyName(EnvironmentPrefix + "PASSWORD")]
+    [ConfigurationKeyName("Password")]
     [NotNull]
     [Required(AllowEmptyStrings = false,
-        ErrorMessage = $"The configuration {EnvironmentPrefix}PASSWORD is not set.")]
+        ErrorMessage = $"The configuration {Position}:Password is not set.")]
     public string? Password { get; set; }
 }
