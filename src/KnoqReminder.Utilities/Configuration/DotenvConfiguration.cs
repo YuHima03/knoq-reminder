@@ -51,8 +51,8 @@ static class DotenvConfigurationPathHelper
                     var c = originalPart[i];
                     sb.Append((i == 0) ? char.ToUpperInvariant(c) : char.ToLowerInvariant(c));
                 }
-                sb.Append(ConfigurationPath.KeyDelimiter);
             }
+            sb.Append(ConfigurationPath.KeyDelimiter);
         }
         if (sb.Length != 0)
         {

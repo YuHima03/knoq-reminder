@@ -1,6 +1,5 @@
 using KnoqReminder.Utilities.Helpers;
 using Microsoft.Extensions.Configuration;
-using ZLinq;
 
 namespace KnoqReminder.Utilities.Configuration;
 
