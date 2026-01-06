@@ -17,6 +17,14 @@ static class ConfigurationExtension
                 }
                 GenericThrowHelper.Throw<FileNotFoundException>($"Configuration file not found: {fullPath}");
             }
+            else if (File.GetAttributes(fullPath).HasFlag(FileAttributes.Directory))
+            {
+                if (areOptional)
+                {
+                    continue;
+                }
+                GenericThrowHelper.Throw<IOException>($"Configuration path is a directory: {fullPath}");
+            }
             using var stream = File.OpenRead(fullPath);
             builder.AddIniStream(stream);
         }
