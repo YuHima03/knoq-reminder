@@ -31,8 +31,23 @@ sealed partial class ReminderScheduler(
                 // The object will be disposed on finalization by the GC.
                 CancellationTokenSource cts = new(options.Value.RemindingTaskTimeout);
                 var ct = cts.Token;
-                ct.Register(() => LoggerExtensions.LogWarning_ReminderTimeOut(logger, options.Value.RemindingTaskTimeout));
-                _ = ExecuteCoreAsync(utcNow, ct);
+                var task = Task.Run(
+                    action: async () =>
+                    {
+                        try
+                        {
+                            await ExecuteCoreAsync(utcNow, ct).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                        {
+                            LoggerExtensions.LogWarning_ReminderTimeOut(logger, options.Value.RemindingTaskTimeout);
+                        }
+                        catch (Exception ex)
+                        {
+                            LoggerExtensions.LogError_ReminderSchedulerError(logger, ex);
+                        }
+                    },
+                    cancellationToken: CancellationToken.None);
                 lastRunAt = utcNow;
             }
         }
@@ -117,8 +132,11 @@ sealed partial class ReminderScheduler(
 
     static partial class LoggerExtensions
     {
+        [LoggerMessage(Level = LogLevel.Error, Message = "An error occurred whlie executing reminder scheduler.")]
+        public static partial void LogError_ReminderSchedulerError(ILogger<ReminderScheduler> logger, Exception exception);
+
         [LoggerMessage(Level = LogLevel.Warning, Message = "Reminder task time out occurred: running over {timeout}")]
-        public static partial void LogWarning_ReminderTimeOut(ILogger logger, TimeSpan timeout);
+        public static partial void LogWarning_ReminderTimeOut(ILogger<ReminderScheduler> logger, TimeSpan timeout);
     }
 }
 
