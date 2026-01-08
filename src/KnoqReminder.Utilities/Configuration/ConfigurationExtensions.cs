@@ -1,8 +1,9 @@
 using KnoqReminder.Utilities.Helpers;
+using Microsoft.Extensions.Configuration;
 
-namespace KnoqReminder.App.Configurations;
+namespace KnoqReminder.Utilities.Configuration;
 
-static class ConfigurationExtension
+public static class ConfigurationExtensions
 {
     public static IConfigurationBuilder AddEnvFiles(this IConfigurationBuilder builder, bool areOptional, params ReadOnlySpan<string> paths)
     {
@@ -18,7 +19,7 @@ static class ConfigurationExtension
                 GenericThrowHelper.Throw<FileNotFoundException>($"Configuration file not found: {fullPath}");
             }
             using var stream = File.OpenRead(fullPath);
-            builder.AddIniStream(stream);
+            builder.Add(new DotenvConfigurationSource() { Stream = stream });
         }
         return builder;
     }

@@ -6,7 +6,7 @@ using KnoqReminder.App.Services.Events;
 using KnoqReminder.App.Services.Localization;
 using KnoqReminder.App.Services.Reminder;
 using KnoqReminder.Infrastructure.Database;
-using Microsoft.EntityFrameworkCore;
+using KnoqReminder.Utilities.Configuration;
 
 class Program
 {

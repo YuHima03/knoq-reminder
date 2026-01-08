@@ -15,7 +15,7 @@ static class ServiceCollectionExtensions
     public static IServiceCollection SetupKnoqClient(this IServiceCollection services, IConfigurationRoot config)
     {
         services.AddOptions<IKnoqClientOptions, KnoqClientConfiguration>()
-            .Bind(config)
+            .Bind(config.GetSection(KnoqClientConfiguration.Position))
             .ValidateDataAnnotations()
             .ValidateOnStart();
         services.AddAuthenticatedKnoqApiClient(
@@ -36,7 +36,7 @@ static class ServiceCollectionExtensions
     public static IServiceCollection SetupTraqClient(this IServiceCollection services, IConfigurationRoot config)
     {
         services.AddOptions<ITraqClientOptions, TraqClientConfiguration>()
-            .Bind(config)
+            .Bind(config.GetSection(TraqClientConfiguration.Position))
             .ValidateDataAnnotations()
             .ValidateOnStart();
         services.AddTraqApiClient((sp, o) =>

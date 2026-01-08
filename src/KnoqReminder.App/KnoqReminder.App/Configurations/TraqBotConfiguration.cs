@@ -5,9 +5,9 @@ namespace KnoqReminder.App.Configurations;
 
 public class TraqBotConfiguration : ITraqBotOptions
 {
-    public const string EnvironmentPrefix = "TRAQ_BOT_";
+    public const string Position = "Traq:Bot";
 
-    [ConfigurationKeyName(EnvironmentPrefix + "USER_ID")]
-    [IsNotDefaultValue<Guid>(ErrorMessage = $"The configuration {EnvironmentPrefix}USER_ID is not set or zero uuid.")]
+    [ConfigurationKeyName("UserId")]
+    [IsNotDefaultValue<Guid>(ErrorMessage = $"The configuration {Position}:UserId is not set or zero uuid.")]
     public Guid BotUserId { get; set; }
 }
