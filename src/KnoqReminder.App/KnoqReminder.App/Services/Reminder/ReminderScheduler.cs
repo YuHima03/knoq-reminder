@@ -27,27 +27,23 @@ sealed partial class ReminderScheduler(
             var utcNow = DateTimeOffset.UtcNow;
             if (lastRunAt.AddMinutes(1) <= utcNow) // Runs every minute
             {
-                // No `using` to keep it alive during the task.
-                // The object will be disposed on finalization by the GC.
-                CancellationTokenSource cts = new(options.Value.RemindingTaskTimeout);
-                var ct = cts.Token;
-                var task = Task.Run(
-                    action: async () =>
+                _ = Task.Run(async () =>
+                {
+                    using CancellationTokenSource cts = new(options.Value.RemindingTaskTimeout);
+                    var ct = cts.Token;
+                    try
                     {
-                        try
-                        {
-                            await ExecuteCoreAsync(utcNow, ct).ConfigureAwait(false);
-                        }
-                        catch (OperationCanceledException) when (ct.IsCancellationRequested)
-                        {
-                            LoggerExtensions.LogWarning_ReminderTimeOut(logger, options.Value.RemindingTaskTimeout);
-                        }
-                        catch (Exception ex)
-                        {
-                            LoggerExtensions.LogError_ReminderSchedulerError(logger, ex);
-                        }
-                    },
-                    cancellationToken: CancellationToken.None);
+                        await ExecuteCoreAsync(utcNow, ct).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                    {
+                        LoggerExtensions.LogWarning_ReminderTimeOut(logger, options.Value.RemindingTaskTimeout);
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggerExtensions.LogError_ReminderSchedulerError(logger, ex);
+                    }
+                }, CancellationToken.None);
                 lastRunAt = utcNow;
             }
         }
