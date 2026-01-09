@@ -114,15 +114,6 @@ public partial class AppDbContext : IUserReminderRepository
             .ToArrayAsync(cancellationToken);
         return (discordWebhooks, traqChannels);
     }
-    async ValueTask<ReminderDestination> GetReminderDestinationAsync(Guid reminderId, CancellationToken cancellationToken = default)
-    {
-        var (discordWebhooks, traqChannels) = await GetDestinationsAsync(reminderId, cancellationToken).ConfigureAwait(false);
-        return new ReminderDestination
-        {
-            DiscordWebhooks = discordWebhooks,
-            TraqChannels = traqChannels
-        };
-    }
 
     async ValueTask<UserAotReminder[]> IUserReminderRepository.GetUserAotRemindersAsync(AheadOfTimeReminderTime offsetFrom, AheadOfTimeReminderTime offsetTo, CancellationToken cancellationToken)
     {
@@ -134,13 +125,18 @@ public partial class AppDbContext : IUserReminderRepository
             .Select(ar => new UserAotReminder(
                 ar.ReminderId,
                 ar.Reminder.UserId,
-                null!,
+                new ReminderDestination
+                {
+                    DiscordWebhooks = ar.Reminder.DestinationDiscordWebhooks
+                        .AsQueryable()
+                        .Select(DestinationDiscordWebhookHelper.DtoToDomainExpression)
+                        .ToArray(),
+                    TraqChannels = ar.Reminder.DestinationTraqChannels
+                        .AsQueryable()
+                        .Select(DestinationTraqChannelHelper.DtoToDomainExpression)
+                        .ToArray()
+                },
                 new AheadOfTimeReminderTime(ar.Offset)))
-            .AsAsyncEnumerable()
-            .Select(async (ar, ct) => ar with
-            {
-                Destination = await GetReminderDestinationAsync(ar.ReminderId, ct)
-            })
             .ToArrayAsync(cancellationToken);
     }
 
@@ -154,13 +150,18 @@ public partial class AppDbContext : IUserReminderRepository
             .Select(dr => new UserDailyReminder(
                 dr.ReminderId,
                 dr.Reminder.UserId,
-                null!,
+                new ReminderDestination
+                {
+                    DiscordWebhooks = dr.Reminder.DestinationDiscordWebhooks
+                        .AsQueryable()
+                        .Select(DestinationDiscordWebhookHelper.DtoToDomainExpression)
+                        .ToArray(),
+                    TraqChannels = dr.Reminder.DestinationTraqChannels
+                        .AsQueryable()
+                        .Select(DestinationTraqChannelHelper.DtoToDomainExpression)
+                        .ToArray()
+                },
                 new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time))))
-            .AsAsyncEnumerable()
-            .Select(async (dr, ct) => dr with
-            {
-                Destination = await GetReminderDestinationAsync(dr.ReminderId, ct)
-            })
             .ToArrayAsync(cancellationToken);
     }
 
