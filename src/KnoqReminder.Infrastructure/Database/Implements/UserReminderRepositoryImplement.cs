@@ -115,6 +115,15 @@ public partial class AppDbContext : IUserReminderRepository
             .ToArrayAsync(cancellationToken);
         return (discordWebhooks, traqChannels);
     }
+    async ValueTask<ReminderDestination> GetReminderDestinationAsync(Guid reminderId, CancellationToken cancellationToken = default)
+    {
+        var (discordWebhooks, traqChannels) = await GetDestinationsAsync(reminderId, cancellationToken).ConfigureAwait(false);
+        return new ReminderDestination
+        {
+            DiscordWebhooks = discordWebhooks,
+            TraqChannels = traqChannels
+        };
+    }
 
     async ValueTask<UserAotReminder[]> IUserReminderRepository.GetUserAotRemindersAsync(AheadOfTimeReminderTime offsetFrom, AheadOfTimeReminderTime offsetTo, CancellationToken cancellationToken)
     {
@@ -123,20 +132,16 @@ public partial class AppDbContext : IUserReminderRepository
             : AheadOfTimeReminders.AsNoTracking().Where(x => offsetFrom.TimeSpan <= x.Offset && x.Offset <= offsetTo.TimeSpan);
         return await q
             .OrderBy(r => r.Offset)
-            .GroupBy(r => r.ReminderId)
-            .GroupJoinDestinations(
-                DestinationsDiscords.AsNoTracking(),
-                DestinationsTraqs.AsNoTracking())
-            .Join(
-                inner: UserReminders.AsNoTracking(),
-                outerKeySelector: x => x.Outer.Key,
-                innerKeySelector: y => y.Id,
-                resultSelector: (outer, inner) => DefaultJoinResult.Create(outer, inner.UserId).Flatten())
-            .SelectMany(x => x.Item1.Select(r => new UserAotReminder(
-                r.ReminderId,
-                x.Item3,
-                x.Item2,
-                new AheadOfTimeReminderTime(r.Offset))))
+            .Select(ar => new UserAotReminder(
+                ar.ReminderId,
+                ar.Reminder.UserId,
+                null!,
+                new AheadOfTimeReminderTime(ar.Offset)))
+            .AsAsyncEnumerable()
+            .Select(async (ar, ct) => ar with
+            {
+                Destination = await GetReminderDestinationAsync(ar.ReminderId, ct)
+            })
             .ToArrayAsync(cancellationToken);
     }
 
@@ -147,20 +152,16 @@ public partial class AppDbContext : IUserReminderRepository
             : DailyReminders.AsNoTracking().Where(x => timeFrom.TimeSpan <= x.Time && x.Time <= timeTo.TimeSpan);
         return await q
             .OrderBy(r => r.Time)
-            .GroupBy(r => r.ReminderId)
-            .GroupJoinDestinations(
-                DestinationsDiscords.AsNoTracking(),
-                DestinationsTraqs.AsNoTracking())
-            .Join(
-                inner: UserReminders.AsNoTracking(),
-                outerKeySelector: x => x.Outer.Key,
-                innerKeySelector: y => y.Id,
-                resultSelector: (outer, inner) => DefaultJoinResult.Create(outer, inner.UserId).Flatten())
-            .SelectMany(x => x.Item1.Select(r => new UserDailyReminder(
-                r.ReminderId,
-                x.Item3,
-                x.Item2,
-                new DailyReminderTime(TimeOnly.FromTimeSpan(r.Time)))))
+            .Select(dr => new UserDailyReminder(
+                dr.ReminderId,
+                dr.Reminder.UserId,
+                null!,
+                new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time))))
+            .AsAsyncEnumerable()
+            .Select(async (dr, ct) => dr with
+            {
+                Destination = await GetReminderDestinationAsync(dr.ReminderId, ct)
+            })
             .ToArrayAsync(cancellationToken);
     }
 
