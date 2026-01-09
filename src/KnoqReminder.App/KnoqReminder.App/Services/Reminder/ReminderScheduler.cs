@@ -128,7 +128,7 @@ sealed partial class ReminderScheduler(
 
     static partial class LoggerExtensions
     {
-        [LoggerMessage(Level = LogLevel.Error, Message = "An error occurred whlie executing reminder scheduler.")]
+        [LoggerMessage(Level = LogLevel.Error, Message = "An error occurred while executing reminder scheduler.")]
         public static partial void LogError_ReminderSchedulerError(ILogger<ReminderScheduler> logger, Exception exception);
 
         [LoggerMessage(Level = LogLevel.Warning, Message = "Reminder task time out occurred: running over {timeout}")]
