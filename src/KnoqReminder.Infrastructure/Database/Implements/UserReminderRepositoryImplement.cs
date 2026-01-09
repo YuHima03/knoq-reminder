@@ -72,6 +72,7 @@ public partial class AppDbContext : IUserReminderRepository
         var entity = UserReminders.Add(reminder);
         await SaveChangesAsync(cancellationToken);
         return Queryable.AsQueryable([entity.Entity])
+            .AsSplitQuery()
             .SelectDomainUserReminder()
             .First();
     }
@@ -104,6 +105,8 @@ public partial class AppDbContext : IUserReminderRepository
             ? AheadOfTimeReminders.AsNoTracking().Where(x => x.Offset == offsetFrom.TimeSpan)
             : AheadOfTimeReminders.AsNoTracking().Where(x => offsetFrom.TimeSpan <= x.Offset && x.Offset <= offsetTo.TimeSpan);
         return await q
+            // Note: Please ensure that `DestinationDiscordWebhooks.Count() * DestinationTraqChannels.Count()` is small enough to use AsSingleQuery() method.
+            .AsSingleQuery()
             .OrderBy(r => r.Offset)
             .Select(ar => new UserAotReminder(
                 ar.ReminderId,
@@ -111,11 +114,9 @@ public partial class AppDbContext : IUserReminderRepository
                 new ReminderDestination
                 {
                     DiscordWebhooks = ar.Reminder.DestinationDiscordWebhooks
-                        .AsQueryable()
                         .SelectDomainDestinationDiscordWebhook()
                         .ToArray(),
                     TraqChannels = ar.Reminder.DestinationTraqChannels
-                        .AsQueryable()
                         .SelectDomainDestinationTraqChannel()
                         .ToArray()
                 },
@@ -129,6 +130,8 @@ public partial class AppDbContext : IUserReminderRepository
             ? DailyReminders.AsNoTracking().Where(x => x.Time == timeFrom.TimeSpan)
             : DailyReminders.AsNoTracking().Where(x => timeFrom.TimeSpan <= x.Time && x.Time <= timeTo.TimeSpan);
         return await q
+            // Note: Please ensure that `DestinationDiscordWebhooks.Count() * DestinationTraqChannels.Count()` is small enough to use AsSingleQuery() method.
+            .AsSingleQuery()
             .OrderBy(r => r.Time)
             .Select(dr => new UserDailyReminder(
                 dr.ReminderId,
@@ -136,11 +139,9 @@ public partial class AppDbContext : IUserReminderRepository
                 new ReminderDestination
                 {
                     DiscordWebhooks = dr.Reminder.DestinationDiscordWebhooks
-                        .AsQueryable()
                         .SelectDomainDestinationDiscordWebhook()
                         .ToArray(),
                     TraqChannels = dr.Reminder.DestinationTraqChannels
-                        .AsQueryable()
                         .SelectDomainDestinationTraqChannel()
                         .ToArray()
                 },
@@ -151,6 +152,7 @@ public partial class AppDbContext : IUserReminderRepository
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.GetUserReminderAsync(Guid id, CancellationToken cancellationToken)
     {
         return await UserReminders.AsNoTracking()
+            .AsSplitQuery()
             .Where(x => x.Id == id)
             .SelectDomainUserReminder()
             .FirstOrDefaultAsync(cancellationToken)
@@ -160,6 +162,7 @@ public partial class AppDbContext : IUserReminderRepository
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.GetUserReminderByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         return await UserReminders.AsNoTracking()
+            .AsSplitQuery()
             .Where(x => x.UserId == userId)
             .SelectDomainUserReminder()
             .FirstOrDefaultAsync(cancellationToken)
@@ -245,6 +248,7 @@ public partial class AppDbContext : IUserReminderRepository
         }
         await SaveChangesAsync(cancellationToken);
         return await query
+            .AsSplitQuery()
             .SelectDomainUserReminder()
             .FirstAsync(cancellationToken);
     }
