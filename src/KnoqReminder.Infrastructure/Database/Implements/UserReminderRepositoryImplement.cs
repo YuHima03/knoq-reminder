@@ -4,7 +4,6 @@ using KnoqReminder.Domain.Models;
 using KnoqReminder.Domain.Repositories;
 using KnoqReminder.Infrastructure.Database.Helpers;
 using KnoqReminder.Utilities.Helpers;
-using KnoqReminder.Utilities.Linq;
 using Microsoft.EntityFrameworkCore;
 using ZLinq;
 
