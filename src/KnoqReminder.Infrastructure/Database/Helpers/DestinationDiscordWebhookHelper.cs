@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KnoqReminder.Infrastructure.Database.Helpers;
 
-static class DestinationDiscordHelper
+static class DestinationDiscordWebhookHelper
 {
-    public static readonly Expression<Func<DestinationsDiscord, DestinationDiscordWebhook>> DtoToDomainExpression = x => new DestinationDiscordWebhook
+    public static readonly Expression<Func<DestinationDiscordWebhook, Domain.Models.DestinationDiscordWebhook>> DtoToDomainExpression = x => new Domain.Models.DestinationDiscordWebhook
     {
         WebhookId = x.WebhookId,
         WebhookSecret = x.WebhookSecret,
     };
 
-    public static IQueryable<Domain.Models.UserReminder> GroupJoinDiscordWebhooks(this IQueryable<Domain.Models.UserReminder> @this, DbSet<DestinationsDiscord> destinationsDiscords)
+    public static IQueryable<Domain.Models.UserReminder> GroupJoinDiscordWebhooks(this IQueryable<Domain.Models.UserReminder> @this, DbSet<DestinationDiscordWebhook> destinationsDiscords)
     {
         return @this.GroupJoin(
             destinationsDiscords.AsNoTracking(),
@@ -34,7 +34,7 @@ static class DestinationDiscordHelper
         );
     }
 
-    public static DestinationDiscordWebhook ToDomain(this DestinationsDiscord dto)
+    public static Domain.Models.DestinationDiscordWebhook ToDomain(this DestinationDiscordWebhook dto)
     {
         return new()
         {

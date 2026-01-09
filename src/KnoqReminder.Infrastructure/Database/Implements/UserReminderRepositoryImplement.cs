@@ -40,9 +40,9 @@ public partial class AppDbContext : IUserReminderRepository
         }
         if (item.DestinationDiscordWebhooks is { Length: > 0 } discordWebhooks)
         {
-            DestinationsDiscords.AddRange(
+            DestinationDiscordWebhooks.AddRange(
                 discordWebhooks.DistinctBy(x => x.WebhookId)
-                    .Select(x => new DestinationsDiscord
+                    .Select(x => new DestinationDiscordWebhook
                     {
                         ReminderId = reminderId,
                         WebhookId = x.WebhookId,
@@ -52,9 +52,9 @@ public partial class AppDbContext : IUserReminderRepository
         }
         if (item.DestinationTraqChannels is { Length: > 0 } traqChannels)
         {
-            DestinationsTraqs.AddRange(
+            DestinationTraqChannels.AddRange(
                 traqChannels.DistinctBy(x => x.ChannelId)
-                    .Select(x => new DestinationsTraq
+                    .Select(x => new DestinationTraqChannel
                     {
                         ReminderId = reminderId,
                         ChannelId = x.ChannelId
@@ -102,15 +102,15 @@ public partial class AppDbContext : IUserReminderRepository
         }
     }
 
-    async ValueTask<(DestinationDiscordWebhook[], DestinationTraqChannel[])> GetDestinationsAsync(Guid reminderId, CancellationToken cancellationToken = default)
+    async ValueTask<(Domain.Models.DestinationDiscordWebhook[], Domain.Models.DestinationTraqChannel[])> GetDestinationsAsync(Guid reminderId, CancellationToken cancellationToken = default)
     {
-        var discordWebhooks = await DestinationsDiscords.AsNoTracking()
+        var discordWebhooks = await DestinationDiscordWebhooks.AsNoTracking()
             .Where(x => x.ReminderId == reminderId)
-            .Select(DestinationDiscordHelper.DtoToDomainExpression)
+            .Select(DestinationDiscordWebhookHelper.DtoToDomainExpression)
             .ToArrayAsync(cancellationToken);
-        var traqChannels = await DestinationsTraqs.AsNoTracking()
+        var traqChannels = await DestinationTraqChannels.AsNoTracking()
             .Where(x => x.ReminderId == reminderId)
-            .Select(DestinationTraqHelper.DtoToDomainExpression)
+            .Select(DestinationTraqChannelHelper.DtoToDomainExpression)
             .ToArrayAsync(cancellationToken);
         return (discordWebhooks, traqChannels);
     }
@@ -246,26 +246,26 @@ public partial class AppDbContext : IUserReminderRepository
         }
         if (item.DestinationDiscordWebhooks is not null)
         {
-            var prev = await DestinationsDiscords.AsNoTracking()
+            var prev = await DestinationDiscordWebhooks.AsNoTracking()
                 .Where(x => x.ReminderId == id)
                 .ToArrayAsync(cancellationToken);
-            DestinationsDiscords.ApplyChangesSlow(
+            DestinationDiscordWebhooks.ApplyChangesSlow(
                 item.DestinationDiscordWebhooks,
                 prev.AsSpan(),
-                e => new DestinationDiscordWebhook { WebhookId = e.WebhookId, WebhookSecret = e.WebhookSecret },
-                v => new DestinationsDiscord { ReminderId = id, WebhookId = v.WebhookId, WebhookSecret = v.WebhookSecret }
+                e => new Domain.Models.DestinationDiscordWebhook { WebhookId = e.WebhookId, WebhookSecret = e.WebhookSecret },
+                v => new DestinationDiscordWebhook { ReminderId = id, WebhookId = v.WebhookId, WebhookSecret = v.WebhookSecret }
             );
         }
         if (item.DestinationTraqChannels is not null)
         {
-            var prev = await DestinationsTraqs.AsNoTracking()
+            var prev = await DestinationTraqChannels.AsNoTracking()
                 .Where(x => x.ReminderId == id)
                 .ToArrayAsync(cancellationToken);
-            DestinationsTraqs.ApplyChanges(
+            DestinationTraqChannels.ApplyChanges(
                 item.DestinationTraqChannels,
                 prev.AsSpan(),
-                e => new DestinationTraqChannel { ChannelId = e.ChannelId },
-                v => new DestinationsTraq { ReminderId = id, ChannelId = v.ChannelId }
+                e => new Domain.Models.DestinationTraqChannel { ChannelId = e.ChannelId },
+                v => new DestinationTraqChannel { ReminderId = id, ChannelId = v.ChannelId }
             );
         }
         await SaveChangesAsync(cancellationToken);

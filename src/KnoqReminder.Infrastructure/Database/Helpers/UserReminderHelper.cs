@@ -14,8 +14,8 @@ static partial class UserReminderHelper
         ParseDtoStringToReminderOptionsForOpenEvents(dto.RemindsFreeEvents),
         dto.AheadOfTimeReminders.Select(ar => new AheadOfTimeReminderTime(ar.Offset)).ToArray(),
         dto.DailyReminders.Select(dr => new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time))).ToArray(),
-        Array.Empty<DestinationDiscordWebhook>(),
-        Array.Empty<DestinationTraqChannel>(),
+        Array.Empty<Domain.Models.DestinationDiscordWebhook>(),
+        Array.Empty<Domain.Models.DestinationTraqChannel>(),
         dto.CreatedAt,
         dto.UpdatedAt);
 

@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KnoqReminder.Infrastructure.Database.Helpers;
 
-static class DestinationTraqHelper
+static class DestinationTraqChannelHelper
 {
-    public static readonly Expression<Func<DestinationsTraq, DestinationTraqChannel>> DtoToDomainExpression = x => new DestinationTraqChannel
+    public static readonly Expression<Func<DestinationTraqChannel, Domain.Models.DestinationTraqChannel>> DtoToDomainExpression = x => new Domain.Models.DestinationTraqChannel
     {
         ChannelId = x.ChannelId,
     };
 
-    public static IQueryable<Domain.Models.UserReminder> GroupJoinTraqChannels(this IQueryable<Domain.Models.UserReminder> @this, DbSet<DestinationsTraq> destinationsTraqs)
+    public static IQueryable<Domain.Models.UserReminder> GroupJoinTraqChannels(this IQueryable<Domain.Models.UserReminder> @this, DbSet<DestinationTraqChannel> destinationsTraqs)
     {
         return @this.GroupJoin(
             destinationsTraqs.AsNoTracking(),
@@ -33,7 +33,7 @@ static class DestinationTraqHelper
         );
     }
 
-    public static DestinationTraqChannel ToDomain(this DestinationsTraq dto)
+    public static Domain.Models.DestinationTraqChannel ToDomain(this DestinationTraqChannel dto)
     {
         return new()
         {
