@@ -69,15 +69,11 @@ public partial class AppDbContext : IUserReminderRepository
             RemindsWhenAbsent = item.RemindsWhenAbsent.GetValueOrDefault().ToDtoString(),
             RemindsFreeEvents = item.RemindsOpenEvents.GetValueOrDefault().ToDtoString(),
         };
-        UserReminders.Add(reminder);
+        var entity = UserReminders.Add(reminder);
         await SaveChangesAsync(cancellationToken);
-        return reminder.ToDomain() with
-        {
-            AheadOfTimeReminderTimes = item.AheadOfTimeReminderTimes?.AsValueEnumerable().Distinct().ToArray() ?? [],
-            DailyReminderTimes = item.DailyReminderTimes?.AsValueEnumerable().Distinct().ToArray() ?? [],
-            DestinationDiscordWebhooks = item.DestinationDiscordWebhooks?.AsValueEnumerable().DistinctBy(x => x.WebhookId).ToArray() ?? [],
-            DestinationTraqChannels = item.DestinationTraqChannels?.AsValueEnumerable().DistinctBy(x => x.ChannelId).ToArray() ?? []
-        };
+        return Queryable.AsQueryable([entity.Entity])
+            .SelectDomainUserReminder()
+            .First();
     }
 
     async ValueTask IUserReminderRepository.DeleteUserRemindersAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken)
@@ -102,19 +98,6 @@ public partial class AppDbContext : IUserReminderRepository
         }
     }
 
-    async ValueTask<(Domain.Models.DestinationDiscordWebhook[], Domain.Models.DestinationTraqChannel[])> GetDestinationsAsync(Guid reminderId, CancellationToken cancellationToken = default)
-    {
-        var discordWebhooks = await DestinationDiscordWebhooks.AsNoTracking()
-            .Where(x => x.ReminderId == reminderId)
-            .Select(DestinationDiscordWebhookHelper.DtoToDomainExpression)
-            .ToArrayAsync(cancellationToken);
-        var traqChannels = await DestinationTraqChannels.AsNoTracking()
-            .Where(x => x.ReminderId == reminderId)
-            .Select(DestinationTraqChannelHelper.DtoToDomainExpression)
-            .ToArrayAsync(cancellationToken);
-        return (discordWebhooks, traqChannels);
-    }
-
     async ValueTask<UserAotReminder[]> IUserReminderRepository.GetUserAotRemindersAsync(AheadOfTimeReminderTime offsetFrom, AheadOfTimeReminderTime offsetTo, CancellationToken cancellationToken)
     {
         var q = (offsetFrom == offsetTo)
@@ -129,11 +112,11 @@ public partial class AppDbContext : IUserReminderRepository
                 {
                     DiscordWebhooks = ar.Reminder.DestinationDiscordWebhooks
                         .AsQueryable()
-                        .Select(DestinationDiscordWebhookHelper.DtoToDomainExpression)
+                        .SelectDomainDestinationDiscordWebhook()
                         .ToArray(),
                     TraqChannels = ar.Reminder.DestinationTraqChannels
                         .AsQueryable()
-                        .Select(DestinationTraqChannelHelper.DtoToDomainExpression)
+                        .SelectDomainDestinationTraqChannel()
                         .ToArray()
                 },
                 new AheadOfTimeReminderTime(ar.Offset)))
@@ -154,11 +137,11 @@ public partial class AppDbContext : IUserReminderRepository
                 {
                     DiscordWebhooks = dr.Reminder.DestinationDiscordWebhooks
                         .AsQueryable()
-                        .Select(DestinationDiscordWebhookHelper.DtoToDomainExpression)
+                        .SelectDomainDestinationDiscordWebhook()
                         .ToArray(),
                     TraqChannels = dr.Reminder.DestinationTraqChannels
                         .AsQueryable()
-                        .Select(DestinationTraqChannelHelper.DtoToDomainExpression)
+                        .SelectDomainDestinationTraqChannel()
                         .ToArray()
                 },
                 new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time))))
@@ -167,48 +150,39 @@ public partial class AppDbContext : IUserReminderRepository
 
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.GetUserReminderAsync(Guid id, CancellationToken cancellationToken)
     {
-        var reminder = await UserReminders.AsNoTracking()
+        return await UserReminders.AsNoTracking()
             .Where(x => x.Id == id)
-            .Select(UserReminderHelper.DtoToDomainExpression)
-            .FirstOrDefaultAsync(cancellationToken);
-        var (discordWebhooks, traqChannels) = await GetDestinationsAsync(id, cancellationToken);
-        return (reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Models.UserReminder>()) with
-        {
-            DestinationDiscordWebhooks = discordWebhooks,
-            DestinationTraqChannels = traqChannels
-        };
+            .SelectDomainUserReminder()
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Models.UserReminder>();
     }
 
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.GetUserReminderByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
-        var reminder = await UserReminders.AsNoTracking()
+        return await UserReminders.AsNoTracking()
             .Where(x => x.UserId == userId)
-            .Select(UserReminderHelper.DtoToDomainExpression)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (reminder is null)
-        {
-            return GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Models.UserReminder>();
-        }
-        var (discordWebhooks, traqChannels) = await GetDestinationsAsync(reminder.Id, cancellationToken);
-        return reminder with
-        {
-            DestinationDiscordWebhooks = discordWebhooks,
-            DestinationTraqChannels = traqChannels
-        };
+            .SelectDomainUserReminder()
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, Domain.Models.UserReminder>();
     }
 
     async ValueTask<UserReminderOverview> IUserReminderRepository.GetUserReminderOverviewAsync(Guid id, CancellationToken cancellationToken)
     {
-        var reminder = await UserReminders.AsNoTracking()
+        return await UserReminders.AsNoTracking()
             .Where(x => x.Id == id)
-            .Select(UserReminderHelper.DtoToDomainOverviewExpression)
-            .FirstOrDefaultAsync(cancellationToken);
-        return reminder ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminderOverview>();
+            .SelectDomainUserReminderOverview()
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminderOverview>();
     }
 
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.UpdateUserReminderAsync(Guid id, UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)
     {
-        var entity = await UserReminders.Where(x => x.Id == id).SingleOrDefaultAsync(cancellationToken) ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminder>();
+        var query = UserReminders
+            .AsNoTracking()
+            .Where(x => x.Id == id);
+        var entity = await query
+            .SingleOrDefaultAsync(cancellationToken)
+            ?? GenericThrowHelper.Throw<RepositoryKeyNotFoundException, UserReminder>();
         if (item.UserId is not null)
         {
             entity.UserId = item.UserId.Value;
@@ -270,10 +244,8 @@ public partial class AppDbContext : IUserReminderRepository
             );
         }
         await SaveChangesAsync(cancellationToken);
-        return entity.ToDomain() with
-        {
-            DestinationDiscordWebhooks = item.DestinationDiscordWebhooks ?? [],
-            DestinationTraqChannels = item.DestinationTraqChannels ?? []
-        };
+        return await query
+            .SelectDomainUserReminder()
+            .FirstAsync(cancellationToken);
     }
 }

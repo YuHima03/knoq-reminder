@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using CommunityToolkit.Diagnostics;
 using KnoqReminder.Domain.Models;
 
@@ -6,41 +5,43 @@ namespace KnoqReminder.Infrastructure.Database.Helpers;
 
 static partial class UserReminderHelper
 {
-    public static readonly Expression<Func<UserReminder, Domain.Models.UserReminder>> DtoToDomainExpression = dto => new(
-        dto.Id,
-        dto.UserId,
-        ParseDtoStringToReminderOptionsWhenUserPending(dto.RemindsWhenPending),
-        ParseDtoStringToReminderOptionsWhenUserAbsent(dto.RemindsWhenAbsent),
-        ParseDtoStringToReminderOptionsForOpenEvents(dto.RemindsFreeEvents),
-        dto.AheadOfTimeReminders.Select(ar => new AheadOfTimeReminderTime(ar.Offset)).ToArray(),
-        dto.DailyReminders.Select(dr => new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time))).ToArray(),
-        Array.Empty<Domain.Models.DestinationDiscordWebhook>(),
-        Array.Empty<Domain.Models.DestinationTraqChannel>(),
-        dto.CreatedAt,
-        dto.UpdatedAt);
-
-    public static readonly Expression<Func<UserReminder, UserReminderOverview>> DtoToDomainOverviewExpression = dto => new(
-        dto.Id,
-        dto.UserId,
-        ParseDtoStringToReminderOptionsWhenUserPending(dto.RemindsWhenPending),
-        ParseDtoStringToReminderOptionsWhenUserAbsent(dto.RemindsWhenAbsent),
-        ParseDtoStringToReminderOptionsForOpenEvents(dto.RemindsFreeEvents),
-        dto.UpdatedAt);
-
-    public static Domain.Models.UserReminder ToDomain(this UserReminder dto)
+    public static IQueryable<UserReminderOverview> SelectDomainUserReminderOverview(this IQueryable<UserReminder> dtoQueryable)
     {
-        return new(
+        return dtoQueryable.Select(dto => new UserReminderOverview(
             dto.Id,
             dto.UserId,
             ParseDtoStringToReminderOptionsWhenUserPending(dto.RemindsWhenPending),
             ParseDtoStringToReminderOptionsWhenUserAbsent(dto.RemindsWhenAbsent),
             ParseDtoStringToReminderOptionsForOpenEvents(dto.RemindsFreeEvents),
-            [.. dto.AheadOfTimeReminders.Select(ar => new AheadOfTimeReminderTime(ar.Offset))],
-            [.. dto.DailyReminders.Select(dr => new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time)))],
-            [],
-            [],
+            dto.UpdatedAt));
+    }
+
+    public static IQueryable<Domain.Models.UserReminder> SelectDomainUserReminder(this IQueryable<UserReminder> dtoQueryable)
+    {
+        return dtoQueryable.Select(dto => new Domain.Models.UserReminder(
+            dto.Id,
+            dto.UserId,
+            ParseDtoStringToReminderOptionsWhenUserPending(dto.RemindsWhenPending),
+            ParseDtoStringToReminderOptionsWhenUserAbsent(dto.RemindsWhenAbsent),
+            ParseDtoStringToReminderOptionsForOpenEvents(dto.RemindsFreeEvents),
+            dto.AheadOfTimeReminders
+                .AsQueryable()
+                .Select(ar => new AheadOfTimeReminderTime(ar.Offset))
+                .ToArray(),
+            dto.DailyReminders
+                .AsQueryable()
+                .Select(dr => new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time)))
+                .ToArray(),
+            dto.DestinationDiscordWebhooks
+                .AsQueryable()
+                .SelectDomainDestinationDiscordWebhook()
+                .ToArray(),
+            dto.DestinationTraqChannels
+                .AsQueryable()
+                .SelectDomainDestinationTraqChannel()
+                .ToArray(),
             dto.CreatedAt,
-            dto.UpdatedAt);
+            dto.UpdatedAt));
     }
 }
 
