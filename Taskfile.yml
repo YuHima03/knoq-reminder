@@ -57,10 +57,10 @@ tasks:
                 && docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down {{.DEV_COMPOSE_SERVICES_DB}}"
       - "echo \"{{.STEP_BEGIN}}[1/4] Starting temporary database container...{{.STEP_END}}\""
       - docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build -d --wait {{.DEV_COMPOSE_SERVICES_DB}}
-      - "echo \"{{.STEP_BEGIN}}[2/4] Scaffolding from localhost:$MARIADB_EXPOSE_PORT/$MARIADB_DATABASE{{.STEP_END}}\""
+      - "echo \"{{.STEP_BEGIN}}[2/4] Scaffolding from localhost:$MARIADB__EXPOSE_PORT/$MARIADB__DATABASE{{.STEP_END}}\""
       - |
         dotnet ef dbcontext scaffold \
-          "Server=localhost;Port=$MARIADB_EXPOSE_PORT;Database=$MARIADB_DATABASE;User Id=$MARIADB_USER;Password=$MARIADB_PASSWORD;" \
+          "Server=localhost;Port=$MARIADB__EXPOSE_PORT;Database=$MARIADB__DATABASE;User Id=$MARIADB__USER;Password=$MARIADB__PASSWORD;" \
           "MySql.EntityFrameworkCore" \
           --project {{.PROJECT_DIR}} \
           --output-dir Database \

@@ -4,12 +4,12 @@ services:
     image: mariadb:11.8
     restart: "no"
     ports:
-      - "${MARIADB_EXPOSE_PORT:?}:3306"
+      - "${MARIADB__EXPOSE_PORT:?}:3306"
     environment:
-      MARIADB_USER: ${MARIADB_USER:?}
-      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?}
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-password}
-      MARIADB_DATABASE: ${MARIADB_DATABASE:?}
+      MARIADB_USER: ${MARIADB__USER:?}
+      MARIADB_PASSWORD: ${MARIADB__PASSWORD:?}
+      MARIADB_ROOT_PASSWORD: ${MARIADB__ROOT_PASSWORD:-password}
+      MARIADB_DATABASE: ${MARIADB__DATABASE:?}
     volumes:
       - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
@@ -35,4 +35,4 @@ services:
         target: /work/.tbls.yml
         read_only: true
     working_dir: /work
-    command: doc mariadb://${MARIADB_USER:?}:${MARIADB_PASSWORD:?}@db-temp:3306/${MARIADB_DATABASE:?} dbdoc -c .tbls.yml --rm-dist
+    command: doc mariadb://${MARIADB__USER:?}:${MARIADB__PASSWORD:?}@db-temp:3306/${MARIADB__DATABASE:?} dbdoc -c .tbls.yml --rm-dist
