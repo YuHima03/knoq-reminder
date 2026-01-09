@@ -25,19 +25,15 @@ static partial class UserReminderHelper
             ParseDtoStringToReminderOptionsWhenUserAbsent(dto.RemindsWhenAbsent),
             ParseDtoStringToReminderOptionsForOpenEvents(dto.RemindsFreeEvents),
             dto.AheadOfTimeReminders
-                .AsQueryable()
                 .Select(ar => new AheadOfTimeReminderTime(ar.Offset))
                 .ToArray(),
             dto.DailyReminders
-                .AsQueryable()
                 .Select(dr => new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time)))
                 .ToArray(),
             dto.DestinationDiscordWebhooks
-                .AsQueryable()
                 .SelectDomainDestinationDiscordWebhook()
                 .ToArray(),
             dto.DestinationTraqChannels
-                .AsQueryable()
                 .SelectDomainDestinationTraqChannel()
                 .ToArray(),
             dto.CreatedAt,
