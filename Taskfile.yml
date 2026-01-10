@@ -12,7 +12,16 @@ vars:
 
 tasks:
 
-  app-dev-up:
+  app-down:
+    aliases:
+      - down 
+    desc: Stop the development application container and depending services.
+    dir: .
+    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down app-dev
+
+  app-up:
+    aliases:
+      - up
     desc: Start the development application container and depending services.
     preconditions:
       - sh: ls {{.DEV_COMPOSE_ENVFILE}}
@@ -21,12 +30,12 @@ tasks:
     dir: .
     cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build -d --wait app-dev
 
-  app-dev-down:
-    desc: Stop the development application container and depending services.
+  db-down:
+    desc: Stop the development database container and Adminer.
     dir: .
-    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down app-dev
+    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down {{.DEV_COMPOSE_SERVICES_DB}} {{.DEV_COMPOSE_SERVICES_DB_ADMINER}}
 
-  db-dev-up:
+  db-up:
     desc: Start the development database container and Adminer.
     preconditions:
       - sh: ls {{.DEV_COMPOSE_ENVFILE}}
@@ -34,11 +43,6 @@ tasks:
     silent: false
     dir: .
     cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build -d --wait {{.DEV_COMPOSE_SERVICES_DB}} {{.DEV_COMPOSE_SERVICES_DB_ADMINER}}
-
-  db-dev-down:
-    desc: Stop the development database container and Adminer.
-    dir: .
-    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down {{.DEV_COMPOSE_SERVICES_DB}} {{.DEV_COMPOSE_SERVICES_DB_ADMINER}}
 
   db-docs:
     desc: Generate database documentation using tbls.
