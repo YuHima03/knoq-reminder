@@ -12,6 +12,20 @@ vars:
 
 tasks:
 
+  app-dev-up:
+    desc: Start the development application container and depending services.
+    preconditions:
+      - sh: ls {{.DEV_COMPOSE_ENVFILE}}
+        msg: "required .env file not found: {{.DEV_COMPOSE_ENVFILE}}"
+    silent: false
+    dir: .
+    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build -d --wait app-dev
+
+  app-dev-down:
+    desc: Stop the development application container and depending services.
+    dir: .
+    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down app-dev
+
   db-dev-up:
     desc: Start the development database container and Adminer.
     preconditions:
