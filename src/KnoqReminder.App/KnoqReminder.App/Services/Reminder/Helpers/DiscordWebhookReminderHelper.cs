@@ -68,8 +68,13 @@ static class DiscordWebhookReminderHelper
                 Fields = [
                     new()
                     {
+                        Name = "Start",
+                        Value = $"<t:{e.StartsAt.ToUnixTimeSeconds()}:R>",
+                    },
+                    new()
+                    {
                         Name = "Time",
-                        Value = $"{e.StartsAt.ToString(ReminderConstants.EventDateTimeFormat)} ~ {e.EndsAt.ToString(ReminderConstants.EventDateTimeFormat)}"
+                        Value = $"<t:{e.StartsAt.ToUnixTimeSeconds()}> ~ <t:{e.EndsAt.ToUnixTimeSeconds()}>"
                     },
                     new()
                     {
