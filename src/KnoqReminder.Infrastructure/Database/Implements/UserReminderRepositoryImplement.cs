@@ -164,7 +164,6 @@ public partial class AppDbContext : IUserReminderRepository
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.UpdateUserReminderAsync(Guid id, UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)
     {
         var query = UserReminders
-            .AsNoTracking()
             .Where(x => x.Id == id);
         var entity = await query
             .SingleOrDefaultAsync(cancellationToken)
