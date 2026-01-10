@@ -1,7 +1,7 @@
 services:
 
   db-dev-adminer:
-    image: adminer:latest
+    image: adminer:5
     restart: "no"
     ports:
       - "3300:8080"
