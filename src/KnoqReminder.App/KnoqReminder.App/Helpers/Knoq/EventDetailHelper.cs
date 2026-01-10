@@ -1,5 +1,6 @@
 using System.Net;
 using KnoqReminder.Utilities;
+using KnoqReminder.Utilities.Collections;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Kiota.Abstractions;
 
@@ -34,10 +35,9 @@ static class EventDetailHelper
             var logger = CreateLogger(loggerFactory);
             if (logger.IsEnabled(LogLevel.Error))
             {
-                var eventId = builder.ToGetRequestInformation(requestConfiguration).PathParameters["eventId"];
-                if (eventId is Guid eid)
+                if (builder.ToGetRequestInformation(requestConfiguration).PathParameters.TryFindValue("eventId", StringComparison.InvariantCultureIgnoreCase, out var eventId))
                 {
-                    logger.LogError("Event not found: {eventId}", eid);
+                    logger.LogError("Event not found: {eventId}", eventId);
                 }
                 else
                 {
@@ -61,7 +61,7 @@ static class EventDetailHelper
         )
     {
         var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
-        if (pathParams.TryGetValue("eventId", out var eidObj) && eidObj is Guid eid)
+        if (pathParams.TryFindValue("eventId", StringComparison.InvariantCultureIgnoreCase, out var eidObj) && eidObj is Guid eid)
         {
             return await cache.GetOrCreateAsync(EventDetailCacheOptions.GetMemoryCacheKey(eid), async entry =>
             {
