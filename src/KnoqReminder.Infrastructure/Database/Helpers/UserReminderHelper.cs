@@ -39,6 +39,22 @@ static partial class UserReminderHelper
             dto.CreatedAt,
             dto.UpdatedAt));
     }
+
+    public static Domain.Models.UserReminder ToDomainUserReminder(this UserReminder dto)
+    {
+        return new Domain.Models.UserReminder(
+            dto.Id,
+            dto.UserId,
+            ParseDtoStringToReminderOptionsWhenUserPending(dto.RemindsWhenPending),
+            ParseDtoStringToReminderOptionsWhenUserAbsent(dto.RemindsWhenAbsent),
+            ParseDtoStringToReminderOptionsForOpenEvents(dto.RemindsFreeEvents),
+            [.. dto.AheadOfTimeReminders.Select(ar => new AheadOfTimeReminderTime(ar.Offset))],
+            [.. dto.DailyReminders.Select(dr => new DailyReminderTime(TimeOnly.FromTimeSpan(dr.Time)))],
+            [.. dto.DestinationDiscordWebhooks.SelectDomainDestinationDiscordWebhook()],
+            [.. dto.DestinationTraqChannels.SelectDomainDestinationTraqChannel()],
+            dto.CreatedAt,
+            dto.UpdatedAt);
+    }
 }
 
 static partial class UserReminderHelper

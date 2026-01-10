@@ -14,53 +14,6 @@ public partial class AppDbContext : IUserReminderRepository
     async ValueTask<Domain.Models.UserReminder> IUserReminderRepository.AddUserReminderAsync(UserReminderAddOrUpdateRequest item, CancellationToken cancellationToken)
     {
         var reminderId = Guid.CreateVersion7();
-        if (item.AheadOfTimeReminderTimes is { Length: > 0 } aotReminders)
-        {
-            AheadOfTimeReminders.AddRange(
-                aotReminders.Distinct()
-                    .Select(x => new AheadOfTimeReminder
-                    {
-                        Id = Guid.CreateVersion7(),
-                        ReminderId = reminderId,
-                        Offset = x.TimeSpan
-                    })
-            );
-        }
-        if (item.DailyReminderTimes is { Length: > 0 } dailyReminders)
-        {
-            DailyReminders.AddRange(
-                dailyReminders.Distinct()
-                    .Select(x => new DailyReminder
-                    {
-                        Id = Guid.CreateVersion7(),
-                        ReminderId = reminderId,
-                        Time = x.TimeSpan
-                    })
-            );
-        }
-        if (item.DestinationDiscordWebhooks is { Length: > 0 } discordWebhooks)
-        {
-            DestinationDiscordWebhooks.AddRange(
-                discordWebhooks.DistinctBy(x => x.WebhookId)
-                    .Select(x => new DestinationDiscordWebhook
-                    {
-                        ReminderId = reminderId,
-                        WebhookId = x.WebhookId,
-                        WebhookSecret = x.WebhookSecret
-                    })
-            );
-        }
-        if (item.DestinationTraqChannels is { Length: > 0 } traqChannels)
-        {
-            DestinationTraqChannels.AddRange(
-                traqChannels.DistinctBy(x => x.ChannelId)
-                    .Select(x => new DestinationTraqChannel
-                    {
-                        ReminderId = reminderId,
-                        ChannelId = x.ChannelId
-                    })
-            );
-        }
         UserReminder reminder = new()
         {
             Id = reminderId,
@@ -68,13 +21,43 @@ public partial class AppDbContext : IUserReminderRepository
             RemindsWhenPending = item.RemindsWhenPending.GetValueOrDefault().ToDtoString(),
             RemindsWhenAbsent = item.RemindsWhenAbsent.GetValueOrDefault().ToDtoString(),
             RemindsFreeEvents = item.RemindsOpenEvents.GetValueOrDefault().ToDtoString(),
+            AheadOfTimeReminders = [.. (item.AheadOfTimeReminderTimes ?? [])
+                .Distinct()
+                .Select(x => new AheadOfTimeReminder
+                {
+                    Id = Guid.CreateVersion7(),
+                    ReminderId = reminderId,
+                    Offset = x.TimeSpan
+                })],
+            DailyReminders = [.. (item.DailyReminderTimes ?? [])
+                .Distinct()
+                .Select(x => new DailyReminder
+                {
+                    Id = Guid.CreateVersion7(),
+                    ReminderId = reminderId,
+                    Time = x.TimeSpan
+                })],
+            DestinationDiscordWebhooks = [.. (item.DestinationDiscordWebhooks ?? [])
+                .DistinctBy(x => x.WebhookId)
+                .Select(x => new DestinationDiscordWebhook
+                {
+                    Id = Guid.CreateVersion7(),
+                    ReminderId = reminderId,
+                    WebhookId = x.WebhookId,
+                    WebhookSecret = x.WebhookSecret
+                })],
+            DestinationTraqChannels = [.. (item.DestinationTraqChannels ?? [])
+                .DistinctBy(x => x.ChannelId)
+                .Select(x => new DestinationTraqChannel
+                {
+                    Id = Guid.CreateVersion7(),
+                    ReminderId = reminderId,
+                    ChannelId = x.ChannelId
+                })]
         };
         var entity = UserReminders.Add(reminder);
         await SaveChangesAsync(cancellationToken);
-        return Queryable.AsQueryable([entity.Entity])
-            .AsSplitQuery()
-            .SelectDomainUserReminder()
-            .First();
+        return entity.Entity.ToDomainUserReminder();
     }
 
     async ValueTask IUserReminderRepository.DeleteUserRemindersAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken)
