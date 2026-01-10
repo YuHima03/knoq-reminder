@@ -5,7 +5,7 @@ namespace KnoqReminder.App.Services.Reminder;
 
 sealed partial class ReminderPublisher
 {
-    static string AotReminderTitleMarkdown => "⏰ イベント通知";
+    static string AotReminderTitleMarkdown => "⏰ イベント開始前のリマインドです!";
 
     public async ValueTask PublishAotReminderForUserAsync(
         Guid userId,

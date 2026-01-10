@@ -6,7 +6,7 @@ namespace KnoqReminder.App.Services.Reminder;
 
 sealed partial class ReminderPublisher
 {
-    string DailyReminderTitleMarkdown => $"# 📆 {localTimeProvider.LocalToday.ToString(ReminderConstants.TodayDateOnlyFormat)} きょうのイベント";
+    string DailyReminderTitleMarkdown => $"## 📆 {localTimeProvider.LocalToday.ToString(ReminderConstants.TodayDateOnlyFormat)} きょうのイベント";
 
     public async ValueTask PublishDailyReminderForUserAsync(
         Guid userId,

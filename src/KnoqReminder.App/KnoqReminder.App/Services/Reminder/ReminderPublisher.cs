@@ -33,11 +33,15 @@ sealed partial class ReminderPublisher(
         ScheduledEvent[] events,
         CancellationToken cancellationToken = default)
     {
-        if (webhooks.Length == 0)
+        if (webhooks is [])
         {
             return;
         }
         using var eventEmbeds = await DiscordWebhookReminderHelper.GetDiscordWebhookEmbedForEventsAsync(events, cache, knoqUrlProvider, loggerFactory, traq, cancellationToken);
+        if (events is [])
+        {
+            content += "\n\nNo upcoming events.";
+        }
         var messages = DiscordWebhookReminderHelper.CreateDiscordWebhookMessages(
             username: authorName,
             content: content,
@@ -55,7 +59,7 @@ sealed partial class ReminderPublisher(
         ScheduledEvent[] events,
         CancellationToken cancellationToken = default)
     {
-        if (channels.Length == 0)
+        if (channels is [])
         {
             return;
         }
@@ -69,8 +73,14 @@ sealed partial class ReminderPublisher(
             .AppendLine()
             .AppendTraqUserMention(user.Name, user.Id.GetValueOrDefault()).AppendLine()
             .AppendLine();
-        await sb.AppendEventsTableAsync(events, cache, knoqUrlProvider, localTimeProvider, loggerFactory, traq, cancellationToken);
-
+        if (events is [])
+        {
+            sb.AppendLine("No upcoming events.");
+        }
+        else
+        {
+            await sb.AppendEventsTableAsync(events, cache, knoqUrlProvider, localTimeProvider, loggerFactory, traq, cancellationToken);
+        }
         var postReq = postMessageRequestPool.Get();
         postReq.Embed = false;
         postReq.Content = sb.ToString();
