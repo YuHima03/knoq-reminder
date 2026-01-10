@@ -8,9 +8,9 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
 
     public virtual DbSet<DailyReminder> DailyReminders { get; set; }
 
-    public virtual DbSet<DestinationsDiscord> DestinationsDiscords { get; set; }
+    public virtual DbSet<DestinationDiscordWebhook> DestinationDiscordWebhooks { get; set; }
 
-    public virtual DbSet<DestinationsTraq> DestinationsTraqs { get; set; }
+    public virtual DbSet<DestinationTraqChannel> DestinationTraqChannels { get; set; }
 
     public virtual DbSet<UserReminder> UserReminders { get; set; }
 
@@ -44,25 +44,29 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
             entity.HasOne(d => d.Reminder).WithMany(p => p.DailyReminders).HasConstraintName("daily_reminders_ibfk_1");
         });
 
-        modelBuilder.Entity<DestinationsDiscord>(entity =>
+        modelBuilder.Entity<DestinationDiscordWebhook>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("'current_timestamp()'");
             entity.Property(e => e.UpdatedAt)
                 .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("'current_timestamp()'");
 
-            entity.HasOne(d => d.Reminder).WithMany().HasConstraintName("destinations_discord_ibfk_1");
+            entity.HasOne(d => d.Reminder).WithMany(p => p.DestinationDiscordWebhooks).HasConstraintName("destination_discord_webhooks_ibfk_1");
         });
 
-        modelBuilder.Entity<DestinationsTraq>(entity =>
+        modelBuilder.Entity<DestinationTraqChannel>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
             entity.Property(e => e.ChannelId).HasComment("traQ channel uuid");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("'current_timestamp()'");
             entity.Property(e => e.UpdatedAt)
                 .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("'current_timestamp()'");
 
-            entity.HasOne(d => d.Reminder).WithMany().HasConstraintName("destinations_traq_ibfk_1");
+            entity.HasOne(d => d.Reminder).WithMany(p => p.DestinationTraqChannels).HasConstraintName("destination_traq_channels_ibfk_1");
         });
 
         modelBuilder.Entity<UserReminder>(entity =>

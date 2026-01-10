@@ -4,21 +4,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KnoqReminder.Infrastructure.Database;
 
-[Keyless]
-[Table("destinations_discord")]
-[Index("ReminderId", "WebhookId", Name = "reminder_id", IsUnique = true)]
-public partial class DestinationsDiscord
+[Table("destination_traq_channels")]
+[Index("ReminderId", "ChannelId", Name = "reminder_id", IsUnique = true)]
+public partial class DestinationTraqChannel
 {
+    [Key]
+    [Column("id")]
+    public Guid Id { get; set; }
+
     [Column("reminder_id")]
     public Guid ReminderId { get; set; }
 
-    [Column("webhook_id")]
-    [StringLength(63)]
-    public string WebhookId { get; set; } = null!;
-
-    [Column("webhook_secret")]
-    [StringLength(255)]
-    public string WebhookSecret { get; set; } = null!;
+    /// <summary>
+    /// traQ channel uuid
+    /// </summary>
+    [Column("channel_id")]
+    public Guid ChannelId { get; set; }
 
     [Column("created_at", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
@@ -27,5 +28,6 @@ public partial class DestinationsDiscord
     public DateTime UpdatedAt { get; set; }
 
     [ForeignKey("ReminderId")]
+    [InverseProperty("DestinationTraqChannels")]
     public virtual UserReminder Reminder { get; set; } = null!;
 }

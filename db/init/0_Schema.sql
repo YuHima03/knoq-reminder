@@ -30,7 +30,8 @@ CREATE TABLE `daily_reminders` (
 )   DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ALTER TABLE `daily_reminders` ADD INDEX (`time`);
 
-CREATE TABLE `destinations_discord` (
+CREATE TABLE `destination_discord_webhooks` (
+    `id`                char(36)        NOT NULL    PRIMARY KEY,
     `reminder_id`       char(36)        NOT NULL,
     `webhook_id`        varchar(63)     NOT NULL,
     `webhook_secret`    varchar(255)    NOT NULL,
@@ -40,7 +41,8 @@ CREATE TABLE `destinations_discord` (
     FOREIGN KEY (`reminder_id`) REFERENCES `user_reminders`(`id`) ON DELETE CASCADE
 )   DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE `destinations_traq` (
+CREATE TABLE `destination_traq_channels` (
+    `id`            char(36)    NOT NULL    PRIMARY KEY,
     `reminder_id`   char(36)    NOT NULL,
     `channel_id`    char(36)    NOT NULL    COMMENT 'traQ channel uuid',
     `created_at`    datetime    NOT NULL    DEFAULT CURRENT_TIMESTAMP,

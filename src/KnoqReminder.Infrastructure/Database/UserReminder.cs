@@ -50,4 +50,10 @@ public partial class UserReminder
 
     [InverseProperty("Reminder")]
     public virtual ICollection<DailyReminder> DailyReminders { get; set; } = [];
+
+    [InverseProperty("Reminder")]
+    public virtual ICollection<DestinationDiscordWebhook> DestinationDiscordWebhooks { get; set; } = [];
+
+    [InverseProperty("Reminder")]
+    public virtual ICollection<DestinationTraqChannel> DestinationTraqChannels { get; set; } = [];
 }
