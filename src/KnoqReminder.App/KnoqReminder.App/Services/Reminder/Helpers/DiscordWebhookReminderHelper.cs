@@ -1,4 +1,3 @@
-using System.Collections.Frozen;
 using KnoqReminder.App.Helpers.Traq;
 using KnoqReminder.Domain.Services.DiscordWebhook;
 using KnoqReminder.Domain.Services.Events;
