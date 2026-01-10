@@ -1,14 +1,30 @@
-﻿version: 3
+version: 3
 
 vars:
   DEV_COMPOSE_FILENAME: docker-compose.dev.yml
   DEV_COMPOSE_ENVFILE: .env.dev
-  DEV_COMPOSE_SERVICES_DB: db-temp
+  DEV_COMPOSE_SERVICES_DB_TEMP: db-temp
+  DEV_COMPOSE_SERVICES_DB: db-dev
+  DEV_COMPOSE_SERVICES_DB_ADMINER: db-dev-adminer
   DEV_COMPOSE_SERVICES_TBLS: tbls
   STEP_BEGIN: "\e[36;1m"
   STEP_END: "\e[m"
 
 tasks:
+
+  db-dev-up:
+    desc: Start the development database container and Adminer.
+    preconditions:
+      - sh: ls {{.DEV_COMPOSE_ENVFILE}}
+        msg: "required .env file not found: {{.DEV_COMPOSE_ENVFILE}}"
+    silent: false
+    dir: .
+    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build -d --wait {{.DEV_COMPOSE_SERVICES_DB}} {{.DEV_COMPOSE_SERVICES_DB_ADMINER}}
+
+  db-dev-down:
+    desc: Stop the development database container and Adminer.
+    dir: .
+    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down {{.DEV_COMPOSE_SERVICES_DB}} {{.DEV_COMPOSE_SERVICES_DB_ADMINER}}
 
   db-docs:
     desc: Generate database documentation using tbls.
@@ -24,7 +40,7 @@ tasks:
     silent: false
     dir: .
     cmds:
-      - defer: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down {{.DEV_COMPOSE_SERVICES_DB}} {{.DEV_COMPOSE_SERVICES_TBLS}}
+      - defer: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down {{.DEV_COMPOSE_SERVICES_DB_TEMP}} {{.DEV_COMPOSE_SERVICES_TBLS}}
       - docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build --abort-on-container-exit {{.DEV_COMPOSE_SERVICES_TBLS}}
 
   default:
@@ -54,9 +70,9 @@ tasks:
     silent: true
     cmds:
       - defer: "echo \"{{.STEP_BEGIN}}[4/4] Terminating...{{.STEP_END}}\"
-                && docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down {{.DEV_COMPOSE_SERVICES_DB}}"
+                && docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down {{.DEV_COMPOSE_SERVICES_DB_TEMP}}"
       - "echo \"{{.STEP_BEGIN}}[1/4] Starting temporary database container...{{.STEP_END}}\""
-      - docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build -d --wait {{.DEV_COMPOSE_SERVICES_DB}}
+      - docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build -d --wait {{.DEV_COMPOSE_SERVICES_DB_TEMP}}
       - "echo \"{{.STEP_BEGIN}}[2/4] Scaffolding from localhost:$MARIADB__EXPOSE_PORT/$MARIADB__DATABASE{{.STEP_END}}\""
       - |
         dotnet ef dbcontext scaffold \
