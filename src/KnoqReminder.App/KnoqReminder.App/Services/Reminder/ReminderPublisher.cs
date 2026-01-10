@@ -37,7 +37,7 @@ sealed partial class ReminderPublisher(
         {
             return;
         }
-        using var eventEmbeds = await DiscordWebhookReminderHelper.GetDiscordWebhookEmbedForEventsAsync(events, cache, knoqUrlProvider, loggerFactory, traq, cancellationToken);
+        var eventEmbeds = await DiscordWebhookReminderHelper.GetDiscordWebhookEmbedForEventsAsync(events, cache, knoqUrlProvider, loggerFactory, traq, cancellationToken);
         if (events is [])
         {
             content += "\n\nNo upcoming events.";
@@ -45,7 +45,7 @@ sealed partial class ReminderPublisher(
         var messages = DiscordWebhookReminderHelper.CreateDiscordWebhookMessages(
             username: authorName,
             content: content,
-            embeds: eventEmbeds.Span);
+            embeds: eventEmbeds.AsSpan());
         await Task.WhenAll([.. webhooks.AsValueEnumerable()
             .SelectMany(w => messages.AsValueEnumerable()
                 .Select(msg => discordWebhookPublisher.PublishDiscordWebhookMessageAsync(w.WebhookId, w.WebhookSecret, msg, cancellationToken).AsTask()))
