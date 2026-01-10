@@ -214,7 +214,7 @@ public partial class AppDbContext : IUserReminderRepository
                 item.DestinationDiscordWebhooks,
                 prev.AsSpan(),
                 e => new Domain.Models.DestinationDiscordWebhook { WebhookId = e.WebhookId, WebhookSecret = e.WebhookSecret },
-                v => new DestinationDiscordWebhook { ReminderId = id, WebhookId = v.WebhookId, WebhookSecret = v.WebhookSecret }
+                v => new DestinationDiscordWebhook { Id = Guid.CreateVersion7(), ReminderId = id, WebhookId = v.WebhookId, WebhookSecret = v.WebhookSecret }
             );
         }
         if (item.DestinationTraqChannels is not null)
@@ -226,7 +226,7 @@ public partial class AppDbContext : IUserReminderRepository
                 item.DestinationTraqChannels,
                 prev.AsSpan(),
                 e => new Domain.Models.DestinationTraqChannel { ChannelId = e.ChannelId },
-                v => new DestinationTraqChannel { ReminderId = id, ChannelId = v.ChannelId }
+                v => new DestinationTraqChannel { Id = Guid.CreateVersion7(), ReminderId = id, ChannelId = v.ChannelId }
             );
         }
         await SaveChangesAsync(cancellationToken);
