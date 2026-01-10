@@ -15,6 +15,7 @@ class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Configuration
+            .AddKeyNormalizedEnvironmentVariables()
             .AddEnvFiles(true, ".env", $"{builder.Environment.EnvironmentName}.env")
             .AddEnvFiles(false, builder.Configuration["env-files"]?.Split(';'));
 
