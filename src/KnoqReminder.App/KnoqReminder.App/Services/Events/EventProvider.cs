@@ -12,21 +12,21 @@ sealed class EventProvider(
     )
     : IEventProvider
 {
-    public async ValueTask<ScheduledEvent[]> GetEventsAsync(DateTimeOffset timeFrom, DateTimeOffset timeTo, CancellationToken cancellationToken = default)
+    public async ValueTask<ScheduledEvent[]> GetEventsByStartTimeAsync(DateTimeOffset startTimeFrom, DateTimeOffset startTimeTo, CancellationToken cancellationToken = default)
     {
         var knoqEvents = await knoq.Events.GetAsync(
             requestConfiguration: config =>
             {
-                config.QueryParameters.DateBegin = timeFrom.ToUniversalTime().ToString("O");
-                config.QueryParameters.DateEnd = timeTo.ToUniversalTime().ToString("O");
+                config.QueryParameters.DateBegin = startTimeFrom.ToUniversalTime().ToString("O");
+                config.QueryParameters.DateEnd = startTimeTo.ToUniversalTime().ToString("O");
             },
             cancellationToken: cancellationToken);
-
         if (knoqEvents is null or [])
         {
             return [];
         }
         return await knoqEvents
+            .Where(ev => DateTimeOffset.TryParse(ev.TimeStart, out var dtStart) && startTimeFrom <= dtStart)
             .Select(x => x.EventId.GetValueOrDefault())
             .Where(x => x != Guid.Empty)
             .ToAsyncEnumerable()
