@@ -1,0 +1,22 @@
+@if (string.IsNullOrWhiteSpace(Suffix))
+{
+    <PageTitle>@ChildContent</PageTitle>
+}
+else
+{
+    <PageTitle>@ChildContent - @Suffix</PageTitle>
+}
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string? Suffix { get; set; } = "knoQ Reminder";
+
+    protected override void OnParametersSet()
+    {
+        Suffix = Suffix?.Trim();
+    }
+}
