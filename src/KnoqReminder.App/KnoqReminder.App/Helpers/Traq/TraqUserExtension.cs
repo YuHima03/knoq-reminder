@@ -1,5 +1,7 @@
 using System.Net;
 using KnoqReminder.Utilities;
+using KnoqReminder.Utilities.Collections;
+using KnoqReminder.Utilities.Converters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Kiota.Abstractions;
 
@@ -22,8 +24,7 @@ static class TraqUserExtension
         this global::Traq.Users.Item.WithUserItemRequestBuilder builder,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -32,17 +33,14 @@ static class TraqUserExtension
         catch (ApiException ex) when (ex.ResponseStatusCode == (int)HttpStatusCode.NotFound)
         {
             var logger = CreateLogger(loggerFactory);
-            if (logger.IsEnabled(LogLevel.Error))
+            var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
+            if (pathParams.TryFindValue("userId", StringComparison.InvariantCultureIgnoreCase, out var userId))
             {
-                var userId = builder.ToGetRequestInformation(requestConfiguration).PathParameters["userId"];
-                if (userId is Guid uid)
-                {
-                    logger.LogError_FailedToGetUser_UserNotFound(uid);
-                }
-                else
-                {
-                    logger.LogError_FailedToGetUser(ex);
-                }
+                logger.LogError_FailedToGetUser_UserNotFound(userId);
+            }
+            else
+            {
+                logger.LogError_FailedToGetUser(ex);
             }
         }
         catch (ApiException ex)
@@ -57,13 +55,12 @@ static class TraqUserExtension
         IMemoryCache cache,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
-        if (pathParams.TryGetValue("userId", out var uidObj) && uidObj is Guid uid)
+        if (pathParams.TryFindValue("userId", StringComparison.InvariantCultureIgnoreCase, out var obj) && obj.TryConvertToGuid(out var userId))
         {
-            return await cache.GetOrCreateAsync(UserCacheOptions.GetMemoryCacheKey(uid), async entry =>
+            return await cache.GetOrCreateAsync(UserCacheOptions.GetMemoryCacheKey(userId), async entry =>
             {
                 entry.SetOptions(UserCacheOptions.Options);
                 return await builder.TryGetAsync(loggerFactory, requestConfiguration, cancellationToken).ConfigureAwait(false);
@@ -79,7 +76,7 @@ static partial class MessageLogger
     /// User not found: {<paramref name="userId"/>}
     /// </summary>
     [LoggerMessage(Level = LogLevel.Error, Message = "User not found: {userId}")]
-    public static partial void LogError_FailedToGetUser_UserNotFound(this ILogger logger, Guid userId);
+    public static partial void LogError_FailedToGetUser_UserNotFound(this ILogger logger, object? userId);
 
     /// <summary>
     /// Failed to get a traQ user.

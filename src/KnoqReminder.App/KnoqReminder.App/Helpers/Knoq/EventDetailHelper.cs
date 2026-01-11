@@ -1,5 +1,7 @@
 using System.Net;
 using KnoqReminder.Utilities;
+using KnoqReminder.Utilities.Collections;
+using KnoqReminder.Utilities.Converters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Kiota.Abstractions;
 
@@ -22,8 +24,7 @@ static class EventDetailHelper
         this global::Knoq.Events.Item.WithEventItemRequestBuilder builder,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -32,17 +33,14 @@ static class EventDetailHelper
         catch (ApiException ex) when (ex.ResponseStatusCode == (int)HttpStatusCode.NotFound)
         {
             var logger = CreateLogger(loggerFactory);
-            if (logger.IsEnabled(LogLevel.Error))
+            var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
+            if (pathParams.TryFindValue("eventId", StringComparison.InvariantCultureIgnoreCase, out var eventId))
             {
-                var eventId = builder.ToGetRequestInformation(requestConfiguration).PathParameters["eventId"];
-                if (eventId is Guid eid)
-                {
-                    logger.LogError("Event not found: {eventId}", eid);
-                }
-                else
-                {
-                    logger.LogError(ex, "Failed to get a knoQ event.");
-                }
+                logger.LogError_FailedToGetEvent_EventNotFound(eventId);
+            }
+            else
+            {
+                logger.LogError_FailedToGetEvent(ex);
             }
         }
         catch (ApiException ex)
@@ -57,13 +55,12 @@ static class EventDetailHelper
         IMemoryCache cache,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
-        if (pathParams.TryGetValue("eventId", out var eidObj) && eidObj is Guid eid)
+        if (pathParams.TryFindValue("eventId", StringComparison.InvariantCultureIgnoreCase, out var obj) && obj.TryConvertToGuid(out var eventId))
         {
-            return await cache.GetOrCreateAsync(EventDetailCacheOptions.GetMemoryCacheKey(eid), async entry =>
+            return await cache.GetOrCreateAsync(EventDetailCacheOptions.GetMemoryCacheKey(eventId), async entry =>
             {
                 entry.SetOptions(EventDetailCacheOptions.Options);
                 return await builder.TryGetAsync(loggerFactory, requestConfiguration, cancellationToken).ConfigureAwait(false);
@@ -71,4 +68,13 @@ static class EventDetailHelper
         }
         return null;
     }
+}
+
+static partial class MessageLogger
+{
+    [LoggerMessage(Level = LogLevel.Error, Message = "Event not found: {eventId}")]
+    public static partial void LogError_FailedToGetEvent_EventNotFound(this ILogger logger, object? eventId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to get a knoQ event.")]
+    public static partial void LogError_FailedToGetEvent(this ILogger logger, Exception exception);
 }

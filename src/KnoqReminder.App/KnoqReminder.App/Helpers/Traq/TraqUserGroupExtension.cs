@@ -1,5 +1,7 @@
 using System.Net;
 using KnoqReminder.Utilities;
+using KnoqReminder.Utilities.Collections;
+using KnoqReminder.Utilities.Converters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Kiota.Abstractions;
 
@@ -22,8 +24,7 @@ static class TraqUserGroupExtension
         this global::Traq.Groups.Item.WithGroupItemRequestBuilder builder,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -32,17 +33,14 @@ static class TraqUserGroupExtension
         catch (ApiException ex) when (ex.ResponseStatusCode == (int)HttpStatusCode.NotFound)
         {
             var logger = CreateLogger(loggerFactory);
-            if (logger.IsEnabled(LogLevel.Error))
+            var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
+            if (pathParams.TryFindValue("groupId", StringComparison.InvariantCultureIgnoreCase, out var groupId))
             {
-                var groupId = builder.ToGetRequestInformation(requestConfiguration).PathParameters["groupId"];
-                if (groupId is Guid gid)
-                {
-                    logger.LogError_FailedToGetGroup_GroupNotFound(gid);
-                }
-                else
-                {
-                    logger.LogError_FailedToGetGroup(ex);
-                }
+                logger.LogError_FailedToGetGroup_GroupNotFound(groupId);
+            }
+            else
+            {
+                logger.LogError_FailedToGetGroup(ex);
             }
         }
         catch (ApiException ex)
@@ -57,13 +55,12 @@ static class TraqUserGroupExtension
         IMemoryCache cache,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
-        if (pathParams.TryGetValue("groupId", out var gidObj) && gidObj is Guid gid)
+        if (pathParams.TryFindValue("groupId", StringComparison.InvariantCultureIgnoreCase, out var obj) && obj.TryConvertToGuid(out var groupId))
         {
-            return await cache.GetOrCreateAsync(UserGroupCacheOptions.GetMemoryCacheKey(gid), async entry =>
+            return await cache.GetOrCreateAsync(UserGroupCacheOptions.GetMemoryCacheKey(groupId), async entry =>
             {
                 entry.SetOptions(UserGroupCacheOptions.Options);
                 return await builder.TryGetAsync(loggerFactory, requestConfiguration, cancellationToken).ConfigureAwait(false);
@@ -76,7 +73,7 @@ static class TraqUserGroupExtension
 static partial class MessageLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "Group not found: {groupId}")]
-    public static partial void LogError_FailedToGetGroup_GroupNotFound(this ILogger logger, Guid groupId);
+    public static partial void LogError_FailedToGetGroup_GroupNotFound(this ILogger logger, object? groupId);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to get group.")]
     public static partial void LogError_FailedToGetGroup(this ILogger logger, Exception exception);

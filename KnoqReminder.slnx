@@ -6,8 +6,10 @@
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
+    <File Path="docker-compose.dev.yml" />
     <File Path="global.json" />
     <File Path="README.md" />
+    <File Path="Taskfile.yml" />
   </Folder>
   <Project Path="src/KnoqReminder.App/KnoqReminder.App.Client/KnoqReminder.App.Client.csproj" Id="9708ac6f-d54b-4b31-89e1-cd3029ba42dd" />
   <Project Path="src/KnoqReminder.App/KnoqReminder.App/KnoqReminder.App.csproj" Id="4bac5928-4017-46ba-acb1-609490eb4f29" />

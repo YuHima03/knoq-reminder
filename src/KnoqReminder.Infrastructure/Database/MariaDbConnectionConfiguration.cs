@@ -1,25 +1,32 @@
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using KnoqReminder.Utilities.Validation;
 using Microsoft.Extensions.Configuration;
 
 namespace KnoqReminder.Infrastructure.Database;
 
 public class MariaDbConnectionConfiguration : Domain.Options.IDbConnectionOptions
 {
-    public const string EnvironmentPrefix = "MARIADB_";
+    public const string Position = "Mariadb";
 
-    [ConfigurationKeyName(EnvironmentPrefix + "HOST")]
+    [ConfigurationKeyName("Hostname")]
+    [Required(AllowEmptyStrings = false)]
     public string? Host { get; set; }
 
-    [ConfigurationKeyName(EnvironmentPrefix + "PORT")]
-    public string? Port { get; set; }
+    [ConfigurationKeyName("ExposePort")]
+    [RangeStrict<int>("1", "65535")]
+    public int Port { get; set; }
 
-    [ConfigurationKeyName(EnvironmentPrefix + "USER")]
+    [ConfigurationKeyName("User")]
+    [Required(AllowEmptyStrings = false)]
     public string? Username { get; set; }
 
-    [ConfigurationKeyName(EnvironmentPrefix + "PASSWORD")]
+    [ConfigurationKeyName("Password")]
+    [Required(AllowEmptyStrings = true)]
     public string? Password { get; set; }
 
-    [ConfigurationKeyName(EnvironmentPrefix + "DATABASE")]
+    [ConfigurationKeyName("Database")]
+    [Required(AllowEmptyStrings = false)]
     public string? Database { get; set; }
 
     public string ConnectionString => _connectionString ??= BuildConnectionString();
@@ -33,12 +40,9 @@ public class MariaDbConnectionConfiguration : Domain.Options.IDbConnectionOption
         conn.AppendFormatted(Host);
         conn.AppendLiteral(";");
         // Port (Literal=6, Format=1)
-        if (int.TryParse(Port, out var p))
-        {
-            conn.AppendLiteral("Port=");
-            conn.AppendFormatted(p);
-            conn.AppendLiteral(";");
-        }
+        conn.AppendLiteral("Port=");
+        conn.AppendFormatted(Port);
+        conn.AppendLiteral(";");
         // Username (Literal=9, Format=1)
         conn.AppendLiteral("User Id=");
         conn.AppendFormatted(Username);

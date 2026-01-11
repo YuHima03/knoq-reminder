@@ -54,7 +54,7 @@ sealed partial class ReminderScheduler(
     {
         var utcTime = time.ToUniversalTime();
         var utcTimeMinute = utcTime - TimeSpan.FromTicks(utcTime.Ticks % TimeSpan.TicksPerMinute);
-        var eventsToday = await eventProvider.GetEventsAsync(utcTimeMinute, utcTimeMinute.AddDays(1), cancellationToken).ConfigureAwait(false);
+        var eventsToday = await eventProvider.GetEventsByStartTimeAsync(utcTimeMinute, utcTimeMinute.AddDays(1), cancellationToken).ConfigureAwait(false);
 
         await using var repo = await repositories.CreateRepositoryAsync<IUserReminderRepository>(cancellationToken).ConfigureAwait(false);
 

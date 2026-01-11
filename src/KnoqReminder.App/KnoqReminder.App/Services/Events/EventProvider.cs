@@ -1,6 +1,8 @@
+using System.Globalization;
 using Knoq;
 using KnoqReminder.App.Helpers.Knoq;
 using KnoqReminder.Domain.Services.Events;
+using KnoqReminder.Utilities.Collections;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace KnoqReminder.App.Services.Events;
@@ -12,20 +14,24 @@ sealed class EventProvider(
     )
     : IEventProvider
 {
-    public async ValueTask<ScheduledEvent[]> GetEventsAsync(DateTimeOffset timeFrom, DateTimeOffset timeTo, CancellationToken cancellationToken = default)
+    public async ValueTask<ScheduledEvent[]> GetEventsByStartTimeAsync(DateTimeOffset startTimeFrom, DateTimeOffset startTimeTo, CancellationToken cancellationToken = default)
     {
         var knoqEvents = await knoq.Events.GetAsync(
             requestConfiguration: config =>
             {
-                config.QueryParameters.DateBegin = timeFrom.ToUniversalTime().ToString("O");
-                config.QueryParameters.DateEnd = timeTo.ToUniversalTime().ToString("O");
+                config.QueryParameters.DateBegin = startTimeFrom.ToUniversalTime().ToString("O");
+                config.QueryParameters.DateEnd = startTimeTo.ToUniversalTime().ToString("O");
             },
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken) ?? [];
 
-        if (knoqEvents is null or [])
+        // Note: API は指定された期間内と開催時間が重複するイベントを返すため、開始時間で改めてフィルタリングする必要がある.
+        knoqEvents.RemoveAllUnstable(e => !DateTimeOffset.TryParse(e.TimeStart, null, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var dtStart) || dtStart < startTimeFrom);
+        if (knoqEvents is [])
         {
             return [];
         }
+        knoqEvents.Sort((x, y) => x.TimeStart!.CompareTo(y.TimeStart!));
+
         return await knoqEvents
             .Select(x => x.EventId.GetValueOrDefault())
             .Where(x => x != Guid.Empty)

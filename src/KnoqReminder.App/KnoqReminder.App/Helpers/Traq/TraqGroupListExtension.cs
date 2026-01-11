@@ -21,8 +21,7 @@ static class TraqGroupListExtension
         this global::Traq.Groups.GroupsRequestBuilder builder,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? request = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -40,8 +39,7 @@ static class TraqGroupListExtension
         IMemoryCache cache,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? request = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         return await cache.GetOrCreateAsync(GroupListCacheOptions.Key, async entry =>
         {

@@ -1,4 +1,3 @@
-using System.Collections.Frozen;
 using KnoqReminder.App.Helpers.Traq;
 using KnoqReminder.Domain.Services.DiscordWebhook;
 using KnoqReminder.Domain.Services.Events;
@@ -40,7 +39,7 @@ static class DiscordWebhookReminderHelper
             })];
     }
 
-    public static async ValueTask<PooledArray<DiscordWebhookMessage.Embed>> GetDiscordWebhookEmbedForEventsAsync(
+    public static async ValueTask<DiscordWebhookMessage.Embed[]> GetDiscordWebhookEmbedForEventsAsync(
         ScheduledEvent[] events,
         IMemoryCache cache,
         IKnoqUrlProvider knoqUrlProvider,
@@ -48,18 +47,13 @@ static class DiscordWebhookReminderHelper
         TraqApiClient traq,
         CancellationToken cancellationToken = default)
     {
-        var groupNames = await cache.GetOrCreateAsync(TraqGroupMapCacheKey, async entry =>
-        {
-            var list = await traq.Groups.TryGetAsync(loggerFactory, cancellationToken: cancellationToken);
-            entry.SetAbsoluteExpiration(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(3));
-            return list?.ToFrozenDictionary(g => g.Id.GetValueOrDefault(), g => g.Name);
-        });
-        return events.AsValueEnumerable()
-            .Select(e => new DiscordWebhookMessage.Embed
+        return await events
+            .ToAsyncEnumerable()
+            .Select(async (e, ct) => new DiscordWebhookMessage.Embed
             {
                 Author = new()
                 {
-                    Name = groupNames?.GetValueOrDefault(e.HostGroupId) ?? "Unknown group",
+                    Name = (await traq.Groups[e.HostGroupId].TryGetCachedAsync(cache, loggerFactory, cancellationToken: ct))?.Name ?? "Unknown group",
                     Url = knoqUrlProvider.GetGroupPageUrl(e.HostGroupId)
                 },
                 Title = e.Name.Truncate(ReminderConstants.MaxEventNameLength),
@@ -68,8 +62,13 @@ static class DiscordWebhookReminderHelper
                 Fields = [
                     new()
                     {
+                        Name = "Start",
+                        Value = $"<t:{e.StartsAt.ToUnixTimeSeconds()}:R>",
+                    },
+                    new()
+                    {
                         Name = "Time",
-                        Value = $"{e.StartsAt.ToString(ReminderConstants.EventDateTimeFormat)} ~ {e.EndsAt.ToString(ReminderConstants.EventDateTimeFormat)}"
+                        Value = $"<t:{e.StartsAt.ToUnixTimeSeconds()}> ~ <t:{e.EndsAt.ToUnixTimeSeconds()}>"
                     },
                     new()
                     {
@@ -78,6 +77,6 @@ static class DiscordWebhookReminderHelper
                     }
                 ]
             })
-            .ToArrayPool();
+            .ToArrayAsync(cancellationToken);
     }
 }

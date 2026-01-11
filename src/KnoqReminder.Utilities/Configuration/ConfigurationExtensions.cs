@@ -1,3 +1,5 @@
+using KnoqReminder.Utilities.Configuration.Dotenv;
+using KnoqReminder.Utilities.Configuration.EnvironmentVariables;
 using KnoqReminder.Utilities.Helpers;
 using Microsoft.Extensions.Configuration;
 
@@ -5,6 +7,11 @@ namespace KnoqReminder.Utilities.Configuration;
 
 public static class ConfigurationExtensions
 {
+    public static IConfigurationBuilder AddKeyNormalizedEnvironmentVariables(this IConfigurationBuilder builder, Predicate<string>? keyFilter = null)
+    {
+        return builder.Add(new KeyNormalizedEnvironmentVariablesConfigurationSource(keyFilter));
+    }
+
     public static IConfigurationBuilder AddEnvFiles(this IConfigurationBuilder builder, bool areOptional, params ReadOnlySpan<string> paths)
     {
         foreach (var p in paths)

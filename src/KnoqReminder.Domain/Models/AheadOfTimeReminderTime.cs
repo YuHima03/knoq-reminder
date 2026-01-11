@@ -44,10 +44,10 @@ public readonly struct AheadOfTimeReminderTime : IComparable<AheadOfTimeReminder
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static void ValidateConstructorArguments(int hours, int minutes)
     {
-        Guard.IsBetween(hours, 0, 24);
+        Guard.IsBetweenOrEqualTo(hours, 0, 24);
         if (hours != 24)
         {
-            Guard.IsBetween(minutes, 0, 59);
+            Guard.IsBetweenOrEqualTo(minutes, 0, 59);
         }
         else if (minutes != 0)
         {

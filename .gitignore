@@ -409,3 +409,6 @@ FodyWeavers.xsd
 
 # Taskfile temp files
 .task
+
+# Mounted db volumes
+db/mysql
