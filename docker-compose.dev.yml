@@ -6,7 +6,7 @@ services:
       dockerfile: ./src/KnoqReminder.App/KnoqReminder.App/Dockerfile
     restart: "no"
     ports:
-      - "5000:80"
+      - "5000:8080"
     env_file:
       - .env.dev
     depends_on:
