@@ -23,6 +23,10 @@ static class EnvironmentVariablesConfigurationPath
 
     public static int NormalizeKey(scoped ReadOnlySpan<char> source, scoped Span<char> destination)
     {
+        if (source is [])
+        {
+            return 0;
+        }
         Guard.IsGreaterThanOrEqualTo(destination.Length, source.Length);
         using var sections = source.Split(KeyDelimiter);
         int charsWritten = 0;
