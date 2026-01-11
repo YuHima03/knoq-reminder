@@ -3,6 +3,7 @@ version: 3
 vars:
   DEV_COMPOSE_FILENAME: docker-compose.dev.yml
   DEV_COMPOSE_ENVFILE: .env.dev
+  DEV_COMPOSE_SERVICES_APP: app-dev
   DEV_COMPOSE_SERVICES_DB_TEMP: db-temp
   DEV_COMPOSE_SERVICES_DB: db-dev
   DEV_COMPOSE_SERVICES_DB_ADMINER: db-dev-adminer
@@ -17,7 +18,7 @@ tasks:
       - down
     desc: Stop the development application container and depending services.
     dir: .
-    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down app-dev
+    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down
 
   app-up:
     aliases:
@@ -28,7 +29,7 @@ tasks:
         msg: "required .env file not found: {{.DEV_COMPOSE_ENVFILE}}"
     silent: false
     dir: .
-    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build -d --wait app-dev
+    cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} up --build -d --wait {{.DEV_COMPOSE_SERVICES_APP}}
 
   db-down:
     desc: Stop the development database container and Adminer.
