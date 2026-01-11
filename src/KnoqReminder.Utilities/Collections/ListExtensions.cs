@@ -8,13 +8,18 @@ public static class ListExtensions
     {
         var span = CollectionsMarshal.AsSpan(list);
         var keeping = span;
-        for (int i = 0; i < keeping.Length; i++)
+        int i = 0;
+        while (i < keeping.Length)
         {
             var item = keeping[i];
             if (match(item))
             {
                 keeping[i] = keeping[^1];
                 keeping = keeping[..^1];
+            }
+            else
+            {
+                i++;
             }
         }
         var removeCount = span.Length - keeping.Length;
