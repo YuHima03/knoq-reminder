@@ -47,7 +47,7 @@ public readonly struct AheadOfTimeReminderTime : IComparable<AheadOfTimeReminder
         Guard.IsBetweenOrEqualTo(hours, 0, 24);
         if (hours != 24)
         {
-            Guard.IsBetween(minutes, 0, 59);
+            Guard.IsBetweenOrEqualTo(minutes, 0, 59);
         }
         else if (minutes != 0)
         {
