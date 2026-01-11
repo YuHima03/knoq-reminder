@@ -12,9 +12,12 @@ sealed class KeyNormalizedEnvironmentVariablesConfigurationProvider(Predicate<st
         Data = NormalizeKeys(Data);
     }
 
-    static FrozenDictionary<string, string?> NormalizeKeys(IDictionary<string, string?> source)
+    FrozenDictionary<string, string?> NormalizeKeys(IDictionary<string, string?> source)
     {
-        var keysReplaced = source.ToFrozenDictionary(
+        var filtered = keyFilter is null
+            ? source
+            : source.Where(kvp => keyFilter(kvp.Key));
+        var keysReplaced = filtered.ToFrozenDictionary(
             kvp => NormalizeMixedKey(kvp.Key),
             kvp => kvp.Value);
         source.Clear();
