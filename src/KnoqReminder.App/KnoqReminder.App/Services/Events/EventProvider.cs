@@ -25,7 +25,7 @@ sealed class EventProvider(
             cancellationToken: cancellationToken) ?? [];
 
         // Note: API は指定された期間内と開催時間が重複するイベントを返すため、開始時間で改めてフィルタリングする必要がある.
-        knoqEvents.RemoveAllUnstable(e => DateTimeOffset.TryParse(e.TimeStart, null, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var dtStart) && startTimeFrom <= dtStart);
+        knoqEvents.RemoveAllUnstable(e => !DateTimeOffset.TryParse(e.TimeStart, null, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var dtStart) || dtStart < startTimeFrom);
         if (knoqEvents is [])
         {
             return [];
