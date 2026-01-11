@@ -1,7 +1,9 @@
 using Knoq;
 using KnoqReminder.App.Helpers.Knoq;
 using KnoqReminder.Domain.Services.Events;
+using KnoqReminder.Utilities.Collections;
 using Microsoft.Extensions.Caching.Memory;
+using System.Globalization;
 
 namespace KnoqReminder.App.Services.Events;
 
@@ -20,13 +22,13 @@ sealed class EventProvider(
                 config.QueryParameters.DateBegin = startTimeFrom.ToUniversalTime().ToString("O");
                 config.QueryParameters.DateEnd = startTimeTo.ToUniversalTime().ToString("O");
             },
-            cancellationToken: cancellationToken);
-        if (knoqEvents is null or [])
-        {
-            return [];
-        }
+            cancellationToken: cancellationToken) ?? [];
+
+        // Note: API は指定された期間内と開催時間が重複するイベントを返すため、開始時間で改めてフィルタリングする必要がある.
+        knoqEvents.RemoveAllUnstable(e => DateTimeOffset.TryParse(e.TimeStart, null, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var dtStart) && startTimeFrom <= dtStart);
+        knoqEvents.Sort((x, y) => x.TimeStart!.CompareTo(y.TimeStart!));
+
         return await knoqEvents
-            .Where(ev => DateTimeOffset.TryParse(ev.TimeStart, out var dtStart) && startTimeFrom <= dtStart)
             .Select(x => x.EventId.GetValueOrDefault())
             .Where(x => x != Guid.Empty)
             .ToAsyncEnumerable()
