@@ -1,6 +1,7 @@
 using System.Net;
 using KnoqReminder.Utilities;
 using KnoqReminder.Utilities.Collections;
+using KnoqReminder.Utilities.Converters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Kiota.Abstractions;
 
@@ -57,9 +58,9 @@ static class TraqUserGroupExtension
         CancellationToken cancellationToken = default)
     {
         var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
-        if (pathParams.TryFindValue("groupId", StringComparison.InvariantCultureIgnoreCase, out var gidObj) && gidObj is Guid gid)
+        if (pathParams.TryFindValue("groupId", StringComparison.InvariantCultureIgnoreCase, out var obj) && obj.TryConvertToGuid(out var groupId))
         {
-            return await cache.GetOrCreateAsync(UserGroupCacheOptions.GetMemoryCacheKey(gid), async entry =>
+            return await cache.GetOrCreateAsync(UserGroupCacheOptions.GetMemoryCacheKey(groupId), async entry =>
             {
                 entry.SetOptions(UserGroupCacheOptions.Options);
                 return await builder.TryGetAsync(loggerFactory, requestConfiguration, cancellationToken).ConfigureAwait(false);

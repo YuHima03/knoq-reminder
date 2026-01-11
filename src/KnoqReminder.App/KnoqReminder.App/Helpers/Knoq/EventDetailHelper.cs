@@ -1,6 +1,7 @@
 using System.Net;
 using KnoqReminder.Utilities;
 using KnoqReminder.Utilities.Collections;
+using KnoqReminder.Utilities.Converters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Kiota.Abstractions;
 
@@ -57,9 +58,9 @@ static class EventDetailHelper
         CancellationToken cancellationToken = default)
     {
         var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
-        if (pathParams.TryFindValue("eventId", StringComparison.InvariantCultureIgnoreCase, out var eidObj) && eidObj is Guid eid)
+        if (pathParams.TryFindValue("eventId", StringComparison.InvariantCultureIgnoreCase, out var obj) && obj.TryConvertToGuid(out var eventId))
         {
-            return await cache.GetOrCreateAsync(EventDetailCacheOptions.GetMemoryCacheKey(eid), async entry =>
+            return await cache.GetOrCreateAsync(EventDetailCacheOptions.GetMemoryCacheKey(eventId), async entry =>
             {
                 entry.SetOptions(EventDetailCacheOptions.Options);
                 return await builder.TryGetAsync(loggerFactory, requestConfiguration, cancellationToken).ConfigureAwait(false);
