@@ -26,9 +26,9 @@ static class TraqMessageExtension
         {
             var logger = CreateLogger(loggerFactory);
             var pathParams = builder.ToPostRequestInformation(body, requestConfiguration).PathParameters;
-            if (pathParams.TryFindValue("channelId", StringComparison.InvariantCultureIgnoreCase, out var cidObj) && cidObj is Guid cid)
+            if (pathParams.TryFindValue("channelId", StringComparison.InvariantCultureIgnoreCase, out var channelId))
             {
-                logger.LogError_FailedToSendTraqMessage_ChannelNotFound(cid);
+                logger.LogError_FailedToSendTraqMessage_ChannelNotFound(channelId);
             }
             else
             {
@@ -50,7 +50,7 @@ static partial class MessageLogger
     /// Failed to send a message to traQ: channel not found: {<paramref name="channelId"/>}
     /// </summary>
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send a message to traQ: channel not found: {ChannelId}")]
-    public static partial void LogError_FailedToSendTraqMessage_ChannelNotFound(this ILogger logger, Guid channelId);
+    public static partial void LogError_FailedToSendTraqMessage_ChannelNotFound(this ILogger logger, object? channelId);
 
     /// <summary>
     /// Failed to send a message to traQ.

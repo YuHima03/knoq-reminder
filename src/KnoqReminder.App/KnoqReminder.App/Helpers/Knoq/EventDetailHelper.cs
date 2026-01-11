@@ -72,15 +72,7 @@ static class EventDetailHelper
 static partial class MessageLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "Event not found: {eventId}")]
-    public static partial void LogError_FailedToGetEvent_EventNotFound(this ILogger logger, string eventId);
-
-    public static void LogError_FailedToGetEvent_EventNotFound(this ILogger logger, object eventId)
-    {
-        if (logger.IsEnabled(LogLevel.Error))
-        {
-            logger.LogError_FailedToGetEvent_EventNotFound(eventId?.ToString() ?? string.Empty);
-        }
-    }
+    public static partial void LogError_FailedToGetEvent_EventNotFound(this ILogger logger, object? eventId);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to get a knoQ event.")]
     public static partial void LogError_FailedToGetEvent(this ILogger logger, Exception exception);

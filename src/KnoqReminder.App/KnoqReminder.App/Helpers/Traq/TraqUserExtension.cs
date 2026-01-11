@@ -33,9 +33,9 @@ static class TraqUserExtension
         {
             var logger = CreateLogger(loggerFactory);
             var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
-            if (pathParams.TryFindValue("userId", StringComparison.InvariantCultureIgnoreCase, out var uidObj) && uidObj is Guid uid)
+            if (pathParams.TryFindValue("userId", StringComparison.InvariantCultureIgnoreCase, out var userId))
             {
-                logger.LogError_FailedToGetUser_UserNotFound(uid);
+                logger.LogError_FailedToGetUser_UserNotFound(userId);
             }
             else
             {
@@ -75,7 +75,7 @@ static partial class MessageLogger
     /// User not found: {<paramref name="userId"/>}
     /// </summary>
     [LoggerMessage(Level = LogLevel.Error, Message = "User not found: {userId}")]
-    public static partial void LogError_FailedToGetUser_UserNotFound(this ILogger logger, Guid userId);
+    public static partial void LogError_FailedToGetUser_UserNotFound(this ILogger logger, object? userId);
 
     /// <summary>
     /// Failed to get a traQ user.

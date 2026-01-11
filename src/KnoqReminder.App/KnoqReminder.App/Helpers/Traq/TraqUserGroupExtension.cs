@@ -33,9 +33,9 @@ static class TraqUserGroupExtension
         {
             var logger = CreateLogger(loggerFactory);
             var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
-            if (pathParams.TryFindValue("groupId", StringComparison.InvariantCultureIgnoreCase, out var gidObj) && gidObj is Guid gid)
+            if (pathParams.TryFindValue("groupId", StringComparison.InvariantCultureIgnoreCase, out var groupId))
             {
-                logger.LogError_FailedToGetGroup_GroupNotFound(gid);
+                logger.LogError_FailedToGetGroup_GroupNotFound(groupId);
             }
             else
             {
@@ -72,7 +72,7 @@ static class TraqUserGroupExtension
 static partial class MessageLogger
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "Group not found: {groupId}")]
-    public static partial void LogError_FailedToGetGroup_GroupNotFound(this ILogger logger, Guid groupId);
+    public static partial void LogError_FailedToGetGroup_GroupNotFound(this ILogger logger, object? groupId);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to get group.")]
     public static partial void LogError_FailedToGetGroup(this ILogger logger, Exception exception);
