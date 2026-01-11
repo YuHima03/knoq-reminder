@@ -13,12 +13,8 @@ namespace KnoqReminder.Infrastructure.Database;
 
 public static class ServiceCollectionExtension
 {
-    public static IServiceCollection SetupRepository(this IServiceCollection services, IConfigurationRoot config, IHostEnvironment? environment = null)
+    public static IServiceCollection AddRepository(this IServiceCollection services, IHostEnvironment? environment = null)
     {
-        services.AddOptions<IDbConnectionOptions, MariaDbConnectionConfiguration>()
-            .Bind(config.GetSection(MariaDbConnectionConfiguration.Position))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
         services.AddDbContextFactory<AppDbContext>((sp, ob) =>
         {
             var connectionString = sp.GetRequiredService<IOptions<IDbConnectionOptions>>().Value.ConnectionString;
@@ -30,6 +26,18 @@ public static class ServiceCollectionExtension
             }
         });
         services.TryAddSingleton<IRepositoryProvider, RepositoryProviderImplement>();
+        return services;
+    }
+
+    public static IServiceCollection ConfigureRepository(this IServiceCollection services, IConfigurationRoot config, bool validation = true)
+    {
+        var ob = services.AddOptions<IDbConnectionOptions, MariaDbConnectionConfiguration>()
+            .Bind(config.GetSection(MariaDbConnectionConfiguration.Position));
+        if (validation)
+        {
+            ob.ValidateDataAnnotations()
+                .ValidateOnStart();
+        }
         return services;
     }
 }

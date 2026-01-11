@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using KnoqReminder.Utilities.Validation;
 using Microsoft.Extensions.Configuration;
@@ -29,8 +30,8 @@ public class MariaDbConnectionConfiguration : Domain.Options.IDbConnectionOption
     [Required(AllowEmptyStrings = false)]
     public string? Database { get; set; }
 
-    public string ConnectionString => _connectionString ??= BuildConnectionString();
-    string? _connectionString = null;
+    [NotNull]
+    public string? ConnectionString => field ??= BuildConnectionString();
 
     string BuildConnectionString()
     {
