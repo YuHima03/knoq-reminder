@@ -23,8 +23,7 @@ static class EventDetailHelper
         this global::Knoq.Events.Item.WithEventItemRequestBuilder builder,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -33,16 +32,14 @@ static class EventDetailHelper
         catch (ApiException ex) when (ex.ResponseStatusCode == (int)HttpStatusCode.NotFound)
         {
             var logger = CreateLogger(loggerFactory);
-            if (logger.IsEnabled(LogLevel.Error))
+            var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
+            if (pathParams.TryFindValue("eventId", StringComparison.InvariantCultureIgnoreCase, out var eventId))
             {
-                if (builder.ToGetRequestInformation(requestConfiguration).PathParameters.TryFindValue("eventId", StringComparison.InvariantCultureIgnoreCase, out var eventId))
-                {
-                    logger.LogError("Event not found: {eventId}", eventId);
-                }
-                else
-                {
-                    logger.LogError(ex, "Failed to get a knoQ event.");
-                }
+                logger.LogError("Event not found: {eventId}", eventId);
+            }
+            else
+            {
+                logger.LogError(ex, "Failed to get a knoQ event.");
             }
         }
         catch (ApiException ex)
@@ -57,8 +54,7 @@ static class EventDetailHelper
         IMemoryCache cache,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
         if (pathParams.TryFindValue("eventId", StringComparison.InvariantCultureIgnoreCase, out var eidObj) && eidObj is Guid eid)

@@ -1,5 +1,6 @@
 using System.Net;
 using KnoqReminder.Utilities;
+using KnoqReminder.Utilities.Collections;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Kiota.Abstractions;
 
@@ -22,8 +23,7 @@ static class TraqUserGroupExtension
         this global::Traq.Groups.Item.WithGroupItemRequestBuilder builder,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -32,17 +32,14 @@ static class TraqUserGroupExtension
         catch (ApiException ex) when (ex.ResponseStatusCode == (int)HttpStatusCode.NotFound)
         {
             var logger = CreateLogger(loggerFactory);
-            if (logger.IsEnabled(LogLevel.Error))
+            var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
+            if (pathParams.TryFindValue("groupId", StringComparison.InvariantCultureIgnoreCase, out var gidObj) && gidObj is Guid gid)
             {
-                var groupId = builder.ToGetRequestInformation(requestConfiguration).PathParameters["groupId"];
-                if (groupId is Guid gid)
-                {
-                    logger.LogError_FailedToGetGroup_GroupNotFound(gid);
-                }
-                else
-                {
-                    logger.LogError_FailedToGetGroup(ex);
-                }
+                logger.LogError_FailedToGetGroup_GroupNotFound(gid);
+            }
+            else
+            {
+                logger.LogError_FailedToGetGroup(ex);
             }
         }
         catch (ApiException ex)
@@ -57,11 +54,10 @@ static class TraqUserGroupExtension
         IMemoryCache cache,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
-        if (pathParams.TryGetValue("groupId", out var gidObj) && gidObj is Guid gid)
+        if (pathParams.TryFindValue("groupId", StringComparison.InvariantCultureIgnoreCase, out var gidObj) && gidObj is Guid gid)
         {
             return await cache.GetOrCreateAsync(UserGroupCacheOptions.GetMemoryCacheKey(gid), async entry =>
             {

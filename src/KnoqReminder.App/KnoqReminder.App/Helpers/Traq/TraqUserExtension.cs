@@ -1,5 +1,6 @@
 using System.Net;
 using KnoqReminder.Utilities;
+using KnoqReminder.Utilities.Collections;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Kiota.Abstractions;
 
@@ -22,8 +23,7 @@ static class TraqUserExtension
         this global::Traq.Users.Item.WithUserItemRequestBuilder builder,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -32,17 +32,14 @@ static class TraqUserExtension
         catch (ApiException ex) when (ex.ResponseStatusCode == (int)HttpStatusCode.NotFound)
         {
             var logger = CreateLogger(loggerFactory);
-            if (logger.IsEnabled(LogLevel.Error))
+            var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
+            if (pathParams.TryFindValue("userId", StringComparison.InvariantCultureIgnoreCase, out var uidObj) && uidObj is Guid uid)
             {
-                var userId = builder.ToGetRequestInformation(requestConfiguration).PathParameters["userId"];
-                if (userId is Guid uid)
-                {
-                    logger.LogError_FailedToGetUser_UserNotFound(uid);
-                }
-                else
-                {
-                    logger.LogError_FailedToGetUser(ex);
-                }
+                logger.LogError_FailedToGetUser_UserNotFound(uid);
+            }
+            else
+            {
+                logger.LogError_FailedToGetUser(ex);
             }
         }
         catch (ApiException ex)
@@ -57,11 +54,10 @@ static class TraqUserExtension
         IMemoryCache cache,
         ILoggerFactory loggerFactory,
         Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = null,
-        CancellationToken cancellationToken = default
-        )
+        CancellationToken cancellationToken = default)
     {
         var pathParams = builder.ToGetRequestInformation(requestConfiguration).PathParameters;
-        if (pathParams.TryGetValue("userId", out var uidObj) && uidObj is Guid uid)
+        if (pathParams.TryFindValue("userId", StringComparison.InvariantCultureIgnoreCase, out var uidObj) && uidObj is Guid uid)
         {
             return await cache.GetOrCreateAsync(UserCacheOptions.GetMemoryCacheKey(uid), async entry =>
             {

@@ -1,4 +1,5 @@
 using System.Net;
+using KnoqReminder.Utilities.Collections;
 using Microsoft.Kiota.Abstractions;
 
 namespace KnoqReminder.App.Helpers.Traq;
@@ -24,17 +25,14 @@ static class TraqMessageExtension
         catch (ApiException ex) when (ex.ResponseStatusCode == (int)HttpStatusCode.NotFound)
         {
             var logger = CreateLogger(loggerFactory);
-            if (logger.IsEnabled(LogLevel.Error))
+            var pathParams = builder.ToPostRequestInformation(body, requestConfiguration).PathParameters;
+            if (pathParams.TryFindValue("channelId", StringComparison.InvariantCultureIgnoreCase, out var cidObj) && cidObj is Guid cid)
             {
-                var channelId = builder.ToPostRequestInformation(body, requestConfiguration).PathParameters["channelId"];
-                if (channelId is Guid cid)
-                {
-                    logger.LogError_FailedToSendTraqMessage_ChannelNotFound(cid);
-                }
-                else
-                {
-                    logger.LogError_FailedToSendTraqMessage(ex);
-                }
+                logger.LogError_FailedToSendTraqMessage_ChannelNotFound(cid);
+            }
+            else
+            {
+                logger.LogError_FailedToSendTraqMessage(ex);
             }
         }
         catch (ApiException ex)
