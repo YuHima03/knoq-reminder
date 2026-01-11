@@ -5,9 +5,14 @@ namespace KnoqReminder.Utilities.Converters;
 
 public static class GuidConverter
 {
-    public static bool TryConvertToGuid([NotNullWhen(false)] this object? value, out Guid guid)
+    public static bool TryConvertToGuid([NotNullWhen(true)] this object? value, out Guid guid)
     {
-        if (value is Guid g)
+        if (value is null)
+        {
+            guid = default;
+            return false;
+        }
+        else if (value is Guid g)
         {
             guid = g;
             return true;
