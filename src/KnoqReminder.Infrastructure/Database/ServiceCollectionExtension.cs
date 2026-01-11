@@ -34,7 +34,7 @@ public static class ServiceCollectionExtension
         var ob = services.AddOptions<IDbConnectionOptions, MariaDbConnectionConfiguration>()
             .Bind(config.GetSection(MariaDbConnectionConfiguration.Position));
         if (validation)
-        { 
+        {
             ob.ValidateDataAnnotations()
                 .ValidateOnStart();
         }

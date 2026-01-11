@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using KnoqReminder.Domain.Options;
 using KnoqReminder.Infrastructure.Database;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace KnoqReminder.App.Configurations;
 
