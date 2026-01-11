@@ -26,6 +26,10 @@ sealed class EventProvider(
 
         // Note: API は指定された期間内と開催時間が重複するイベントを返すため、開始時間で改めてフィルタリングする必要がある.
         knoqEvents.RemoveAllUnstable(e => DateTimeOffset.TryParse(e.TimeStart, null, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var dtStart) && startTimeFrom <= dtStart);
+        if (knoqEvents is [])
+        {
+            return [];
+        }
         knoqEvents.Sort((x, y) => x.TimeStart!.CompareTo(y.TimeStart!));
 
         return await knoqEvents
