@@ -1,9 +1,9 @@
+using System.Globalization;
 using Knoq;
 using KnoqReminder.App.Helpers.Knoq;
 using KnoqReminder.Domain.Services.Events;
 using KnoqReminder.Utilities.Collections;
 using Microsoft.Extensions.Caching.Memory;
-using System.Globalization;
 
 namespace KnoqReminder.App.Services.Events;
 

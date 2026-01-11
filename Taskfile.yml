@@ -14,7 +14,7 @@ tasks:
 
   app-down:
     aliases:
-      - down 
+      - down
     desc: Stop the development application container and depending services.
     dir: .
     cmd: docker compose --env-file {{.DEV_COMPOSE_ENVFILE}} -f {{.DEV_COMPOSE_FILENAME}} down app-dev
