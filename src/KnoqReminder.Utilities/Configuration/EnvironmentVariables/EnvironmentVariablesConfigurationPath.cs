@@ -37,7 +37,7 @@ static class EnvironmentVariablesConfigurationPath
             destination[charsWritten] = ConfigurationPath.KeyDelimiter[0];
             charsWritten++;
         }
-        // Remove the last delimiter
+        // Remove the last delimiter.
         return charsWritten - 1;
     }
 
