@@ -33,7 +33,7 @@ sealed partial class ReminderScheduler(
                     var ct = cts.Token;
                     try
                     {
-                        await ExecuteCoreAsync(utcNow, ct).ConfigureAwait(false);
+                        await ExecuteCoreAsync(GetUtcTimeMinute(lastRunAt).AddMinutes(1), utcNow).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException) when (ct.IsCancellationRequested)
                     {
@@ -50,15 +50,17 @@ sealed partial class ReminderScheduler(
         while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false));
     }
 
-    async Task ExecuteCoreAsync(DateTimeOffset time, CancellationToken cancellationToken = default)
+    async Task ExecuteCoreAsync(DateTimeOffset timeFrom, DateTimeOffset timeTo, CancellationToken cancellationToken = default)
     {
-        var utcTime = time.ToUniversalTime();
-        var utcTimeMinute = utcTime - TimeSpan.FromTicks(utcTime.Ticks % TimeSpan.TicksPerMinute);
-        var eventsToday = await eventProvider.GetEventsByStartTimeAsync(utcTimeMinute, utcTimeMinute.AddDays(1), cancellationToken).ConfigureAwait(false);
+        timeFrom = GetUtcTimeMinute(timeFrom);
+        timeTo = GetUtcTimeMinute(timeTo);
 
+        var eventsToday = await eventProvider.GetEventsByStartTimeAsync(timeFrom, timeTo.AddDays(1), cancellationToken).ConfigureAwait(false);
         await using var repo = await repositories.CreateRepositoryAsync<IUserReminderRepository>(cancellationToken).ConfigureAwait(false);
 
-        var dailyReminders = (await repo.GetUserDailyRemindersAsync(TimeOnly.FromDateTime(utcTimeMinute.UtcDateTime), cancellationToken).ConfigureAwait(false))
+        DailyReminderTime drtFrom = new(TimeOnly.FromDateTime(timeFrom.UtcDateTime));
+        DailyReminderTime drtTo = new(TimeOnly.FromDateTime(timeTo.UtcDateTime));
+        var dailyReminders = (await repo.GetUserDailyRemindersAsync(drtFrom, drtTo, cancellationToken).ConfigureAwait(false))
             .ToAsyncEnumerable()
             .Select(async (dailyReminder, ct) =>
             {
@@ -70,7 +72,8 @@ sealed partial class ReminderScheduler(
                     reminderOverview.RemindsWhenAbsent is ReminderOptionsWhenUserAbsent.RemindsDaily or ReminderOptionsWhenUserAbsent.RemindsDailyAndAheadOfTime,
                     reminderOverview.RemindsWhenPending is ReminderOptionsWhenUserPending.RemindsDaily or ReminderOptionsWhenUserPending.RemindsDailyAndAheadOfTime);
                 return (Reminder: dailyReminder, Events: eventsToRemind);
-            });
+            })
+            .Where(x => x.Events is not []);
         Task[] dailyReminderTasks = await dailyReminders
             .Select(r => reminderPublisher.PublishDailyReminderForUserAsync(r.Reminder.UserId, r.Reminder.Destination, r.Events, cancellationToken).AsTask())
             .ToArrayAsync(cancellationToken)
@@ -79,7 +82,9 @@ sealed partial class ReminderScheduler(
         var aotReminders = eventsToday.ToAsyncEnumerable()
             .SelectMany(async (e, ct) =>
             {
-                var aotReminders = await repo.GetUserAotRemindersAsync(e.StartsAt - utcTimeMinute, ct).ConfigureAwait(false);
+                var offsetFrom = e.StartsAt - timeTo;
+                var offsetTo = e.StartsAt - timeFrom;
+                var aotReminders = await repo.GetUserAotRemindersAsync(new(offsetFrom), new(offsetTo), ct).ConfigureAwait(false);
                 return aotReminders.Select(r => (AotReminder: r, Event: e));
             })
             .GroupBy(x => x.AotReminder.ReminderId)
@@ -94,7 +99,8 @@ sealed partial class ReminderScheduler(
                     reminderOverview.RemindsWhenAbsent is ReminderOptionsWhenUserAbsent.RemindsDailyAndAheadOfTime,
                     reminderOverview.RemindsWhenPending is ReminderOptionsWhenUserPending.RemindsDailyAndAheadOfTime);
                 return (Reminder: aotReminder, Events: eventsToRemind);
-            });
+            })
+            .Where(x => x.Events is not []);
         Task[] aotReminderTasks = await aotReminders
             .Select(r => reminderPublisher.PublishAotReminderForUserAsync(r.Reminder.UserId, r.Reminder.Destination, r.Events, cancellationToken).AsTask())
             .ToArrayAsync(cancellationToken)
@@ -126,6 +132,12 @@ sealed partial class ReminderScheduler(
         })];
     }
 
+    static DateTimeOffset GetUtcTimeMinute(DateTimeOffset dto)
+    {
+        dto = dto.ToUniversalTime();
+        return dto - TimeSpan.FromTicks(dto.Ticks % TimeSpan.TicksPerMinute);
+    }
+
     static partial class LoggerExtensions
     {
         [LoggerMessage(Level = LogLevel.Error, Message = "An error occurred while executing reminder scheduler.")]
@@ -133,21 +145,5 @@ sealed partial class ReminderScheduler(
 
         [LoggerMessage(Level = LogLevel.Warning, Message = "Reminder task time out occurred: running over {timeout}")]
         public static partial void LogWarning_ReminderTimeOut(ILogger<ReminderScheduler> logger, TimeSpan timeout);
-    }
-}
-
-file static class UserReminderRepositoryExtensions
-{
-    public static async ValueTask<UserAotReminder[]> GetUserAotRemindersAsync(this IUserReminderRepository repo, TimeSpan offset, CancellationToken cancellationToken = default)
-    {
-        AheadOfTimeReminderTime aotReminderOffset = new(offset - TimeSpan.FromTicks(offset.Ticks % TimeSpan.TicksPerMinute));
-        return await repo.GetUserAotRemindersAsync(aotReminderOffset, aotReminderOffset, cancellationToken).ConfigureAwait(false);
-    }
-
-    public static async ValueTask<UserDailyReminder[]> GetUserDailyRemindersAsync(this IUserReminderRepository repo, TimeOnly utcTimeOnly, CancellationToken cancellationToken = default)
-    {
-        var utcTimeMinutes = utcTimeOnly.Add(-TimeSpan.FromTicks(utcTimeOnly.Ticks % TimeSpan.TicksPerMinute));
-        DailyReminderTime utcDailyReminderTime = new(utcTimeMinutes);
-        return await repo.GetUserDailyRemindersAsync(utcDailyReminderTime, utcDailyReminderTime, cancellationToken).ConfigureAwait(false);
     }
 }
